@@ -1,7 +1,10 @@
 import { csvParse, csvFormat } from "d3";
+import { nanoid } from "nanoid";
 
 async function main() {
   const text = await Bun.file("./tspdt.csv").text();
+
+  const directorToMovieIds = new Map<string, string[]>();
 
   const ARTICLES = [
     "A",
@@ -31,6 +34,8 @@ async function main() {
     let { title, director, ...rest } = line;
 
     const splitByComma = title.split(",");
+
+    const movieId = nanoid();
 
     if (splitByComma.length === 1) {
     } else {
@@ -64,11 +69,38 @@ async function main() {
       directors.push(reverseName(director.trim()));
     }
 
-    return { title, director: directors, ...rest };
+    // now we have parsed list of directors - going to do side effects here, sue me
+    for (const director of directors) {
+      const s = new Set(directorToMovieIds.get(director) ?? []);
+      s.add(movieId);
+      directorToMovieIds.set(director, Array.from(s));
+    }
+
+    return { id: movieId, title, director: directors, ...rest };
   });
 
-  Bun.write("./fixed-tspdt.json", JSON.stringify(parsed));
-  Bun.write("./fixed-tspdt.csv", csvFormat(parsed));
+  const directors = Array.from(directorToMovieIds.entries()).map(
+    ([director, movieIds]) => {
+      return {
+        director,
+        movieIds,
+        id: nanoid(),
+      };
+    },
+  );
+
+  // connect movie id to director id
+  //
+  const movie_to_director = directors.flatMap((d) => {
+    return d.movieIds.map((movieId) => ({ directorId: d.id, movieId }));
+  });
+
+  Bun.write("./movies.json", JSON.stringify(parsed));
+  Bun.write("./movies.csv", csvFormat(parsed));
+  Bun.write("./directors.csv", csvFormat(directors));
+  Bun.write("./directors.json", JSON.stringify(directors));
+  Bun.write("./movie-to-director.csv", csvFormat(movie_to_director));
+  Bun.write("./movie-to-director.json", JSON.stringify(movie_to_director));
 }
 
 main();
