@@ -1,15 +1,9 @@
-import "dotenv/config";
-import { migrate } from "drizzle-orm/libsql/migrator";
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
+import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 
-export const client = createClient({
-  url: "libsql://perfect-snake-eyes-gcuddy.turso.io" as string,
-  authToken:
-    "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOiIyMDIzLTEyLTE3VDA3OjU5OjA0LjUyNDk0MjQxNVoiLCJpZCI6IjY5YmQyODk1LTljYjEtMTFlZS1iNTk2LTEyYWIwZGY3MGIxZiJ9.1CfD0GgsuAoWskfiOElfLV8QBzmMOFtwgZV-UP5KnqEuS_2Vdot45vIaI8i2ufmxXziK0zHpyvdiy4WTXHgqDw" as string,
-});
-
-export const db = drizzle(client);
+const sqlite = new Database("../db.db");
+export const db = drizzle(sqlite);
 
 async function main() {
   try {

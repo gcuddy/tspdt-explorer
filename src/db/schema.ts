@@ -11,10 +11,12 @@ export const movies = sqliteTable("movies", {
   title: text("title"),
   year: integer("year"),
   tmdbId: integer("tmdb_id"),
+  tspdtId: integer("tspdt_id"),
 });
 
 export const movieRelations = relations(movies, ({ many }) => ({
   moviesToDirectors: many(moviesToDirectors),
+  rankings: many(rankings),
 }));
 
 export const directors = sqliteTable("directors", {
@@ -22,6 +24,21 @@ export const directors = sqliteTable("directors", {
   name: text("name"),
   tmdbId: integer("tmdb_id"),
 });
+
+export const rankings = sqliteTable("rankings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  movieId: integer("movie_id"),
+  // refers to tspdt year (probably want to make this more generic)
+  year: integer("year"),
+  ranking: integer("ranking"),
+});
+
+export const rankingsRelations = relations(rankings, ({ one }) => ({
+  movie: one(movies, {
+    fields: [rankings.movieId],
+    references: [movies.id],
+  }),
+}));
 
 export const directorRelations = relations(directors, ({ many }) => ({
   directorsToMovies: many(moviesToDirectors),
