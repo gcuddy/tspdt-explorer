@@ -4,10 +4,10 @@ import type { Config } from "drizzle-kit";
 export default {
   schema: "./src/db/schema.ts",
   out: "./migrations",
-  driver: "d1", // 'pg' | 'mysql2' | 'better-sqlite' | 'libsql' | 'turso'
+  driver: "turso", // 'pg' | 'mysql2' | 'better-sqlite' | 'libsql' | 'turso'
   dbCredentials: {
-    wranglerConfigPath: "wrangler.toml",
-    dbName: "tspdt",
+    url: "libsql://perfect-snake-eyes-gcuddy.turso.io",
+    authToken: process.env.AUTH_TOKEN,
   },
   verbose: false,
   strict: true,
