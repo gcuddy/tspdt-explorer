@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cloudflare/next-on-pages": "^1.8.2",
     "@libsql/client": "^0.4.0-pre.5",
     "d3": "^7.8.5",
     "drizzle-orm": "^0.29.1",
