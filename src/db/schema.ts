@@ -47,10 +47,10 @@ export const directorRelations = relations(directors, ({ many }) => ({
 export const moviesToDirectors = sqliteTable(
   "movies_to_directors",
   {
-    movieId: integer("movie_id")
+    movieId: text("movie_id")
       .notNull()
       .references(() => movies.id),
-    directorId: integer("director_id")
+    directorId: text("director_id")
       .notNull()
       .references(() => directors.id),
   },

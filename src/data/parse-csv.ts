@@ -1,10 +1,12 @@
 import { csvParse, csvFormat } from "d3";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/utils/nanoid";
 
-async function main() {
-  const text = await Bun.file("./tspdt.csv").text();
+async function main(csvPath: string) {
+  const text = await Bun.file(csvPath).text();
 
   const directorToMovieIds = new Map<string, string[]>();
+
+  const rankings: { movieId: string; year: number; ranking: number }[] = [];
 
   const ARTICLES = [
     "A",
@@ -76,6 +78,20 @@ async function main() {
       directorToMovieIds.set(director, Array.from(s));
     }
 
+    // find keys that are year - those are years
+    const yearKeys = Object.keys(rest).filter((key) => /\d{4}/.test(key));
+
+    for (const yk of yearKeys) {
+      const ranking = Number(rest[yk] || "0");
+      if (ranking > 0) {
+        rankings.push({
+          movieId,
+          ranking,
+          year: +yk,
+        });
+      }
+    }
+
     return { id: movieId, title, director: directors, ...rest };
   });
 
@@ -97,10 +113,18 @@ async function main() {
 
   Bun.write("./movies.json", JSON.stringify(parsed));
   Bun.write("./movies.csv", csvFormat(parsed));
+  Bun.write("./rankings.json", JSON.stringify(rankings));
+  Bun.write("./rankings.csv", csvFormat(rankings));
   Bun.write("./directors.csv", csvFormat(directors));
   Bun.write("./directors.json", JSON.stringify(directors));
   Bun.write("./movie-to-director.csv", csvFormat(movie_to_director));
   Bun.write("./movie-to-director.json", JSON.stringify(movie_to_director));
 }
 
-main();
+const [path] = Bun.argv.slice(2);
+
+if (!path) {
+  throw new Error("Path to csv must be provided.");
+}
+
+main(path);
