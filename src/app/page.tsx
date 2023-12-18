@@ -2,6 +2,7 @@ import Image from "next/image";
 import { db } from "@/db/client";
 import { asc, eq, sql } from "drizzle-orm";
 import { rankings, movies, directors, moviesToDirectors } from "@/db/schema";
+import ListItem from "@/components/list-item";
 
 async function getData() {
 	const directors_sq = db.select().from(moviesToDirectors);
@@ -40,15 +41,7 @@ export default async function Home() {
 		<main className="flex min-h-screen flex-col p-4">
 			<ol className="flex flex-col gap-4">
 				{movies.map((movie) => (
-					<li key={movie.id} className="flex items-center gap-1">
-						<span className="text-gray-500 text-sm">{movie.ranking}</span>
-						<span className="font-bold tracking-tight text-xl">
-							{movie.title}
-						</span>
-						{movie.director.map((director) => (
-							<span>{director.name}</span>
-						))}
-					</li>
+					<ListItem movie={movie} key={movie.id} />
 				))}
 			</ol>
 		</main>
