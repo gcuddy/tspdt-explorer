@@ -1,7 +1,8 @@
+import "./src/env.mjs";
 /** @type {import('next').NextConfig} */
 const nextConfig = {};
 
-module.exports = nextConfig;
+export default nextConfig;
 
 // if (process.env.NODE_ENV === "development") {
 //   // we import the utility from the next-dev submodule

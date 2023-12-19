@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { InferSelectModel, relations, sql } from "drizzle-orm";
 import {
   text,
   integer,
@@ -8,11 +8,13 @@ import {
 
 export const movies = sqliteTable("movies", {
   id: text("id").primaryKey(),
-  title: text("title"),
+  title: text("title").notNull(),
   year: integer("year"),
   tmdbId: integer("tmdb_id"),
   tspdtId: integer("tspdt_id"),
 });
+
+export type Movie = InferSelectModel<typeof movies>;
 
 export const movieRelations = relations(movies, ({ many }) => ({
   moviesToDirectors: many(moviesToDirectors),
@@ -32,6 +34,8 @@ export const rankings = sqliteTable("rankings", {
   year: integer("year"),
   ranking: integer("ranking"),
 });
+
+export type Ranking = InferSelectModel<typeof rankings>;
 
 export const rankingsRelations = relations(rankings, ({ one }) => ({
   movie: one(movies, {
@@ -56,7 +60,7 @@ export const moviesToDirectors = sqliteTable(
   },
   (t) => ({
     pk: primaryKey(t.movieId, t.directorId),
-  }),
+  })
 );
 
 export const usersToGroupsRelations = relations(
@@ -70,5 +74,5 @@ export const usersToGroupsRelations = relations(
       fields: [moviesToDirectors.directorId],
       references: [directors.id],
     }),
-  }),
+  })
 );
