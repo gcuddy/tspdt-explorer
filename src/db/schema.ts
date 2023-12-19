@@ -27,6 +27,8 @@ export const directors = sqliteTable("directors", {
   tmdbId: integer("tmdb_id"),
 });
 
+export type Director = InferSelectModel<typeof directors>;
+
 export const rankings = sqliteTable("rankings", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   movieId: integer("movie_id"),

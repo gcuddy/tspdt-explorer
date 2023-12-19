@@ -1,6 +1,17 @@
 import "./src/env.mjs";
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "image.tmdb.org",
+        port: "",
+        // path: "/t/p/w500/*",
+      },
+    ],
+  },
+};
 
 export default nextConfig;
 
