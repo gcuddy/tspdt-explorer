@@ -1,13 +1,10 @@
-"use server";
-
-import Image from "next/image";
 import { db } from "@/db/client";
 import { asc, eq, sql } from "drizzle-orm";
 import { rankings, movies, directors, moviesToDirectors } from "@/db/schema";
-import ListItem from "@/components/list-item";
 import { cache } from "react";
+import { List } from "./list-items";
 
-const getData = cache(async () => {
+export const getData = cache(async () => {
   const directors_sq = db.select().from(moviesToDirectors);
 
   const m = await db
@@ -40,13 +37,10 @@ const getData = cache(async () => {
 
 export default async function Home() {
   const movies = await getData();
+
   return (
     <main className="flex min-h-screen flex-col p-4">
-      <ol className="flex flex-col gap-4">
-        {movies.map((movie) => (
-          <ListItem movie={movie} key={movie.id} />
-        ))}
-      </ol>
+      <List movies={movies} />
     </main>
   );
 }
