@@ -1,8 +1,9 @@
 "use client";
 
-import {
+import React, {
   createContext,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -11,9 +12,12 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { For } from "million/react";
 import { filter, groupBy, pipe, set } from "remeda";
 import { objectEntries } from "@antfu/utils";
+import { usePathname, useRouter } from "next/navigation";
+
+import { ArrowElbowDownRight } from "@phosphor-icons/react";
 
 type Action = {
-  icon: (props: any) => JSX.Element;
+  icon: (props: any) => React.ReactNode;
   disabled?: boolean;
   title: string;
   category?: string;
@@ -27,13 +31,14 @@ type ActionProvider = (filter: string, global: boolean) => Promise<Action[]>;
 function useControl() {
   console.log("use control");
   const providers = new Map<string, ActionProvider>();
+  const [activeProviders, setActiveProviders] = useState<string[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
   const [actions, setActions] = useState<Action[]>([]);
   const [input, setInput] = useState<string>("");
   const [root, setRoot] = useState<HTMLElement | null>(null);
-  const [isTyping, setIsTyping] = useState<boolean>(false);
-  //   TODO: make this use refs, copied this pretty liberally from sst console. i kind of love how it works though
+  let isTyping = false;
 
+  //   TODO: make this use refs, copied this pretty liberally from sst console. i kind of love how it works though
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const control = useMemo(() => {
     return {
@@ -73,6 +78,28 @@ function useControl() {
   }, [root]);
 
   useEffect(() => {
+    if (!visible) return;
+
+    async function runEffect() {
+      console.log("running effect");
+      const p = activeProviders.length
+        ? activeProviders.map((p) => providers.get(p)).filter(Boolean)
+        : [...providers.values()].reverse();
+
+      const actions = await Promise.all(
+        p.map(async (provider) => {
+          const actions = await provider(input, activeProviders.length === 0);
+          return actions;
+        })
+      ).then((x) => x.flat());
+
+      setActions(actions);
+    }
+
+    runEffect();
+  }, [visible]);
+
+  useEffect(() => {
     function onKeydown(e: KeyboardEvent) {
       if (e.key === "k" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
@@ -98,21 +125,35 @@ function useControl() {
   }, [control, visible]);
 
   const groups = useMemo(() => {
-    return pipe(
+    console.log("groups", { actions, input });
+    const grouped = pipe(
       actions || [],
       filter(
         (action) =>
           action.title.toLowerCase().includes(input.toLowerCase()) ||
           Boolean(action.category?.toLowerCase().includes(input.toLowerCase()))
       ),
+      filter((d) => {
+        return true;
+      }),
+      filter((action) => {
+        console.log("action", action);
+        return true;
+      }),
       filter((action) => !action.disabled),
       groupBy((a) => a.category)
     );
-  }, [actions, input]);
+    console.log("grouped", grouped);
+    return grouped;
+  }, [input, actions]);
 
   const show = useCallback(() => {
     setVisible(true);
-    // setInput("");
+    setInput("");
+  }, []);
+
+  const hide = useCallback(() => {
+    setVisible(false);
   }, []);
 
   return {
@@ -122,6 +163,7 @@ function useControl() {
     register(name: string, provider: ActionProvider) {
       providers.set(name, provider);
     },
+    hide,
     unregister(name: string) {
       providers.delete(name);
     },
@@ -142,7 +184,23 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
 
   console.log("rendering command bar");
   let scrollingTimeout: number | null = null;
-  const body = document.querySelector("body");
+
+  const router = useRouter();
+  const pathname = usePathname();
+  // globals
+  control.register("global", async () => {
+    return [
+      NavigationAction({
+        title: "Home",
+        category: "Navigation",
+        path: "/",
+        disabled: false,
+        router,
+        pathname,
+      }),
+    ];
+  });
+
   return (
     <CommandBarContext.Provider value={control}>
       {children}
@@ -154,15 +212,15 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
         }}
       >
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <Dialog.Content
             ref={control.bind}
-            className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-xl animate-in fade-in translate-x-[-50%] translate-y-[-50%] gap-4 border bg-slate-900/90 backdrop-blur-md p-6 shadow-lg rounded-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] "
+            className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-2xl animate-in fade-in ring-1 ring-black/10 translate-x-[-50%] translate-y-[-50%] gap-4 bg-slate-900/90 backdrop-blur-md p-6 shadow-lg rounded-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] "
           >
             <Filter input={control.input} setInput={control.setInput} />
             {/* TODO: get rid of scrollbar */}
             <div
-              className="border-t border-white/[8] max-h-80 p-2 overflow-y-auto empty:hidden"
+              className="border-t border-white/[.08] max-h-80 p-2 overflow-y-auto empty:hidden"
               data-element="results"
               onScroll={() => {
                 if (scrollingTimeout) window.clearTimeout(scrollingTimeout);
@@ -229,11 +287,48 @@ function Filter({
     <div className="flex py-4 px-5">
       <input
         type="text"
-        className="grow border-0 bg-transparent"
+        className="grow border-0 bg-transparent focus:outline-none focus:ring-0"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="Search"
       />
     </div>
   );
+}
+
+export function NavigationAction(input: {
+  path: string;
+  prefix?: boolean;
+  title: string;
+  category: string;
+  icon?: (props: any) => React.ReactNode;
+  disabled?: boolean;
+  router: ReturnType<typeof useRouter>;
+  pathname: string;
+}): Action {
+  return {
+    icon: input.icon || ArrowElbowDownRight,
+    title: input.title,
+    category: input.category,
+    disabled:
+      input.disabled ||
+      (input.path.startsWith("/") &&
+        (!input.prefix
+          ? input.pathname === input.path
+          : input.pathname.startsWith(input.path))) ||
+      (input.path.startsWith("./") &&
+        (!input.prefix
+          ? input.pathname.endsWith(input.path.substring(1))
+          : input.pathname.includes(input.path.substring(1)))),
+    run: (control) => {
+      control.hide();
+      input.router.push(input.path);
+    },
+  };
+}
+
+export function useCommandBar() {
+  const ctx = useContext(CommandBarContext);
+  if (!ctx) throw new Error("No commandbar context");
+  return ctx;
 }
