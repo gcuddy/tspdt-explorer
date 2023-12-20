@@ -3,8 +3,9 @@ import { tmdb } from "@/lib/tmdb";
 import { notFound } from "next/navigation";
 import { Director } from "./director";
 import { MovieList } from "./movie-list";
+import { cache } from "react";
 
-async function getDirector(id: string) {
+const getDirector = cache(async (id: string) => {
   const director = await db.query.directors.findFirst({
     with: {
       directorsToMovies: {
@@ -34,7 +35,7 @@ async function getDirector(id: string) {
   });
 
   return director;
-}
+});
 
 async function lookupDirector(
   name: string,

@@ -1,3 +1,5 @@
+"use server";
+
 import { Stack } from "@/components/ui/layout";
 import { Tag } from "@/components/ui/tag";
 import { PeopleList } from "@/components/utility";
@@ -6,8 +8,9 @@ import { movies, rankings } from "@/db/schema";
 import { and, asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
-async function getMoviesFromYear(year: number) {
+const getMoviesFromYear = cache(async (year: number) => {
   const moviesForYear = await db.query.movies.findMany({
     where: and(eq(movies.year, year)),
     with: {
@@ -43,7 +46,7 @@ async function getMoviesFromYear(year: number) {
 
     return 0;
   });
-}
+});
 
 export default async function Page({ params }: { params: { year: string } }) {
   const year = Number(params.year);

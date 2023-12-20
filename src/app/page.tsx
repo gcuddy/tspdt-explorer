@@ -1,3 +1,5 @@
+"use server";
+
 import Image from "next/image";
 import { db } from "@/db/client";
 import { asc, eq, sql } from "drizzle-orm";
@@ -34,17 +36,17 @@ const getData = cache(async () => {
   }));
 });
 
-export const runtime = "edge";
+// export const runtime = "edge";
 
 export default async function Home() {
-	const movies = await getData();
-	return (
-		<main className="flex min-h-screen flex-col p-4">
-			<ol className="flex flex-col gap-4">
-				{movies.map((movie) => (
-					<ListItem movie={movie} key={movie.id} />
-				))}
-			</ol>
-		</main>
-	);
+  const movies = await getData();
+  return (
+    <main className="flex min-h-screen flex-col p-4">
+      <ol className="flex flex-col gap-4">
+        {movies.map((movie) => (
+          <ListItem movie={movie} key={movie.id} />
+        ))}
+      </ol>
+    </main>
+  );
 }

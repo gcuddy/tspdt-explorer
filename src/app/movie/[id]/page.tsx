@@ -7,8 +7,9 @@ import { RankingChart } from "./ranking-chart";
 import { Card } from "@/components/ui/card";
 import { MovieHeader } from "./movie-header";
 import { Stack } from "@/components/ui/layout";
+import { cache } from "react";
 
-export async function getMovie(id: string) {
+export const getMovie = cache(async (id: string) => {
   const movie = await db.query.movies.findFirst({
     where: eq(movies.id, id),
     with: {
@@ -36,7 +37,7 @@ export async function getMovie(id: string) {
     ...movie,
     tmdb: tmovie,
   };
-}
+});
 
 export default async function MoviePage({
   params,

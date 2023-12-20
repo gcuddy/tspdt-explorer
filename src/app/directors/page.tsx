@@ -7,8 +7,9 @@ import {
   rankings,
 } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
+import { cache } from "react";
 
-async function listTopDirectors() {
+const listTopDirectors = cache(async () => {
   //   const dirs = await db.query.directors.findMany({
   //     // with: {},
   //   });
@@ -72,7 +73,7 @@ async function listTopDirectors() {
   //   }
 
   //   return directors.sort(({ top1000count: a }, { top1000count: b }) => a - b);
-}
+});
 
 export default async function Page() {
   const directors = await listTopDirectors();

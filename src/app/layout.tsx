@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const runtime = "edge";
+// export const runtime = "edge";
 
 export const metadata: Metadata = {
   title: "Create Next App",
