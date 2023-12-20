@@ -6,6 +6,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -16,6 +17,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { ArrowElbowDownRight } from "@phosphor-icons/react";
 import { useDirectors } from "@/app/replicache";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type Action = {
   icon: (props: any) => React.ReactNode;
@@ -159,6 +161,7 @@ function useControl() {
 
   return {
     bind: setRoot,
+    root,
     input,
     setInput,
     register(name: string, provider: ActionProvider) {
@@ -205,7 +208,7 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
   });
 
   control.register("directors", async () => {
-    return directors.slice(0, 25).map(([id, director]) =>
+    return directors.map(([id, director]) =>
       NavigationAction({
         title: director.name ?? "Unknown",
         category: "Directors",
@@ -215,6 +218,25 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
         pathname,
       })
     );
+  });
+
+  // get count of all actions
+  const mappedActions = useMemo(() => {
+    const actions: Array<Action | string> = [];
+    for (const key in control.groups) {
+      actions.push(key);
+      actions.push(...control.groups[key]);
+    }
+    return actions;
+  }, [control.groups]);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: mappedActions.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 40,
+    overscan: 10,
   });
 
   return (
@@ -238,52 +260,81 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
             <div
               className="border-t border-white/[.08] max-h-80 p-2 overflow-y-auto empty:hidden"
               data-element="results"
+              ref={scrollRef}
               onScroll={() => {
                 if (scrollingTimeout) window.clearTimeout(scrollingTimeout);
                 scrollingTimeout = window.setTimeout(() => {
                   scrollingTimeout = null;
                 }, 100);
               }}
+              style={{
+                height: "400px",
+              }}
             >
-              {/*  */}
-              <For memo each={objectEntries(control.groups)}>
-                {([category, actions]) => (
-                  <>
-                    <div className="flex py-2 px-3 uppercase text-sm items-center font-bold text-slate-50/50">
-                      {category.toString()}
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {virtualizer.getVirtualItems().map((item) => {
+                  const action = mappedActions[item.index];
+
+                  const style = {
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${item.size}px`,
+                    transform: `translateY(${item.start}px)`,
+                  } as const;
+
+                  if (typeof action === "string") {
+                    return (
+                      <div
+                        style={style}
+                        key={action}
+                        className="flex py-2 px-3 uppercase text-sm items-center font-bold text-slate-50/50"
+                      >
+                        {action}
+                      </div>
+                    );
+                  }
+
+                  console.log({ action });
+
+                  return (
+                    // biome-ignore lint/a11y/useKeyWithClickEvents: this is fine
+                    // biome-ignore lint/a11y/useKeyWithMouseEvents: this is also fine
+                    <div
+                      style={style}
+                      data-element="action"
+                      onClick={() => {
+                        action.run(control);
+                      }}
+                      onMouseOver={(e) => {
+                        const target = e.currentTarget;
+                        if (control.isTyping) return;
+                        setTimeout(() => {
+                          // if (control.isScrolling) return;
+                          if (scrollingTimeout) return;
+                          control.setActive(target, true);
+                        }, 0);
+                      }}
+                      className="flex gap-1 py-0 px-3 h-12 items-center rounded text-base"
+                    >
+                      <div className="grow-0 shrink-0 basis-auto w-4 h-4">
+                        <action.icon />
+                      </div>
+                      <span className="truncate text-slate-50/80 leading-normal">
+                        {action.title}
+                      </span>
                     </div>
-                    <For each={actions}>
-                      {(action) => (
-                        // biome-ignore lint/a11y/useKeyWithClickEvents: this is fine
-                        // biome-ignore lint/a11y/useKeyWithMouseEvents: this is also fine
-                        <div
-                          data-element="action"
-                          onClick={() => {
-                            action.run(control);
-                          }}
-                          onMouseOver={(e) => {
-                            const target = e.currentTarget;
-                            if (control.isTyping) return;
-                            setTimeout(() => {
-                              // if (control.isScrolling) return;
-                              if (scrollingTimeout) return;
-                              control.setActive(target, true);
-                            }, 0);
-                          }}
-                          className="flex gap-1 py-0 px-3 h-12 items-center rounded text-base"
-                        >
-                          <div className="grow-0 shrink-0 basis-auto w-4 h-4">
-                            <action.icon />
-                          </div>
-                          <span className="truncate text-slate-50/80 leading-normal">
-                            {action.title}
-                          </span>
-                        </div>
-                      )}
-                    </For>
-                  </>
-                )}
-              </For>
+                  );
+                })}
+              </div>
+              {/*  */}
             </div>
           </Dialog.Content>
         </Dialog.Portal>
