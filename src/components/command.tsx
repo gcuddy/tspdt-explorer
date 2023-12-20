@@ -15,6 +15,7 @@ import { objectEntries } from "@antfu/utils";
 import { usePathname, useRouter } from "next/navigation";
 
 import { ArrowElbowDownRight } from "@phosphor-icons/react";
+import { useDirectors } from "@/app/replicache";
 
 type Action = {
   icon: (props: any) => React.ReactNode;
@@ -137,7 +138,7 @@ function useControl() {
         return true;
       }),
       filter((action) => {
-        console.log("action", action);
+        // console.log("action", action);
         return true;
       }),
       filter((action) => !action.disabled),
@@ -182,6 +183,8 @@ export const CommandBarContext = createContext<Control | null>(null);
 export function CommandBar({ children }: { children: React.ReactNode }) {
   const control = useControl();
 
+  const directors = useDirectors();
+
   console.log("rendering command bar");
   let scrollingTimeout: number | null = null;
 
@@ -199,6 +202,19 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
         pathname,
       }),
     ];
+  });
+
+  control.register("directors", async () => {
+    return directors.slice(0, 25).map(([id, director]) =>
+      NavigationAction({
+        title: director.name ?? "Unknown",
+        category: "Directors",
+        path: `/director/${director.id}`,
+        disabled: false,
+        router,
+        pathname,
+      })
+    );
   });
 
   return (

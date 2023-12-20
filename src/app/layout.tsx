@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { CommandBar } from "@/components/command";
 import { GlobalCommands } from "./global-commands";
+import { R } from "./replicache";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,22 +22,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <CommandBar>
-        <body
-          className={`${inter.className} bg-slate-950 text-slate-50 mx-auto flex flex-col gap-4 px-1`}
-        >
-          <GlobalCommands>
-            <header className="flex justify-center w-full grow">
-              <Link href="/">
-                <h1 className="text-2xl font-bold tracking-tight">
-                  They Shoot Pictures, Don't They?
-                </h1>
-              </Link>
-            </header>
-            {children}
-          </GlobalCommands>
-        </body>
-      </CommandBar>
+      <R>
+        <CommandBar>
+          <body
+            className={`${inter.className} bg-slate-950 text-slate-50 mx-auto flex flex-col gap-4 px-1`}
+          >
+            <GlobalCommands>
+              <header className="flex justify-center w-full grow">
+                <Link href="/">
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    They Shoot Pictures, Don't They?
+                  </h1>
+                </Link>
+              </header>
+              {children}
+            </GlobalCommands>
+          </body>
+        </CommandBar>
+      </R>
     </html>
   );
 }

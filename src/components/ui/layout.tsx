@@ -10,5 +10,5 @@ export const Stack = React.forwardRef<HTMLDivElement, DivProps>(
         {children}
       </div>
     );
-  }
+  },
 );
