@@ -18,6 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowElbowDownRight } from "@phosphor-icons/react";
 import { useDirectors, useMovies } from "@/app/replicache";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { Command } from "cmdk";
 
 type Action = {
   icon: (props: any) => React.ReactNode;
@@ -258,6 +259,74 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
   return (
     <CommandBarContext.Provider value={control}>
       {children}
+      <Command.Dialog>
+        <Command.Input />
+        <Command.List>
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((item) => {
+              const action = mappedActions[item.index];
+
+              const style = {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: `${item.size}px`,
+                transform: `translateY(${item.start}px)`,
+              } as const;
+
+              if (typeof action === "string") {
+                return (
+                  <div
+                    style={style}
+                    key={action}
+                    className="flex py-2 px-3 uppercase text-sm items-center font-bold text-zinc-50/50"
+                  >
+                    {action}
+                  </div>
+                );
+              }
+
+              console.log({ action });
+
+              return (
+                // biome-ignore lint/a11y/useKeyWithClickEvents: this is fine
+                // biome-ignore lint/a11y/useKeyWithMouseEvents: this is also fine
+                <div
+                  style={style}
+                  data-element="action"
+                  onClick={() => {
+                    action.run(control);
+                  }}
+                  onMouseOver={(e) => {
+                    const target = e.currentTarget;
+                    if (control.isTyping) return;
+                    setTimeout(() => {
+                      // if (control.isScrolling) return;
+                      if (scrollingTimeout) return;
+                      control.setActive(target, true);
+                    }, 0);
+                  }}
+                  className="flex gap-1 py-0 px-3 h-12 items-center rounded text-base"
+                >
+                  <div className="grow-0 shrink-0 basis-auto w-4 h-4">
+                    <action.icon />
+                  </div>
+                  <span className="truncate text-zinc-50/80 leading-normal">
+                    {action.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </Command.List>
+      </Command.Dialog>
       <Dialog.Root
         open={control.visible}
         onOpenChange={(open) => {
@@ -266,10 +335,10 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
         }}
       >
         <Dialog.Portal>
-          {/* <Dialog.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" /> */}
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <Dialog.Content
             ref={control.bind}
-            className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-2xl animate-in fade-in ring-1 ring-black/10 translate-x-[-50%] translate-y-[-50%] gap-4 bg-black/90 backdrop-blur-md p-6 shadow-lg rounded-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] "
+            className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-2xl animate-in fade-in ring-1 ring-black/10 translate-x-[-50%] translate-y-[-50%] gap-4 bg-zinc-900/90 backdrop-blur-md p-6 shadow-lg rounded-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] "
           >
             <Filter input={control.input} setInput={control.setInput} />
             {/* TODO: get rid of scrollbar */}

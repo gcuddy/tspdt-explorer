@@ -22,6 +22,7 @@
     "better-sqlite3": "^9.2.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "cmdk": "^0.2.0",
     "d3": "^7.8.5",
     "drizzle-orm": "^0.29.1",
     "million": "latest",

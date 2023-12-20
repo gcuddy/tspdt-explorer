@@ -10,7 +10,7 @@ export function Tag({
   return (
     <div
       className={cn(
-        "inline-flex shrink-0 grow-0 basis-auto tracking-widest text-center justify-center text-xs h-[26px] items-center uppercase rounded-lg leading-4 bg-slate-600 px-1",
+        "inline-flex shrink-0 grow-0 basis-auto tracking-widest text-center justify-center text-xs h-[26px] items-center uppercase rounded-lg leading-4 bg-zinc-600 px-1",
         className
       )}
     >

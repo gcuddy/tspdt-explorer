@@ -35,10 +35,10 @@ export function MovieHeader({ movie }: Props) {
         </div> */}
         <div className="col-span-6 col-start-4 gap-2 relative text-center flex flex-col items-center justify-center">
           <h1 className={`text-6xl ${serif.className}`}>{movie.title}</h1>
-          <div className="flex gap-2 text-slate-400">
+          <div className="flex gap-2 text-zinc-400">
             <Link href={`/year/${movie.year}`}>{movie.year}</Link>
             <span>·</span>
-            <p className="text-slate-400">
+            <p className="text-zinc-400">
               <Directors
                 directors={movie.moviesToDirectors.map(
                   ({ director }) => director
@@ -55,7 +55,7 @@ export function MovieHeader({ movie }: Props) {
 
 function DirectorLink({ director }: { director: Director }) {
   return (
-    <Link href={`/director/${director.id}`} className="text-slate-300">
+    <Link href={`/director/${director.id}`} className="text-zinc-300">
       {director.name}
     </Link>
   );

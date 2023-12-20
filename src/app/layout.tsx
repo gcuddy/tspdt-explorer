@@ -25,7 +25,7 @@ export default function RootLayout({
       <R>
         <CommandBar>
           <body
-            className={`${inter.className} bg-slate-950 text-slate-50 mx-auto flex flex-col gap-4 px-1`}
+            className={`${inter.className} bg-zinc-900 text-zinc-50 mx-auto flex flex-col gap-4 px-1`}
           >
             <GlobalCommands>
               <header className="flex justify-center w-full grow">
@@ -35,7 +35,7 @@ export default function RootLayout({
                   </h1>
                 </Link>
               </header>
-              {children}
+              <main className="mx-auto max-w-5xl">{children}</main>
             </GlobalCommands>
           </body>
         </CommandBar>

@@ -82,7 +82,7 @@ export function RankingChart({ rankings }: { rankings: Array<Ranking> }) {
       colors={["#fff"]}
       tooltip={({ point }) => {
         return (
-          <div className="flex flex-col p-2 text-xs text-slate-200 rounded-lg bg-slate-900 border-slate-700 shadow">
+          <div className="flex flex-col p-2 text-xs text-zinc-200 rounded-lg bg-zinc-900 border-zinc-700 shadow">
             {/* <span>movie</span> */}
             <dl className="flex flex-col gap-1">
               <div className="flex justify-between gap-2 items-center">
