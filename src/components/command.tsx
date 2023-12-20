@@ -16,7 +16,7 @@ import { objectEntries } from "@antfu/utils";
 import { usePathname, useRouter } from "next/navigation";
 
 import { ArrowElbowDownRight } from "@phosphor-icons/react";
-import { useDirectors } from "@/app/replicache";
+import { useDirectors, useMovies } from "@/app/replicache";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 type Action = {
@@ -187,6 +187,7 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
   const control = useControl();
 
   const directors = useDirectors();
+  const movies = useMovies();
 
   console.log("rendering command bar");
   let scrollingTimeout: number | null = null;
@@ -213,6 +214,21 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
         title: director.name ?? "Unknown",
         category: "Directors",
         path: `/director/${director.id}`,
+        disabled: false,
+        router,
+        pathname,
+      })
+    );
+  });
+
+  console.log({ movies });
+
+  control.register("movies", async () => {
+    return movies.map(([id, movie]) =>
+      NavigationAction({
+        title: movie.title ?? "Unknown",
+        category: "Movies",
+        path: `/movie/${movie.id}`,
         disabled: false,
         router,
         pathname,

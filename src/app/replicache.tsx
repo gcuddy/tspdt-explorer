@@ -1,6 +1,6 @@
 "use client";
 
-import { Director } from "@/db/schema";
+import { Director, Movie } from "@/db/schema";
 import React, { createContext } from "react";
 import {
   DeepReadonlyObject,
@@ -23,6 +23,10 @@ export const DirectorsContext = createContext<
   (readonly [string, DeepReadonlyObject<Director>])[]
 >([]);
 
+export const MoviesContext = createContext<
+  (readonly [string, DeepReadonlyObject<Movie>])[]
+>([]);
+
 export function R({ children }: { children: React.ReactNode }) {
   const directors = useSubscribe(
     rep,
@@ -38,10 +42,26 @@ export function R({ children }: { children: React.ReactNode }) {
     }
   );
 
+  const movies = useSubscribe(
+    rep,
+    async (tx) => {
+      const movies = await tx
+        .scan<Movie>({ prefix: "movie/" })
+        .entries()
+        .toArray();
+      return movies;
+    },
+    {
+      default: [] as (readonly [string, DeepReadonlyObject<Movie>])[],
+    }
+  );
+
   return (
-    <DirectorsContext.Provider value={directors}>
-      {children}
-    </DirectorsContext.Provider>
+    <MoviesContext.Provider value={movies}>
+      <DirectorsContext.Provider value={directors}>
+        {children}
+      </DirectorsContext.Provider>
+    </MoviesContext.Provider>
   );
 }
 
@@ -49,6 +69,14 @@ export function useDirectors() {
   const ctx = React.useContext(DirectorsContext);
   if (ctx === undefined) {
     throw new Error("useDirectors must be used within a R");
+  }
+  return ctx;
+}
+
+export function useMovies() {
+  const ctx = React.useContext(MoviesContext);
+  if (ctx === undefined) {
+    throw new Error("useMovies must be used within a R");
   }
   return ctx;
 }

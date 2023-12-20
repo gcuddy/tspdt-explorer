@@ -3,7 +3,9 @@ import { directors, movies } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { PatchOperation, PullResponseOKV1 } from "replicache";
 export async function POST(request: Request) {
+  // TODO: transaction or something here
   const dirs = await db.select().from(directors);
+  const ms = await db.select().from(movies);
 
   // initially, let's create dummy data
 
@@ -14,6 +16,14 @@ export async function POST(request: Request) {
       op: "put",
       key: `director/${dir.id}`,
       value: dir,
+    });
+  }
+
+  for (const m of ms) {
+    patches.push({
+      op: "put",
+      key: `movie/${m.id}`,
+      value: m,
     });
   }
 
