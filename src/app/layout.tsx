@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { CommandBar } from "@/components/command";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,18 +20,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.className} bg-slate-950 text-slate-50 mx-auto flex flex-col gap-4 container px-1`}
-      >
-        <header className="flex justify-center w-full grow">
-          <Link href="/">
-            <h1 className="text-2xl font-bold tracking-tight">
-              They Shoot Pictures, Don't They?
-            </h1>
-          </Link>
-        </header>
-        {children}
-      </body>
+      <CommandBar>
+        <body
+          className={`${inter.className} bg-slate-950 text-slate-50 mx-auto flex flex-col gap-4 px-1`}
+        >
+          <header className="flex justify-center w-full grow">
+            <Link href="/">
+              <h1 className="text-2xl font-bold tracking-tight">
+                They Shoot Pictures, Don't They?
+              </h1>
+            </Link>
+          </header>
+          {children}
+        </body>
+      </CommandBar>
     </html>
   );
 }
