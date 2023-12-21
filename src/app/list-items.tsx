@@ -7,8 +7,10 @@ import React from "react";
 
 export function List({
   movies,
+  component,
 }: {
   movies: Awaited<ReturnType<typeof getData>>;
+  component?: JSX.Element;
 }) {
   const listRef = React.useRef<HTMLDivElement>(null);
   const virtualizer = useWindowVirtualizer({
@@ -42,6 +44,7 @@ export function List({
               }}
               key={item.key}
             >
+              {/* <component movie={movies[item.index]} /> */}
               <ListItem movie={movies[item.index]} />
             </div>
           ))}

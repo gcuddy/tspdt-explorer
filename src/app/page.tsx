@@ -13,6 +13,7 @@ export const getData = cache(async () => {
       title: movies.title,
       year: movies.year,
       tmdbId: movies.tmdbId,
+      tspdtId: movies.tspdtId,
       ranking: rankings.ranking,
       _director: sql<string>`json_group_array(json_object('id', directors.id, 'name', directors.name))`, // Group directors into a JSON array
       // director: sql`GROUP_CONCAT(directors.name, ", ")')`, // Concatenate director names
@@ -29,7 +30,7 @@ export const getData = cache(async () => {
 
   return m.map(({ _director, ...movie }) => ({
     ...movie,
-    director: JSON.parse(_director) as { id: number; name: string }[],
+    director: JSON.parse(_director) as { id: string; name: string }[],
   }));
 });
 

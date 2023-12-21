@@ -55,7 +55,11 @@ export function MovieHeader({ movie }: Props) {
   );
 }
 
-function DirectorLink({ director }: { director: Director }) {
+function DirectorLink({
+  director,
+}: {
+  director: Pick<Director, "id" | "name">;
+}) {
   return (
     <Link href={`/director/${director.id}`} className="text-zinc-300">
       {director.name}
@@ -63,7 +67,11 @@ function DirectorLink({ director }: { director: Director }) {
   );
 }
 
-function Directors({ directors }: { directors: Array<Director> }) {
+export function Directors({
+  directors,
+}: {
+  directors: Array<Pick<Director, "id" | "name">>;
+}) {
   if (directors.length === 1) {
     return (
       <span>
