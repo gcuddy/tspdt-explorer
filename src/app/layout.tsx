@@ -26,10 +26,10 @@ export default function RootLayout({
         <CommandBar>
           <body className={`${inter.className} bg-zinc-900 text-zinc-50`}>
             <GlobalCommands>
-              <header className="flex justify-center w-full grow">
+              <header className="flex w-full grow mx-auto items-center max-w-5xl h-24">
                 <Link href="/">
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    They Shoot Pictures, Don't They?
+                  <h1 className="text-2xl leading-tight text-white font-semibold tracking-tight drop-shadow-md">
+                    TSPDT
                   </h1>
                 </Link>
               </header>

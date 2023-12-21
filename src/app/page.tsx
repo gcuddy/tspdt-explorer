@@ -39,8 +39,8 @@ export default async function Home() {
   const movies = await getData();
 
   return (
-    <main className="flex min-h-screen flex-col p-4">
+    <div className="flex flex-col">
       <List movies={movies} />
-    </main>
+    </div>
   );
 }

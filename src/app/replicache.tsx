@@ -1,6 +1,7 @@
 "use client";
 
 import { Director, Movie } from "@/db/schema";
+import { env } from "@/env.mjs";
 import React, { createContext } from "react";
 import {
   DeepReadonlyObject,
@@ -12,7 +13,7 @@ import { useSubscribe } from "replicache-react";
 
 const rep = process.browser
   ? new Replicache({
-      licenseKey: TEST_LICENSE_KEY,
+      licenseKey: env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY,
       name: "tspdt-user-id",
       pushURL: "/api/replicache-push",
       pullURL: "/api/replicache-pull",
