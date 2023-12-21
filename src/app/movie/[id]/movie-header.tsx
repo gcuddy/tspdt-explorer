@@ -18,10 +18,12 @@ export function MovieHeader({ movie }: Props) {
       {!!movie.tmdb && (
         <div className="col-span-12 flex justify-center">
           <Image
-            width={500}
-            height={500 * (9 / 16)}
+            width={1024}
+            height={1024 * (9 / 16)}
+            className="aspect-video"
             alt=""
-            src={`https://image.tmdb.org/t/p/w500${movie.tmdb?.backdrop_path}`}
+            // or w1280 or original
+            src={`https://image.tmdb.org/t/p/original${movie.tmdb?.backdrop_path}`}
           />
         </div>
       )}

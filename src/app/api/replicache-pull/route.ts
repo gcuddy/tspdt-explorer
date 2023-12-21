@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     });
   }
 
-  for (const m of ms) {
+  for (const { tmdbData, ...m } of ms) {
     patches.push({
       op: "put",
       key: `movie/${m.id}`,
