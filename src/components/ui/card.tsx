@@ -6,7 +6,7 @@ export function Card({
   className,
 }: {
   children: React.ReactNode;
-  as: string;
+  as?: string;
   className?: string;
 }) {
   return (

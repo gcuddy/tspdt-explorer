@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { Ranking, movies, rankings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { RankingChart } from "./ranking-chart";
 import { Card } from "@/components/ui/card";
@@ -19,7 +19,9 @@ export const getMovie = cache(async (id: string) => {
           director: true,
         },
       },
-      rankings: true,
+      rankings: {
+        orderBy: asc(rankings.year),
+      },
     },
   });
 

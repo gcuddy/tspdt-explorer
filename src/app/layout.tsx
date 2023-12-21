@@ -6,6 +6,8 @@ import { CommandBar } from "@/components/command";
 import { GlobalCommands } from "./global-commands";
 import { R } from "./replicache";
 import { BodyProvider } from "./body-provider";
+import { MagnifyingGlass } from "@phosphor-icons/react";
+import { SearchButton } from "./search-button";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,12 +29,15 @@ export default function RootLayout({
         <CommandBar>
           <BodyProvider>
             <GlobalCommands>
-              <header className="flex w-full grow mx-auto items-center max-w-5xl h-24">
+              <header className="flex w-full grow mx-auto items-center justify-between max-w-5xl h-24">
                 <Link href="/">
-                  <h1 className="text-2xl leading-tight text-white font-semibold tracking-tight drop-shadow-md">
+                  <h1 className="text-2xl border bg-zinc-50 leading-tight text-zinc-950 font-semibold tracking-tight drop-shadow-md">
                     TSPDT
                   </h1>
                 </Link>
+                <div>
+                  <SearchButton />
+                </div>
               </header>
               <main className="mx-auto max-w-5xl">{children}</main>
             </GlobalCommands>
