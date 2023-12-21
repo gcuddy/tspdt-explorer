@@ -1,0 +1,1 @@
+ALTER TABLE movies ADD `poster_path` text;

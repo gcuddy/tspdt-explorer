@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Suspense } from "react";
-import { FancyMovieListItem } from "./tmovie";
 import { getData } from "@/app/page";
+import { MovieListItem } from "./movie";
 
 type Movie = Awaited<ReturnType<typeof getData>>[0];
 
@@ -9,9 +8,15 @@ export default function ListItem({ movie }: { movie: Movie }) {
   return (
     <li className="flex items-center gap-1">
       <span className="text-gray-500 text-sm">{movie.ranking}</span>
-      <Suspense>
-        <FancyMovieListItem movie={movie} />
-      </Suspense>
+      <MovieListItem
+        movie={movie}
+        director={movie.director}
+        posterSrc={
+          movie.posterPath
+            ? `https://image.tmdb.org/t/p/w154${movie.posterPath}`
+            : undefined
+        }
+      />
       <span className="font-bold tracking-tight text-xl truncate">
         {movie.title}
       </span>

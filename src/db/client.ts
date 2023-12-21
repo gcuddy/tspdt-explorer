@@ -12,6 +12,7 @@ import * as schema from "./schema";
 
 import Database from "better-sqlite3";
 import { drizzle, BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 
 export const serverID = 1;
 const sqlite = new Database("db.db");

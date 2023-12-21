@@ -5,6 +5,7 @@ import {
   sqliteTable,
   primaryKey,
 } from "drizzle-orm/sqlite-core";
+import { Credits, MovieDetails } from "tmdb-ts";
 
 export const movies = sqliteTable("movies", {
   id: text("id").primaryKey(),
@@ -12,6 +13,15 @@ export const movies = sqliteTable("movies", {
   year: integer("year"),
   tmdbId: integer("tmdb_id"),
   tspdtId: integer("tspdt_id"),
+  //   just taken from tmdb, for easy access
+  posterPath: text("poster_path"),
+  tmdbData: text("tmdb_data", {
+    mode: "json",
+  }).$type<
+    MovieDetails & {
+      credits: Omit<Credits, "id">;
+    }
+  >(),
 });
 
 export type Movie = InferSelectModel<typeof movies>;

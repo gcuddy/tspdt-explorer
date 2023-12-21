@@ -8,7 +8,7 @@ export const MovieListItem = ({
   posterSrc,
   director,
 }: {
-  movie: Movie;
+  movie: Pick<Movie, "id" | "title" | "year">;
   director?: Array<Pick<Director, "id" | "name">>;
   posterSrc?: string;
 }) => {

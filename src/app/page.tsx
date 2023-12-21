@@ -15,6 +15,7 @@ export const getData = cache(async () => {
       tmdbId: movies.tmdbId,
       tspdtId: movies.tspdtId,
       ranking: rankings.ranking,
+      posterPath: movies.posterPath,
       _director: sql<string>`json_group_array(json_object('id', directors.id, 'name', directors.name))`, // Group directors into a JSON array
       // director: sql`GROUP_CONCAT(directors.name, ", ")')`, // Concatenate director names
       // directorId: sql`GROUP_CONCAT(directors.id, ", ")')`, // Concatenate director ids

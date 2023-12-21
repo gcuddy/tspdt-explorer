@@ -15,7 +15,7 @@ export function List({
   const listRef = React.useRef<HTMLDivElement>(null);
   const virtualizer = useWindowVirtualizer({
     count: movies.length,
-    estimateSize: () => 48,
+    estimateSize: () => 120,
     overscan: 10,
     scrollMargin: listRef.current?.offsetTop ?? 0,
     getItemKey: (index) => movies[index].id,

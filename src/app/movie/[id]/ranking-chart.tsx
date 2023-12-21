@@ -306,12 +306,11 @@ export function RankingChart({
       //     return Number(point.data.yFormatted) <= 1000 ? "#f56565" : "#fff";
       //   }}
       tooltip={({ point }) => {
-        console.log("tooltip", { point, data });
         const movie = data.find((d) => d.id === point.serieId);
         return (
-          <div className="flex flex-col p-2 text-xs text-zinc-200 rounded-lg bg-zinc-900 border-zinc-700 shadow">
+          <div className="flex flex-col p-2 gap-1 text-xs text-zinc-200 rounded-lg bg-zinc-900 border-zinc-700 shadow">
             {movie && (
-              <span>
+              <span className="font-semibold">
                 {movie.title} ({movie.year})
               </span>
             )}
