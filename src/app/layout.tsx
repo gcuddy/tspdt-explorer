@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CommandBar } from "@/components/command";
 import { GlobalCommands } from "./global-commands";
 import { R } from "./replicache";
+import { BodyProvider } from "./body-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <R>
         <CommandBar>
-          <body className={`${inter.className} bg-zinc-900 text-zinc-50`}>
+          <BodyProvider>
             <GlobalCommands>
               <header className="flex w-full grow mx-auto items-center max-w-5xl h-24">
                 <Link href="/">
@@ -35,7 +36,7 @@ export default function RootLayout({
               </header>
               <main className="mx-auto max-w-5xl">{children}</main>
             </GlobalCommands>
-          </body>
+          </BodyProvider>
         </CommandBar>
       </R>
     </html>

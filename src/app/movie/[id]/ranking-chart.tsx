@@ -198,19 +198,18 @@ export function RankingChart({
         axis: {
           domain: {
             line: {
-              //   stroke: "#64748b",
               strokeWidth: 0,
             },
           },
           ticks: {
             text: {
-              fill: "#64748b",
+              fill: "#71717a",
             },
           },
         },
         grid: {
           line: {
-            stroke: "#1e293b",
+            stroke: "#27272a",
           },
         },
         legends: {
@@ -220,9 +219,9 @@ export function RankingChart({
             },
             text: {
               ...inter.style,
-              fill: "#64748b",
+              fill: "#71717a",
               fontSize: 12,
-              outlineColor: "#64748b",
+              outlineColor: "#71717a",
               outlineWidth: 0,
               textDecoration: "line-through",
             },
@@ -233,7 +232,7 @@ export function RankingChart({
         },
         crosshair: {
           line: {
-            stroke: "#64748b",
+            stroke: "#71717a",
           },
         },
       }}
@@ -248,7 +247,7 @@ export function RankingChart({
       //   }}
       //   colors={
       //     colors ?? [
-      //       "#64748b",
+      //       "#71717a",
       //       "#7e8ea6",
       //       "#a0aec0",
       //       "#cbd5e1",

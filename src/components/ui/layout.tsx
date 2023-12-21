@@ -4,11 +4,11 @@ import React from "react";
 type DivProps = React.BaseHTMLAttributes<HTMLDivElement>;
 
 export const Stack = React.forwardRef<HTMLDivElement, DivProps>(
-  ({ children, className }, ref) => {
+  ({ children, className, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn("flex flex-col", className)}>
+      <div ref={ref} className={cn("flex flex-col", className)} {...props}>
         {children}
       </div>
     );
-  },
+  }
 );

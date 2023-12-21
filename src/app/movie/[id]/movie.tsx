@@ -37,10 +37,18 @@ export function Movie({
   });
 
   return (
-    <Stack className="gap-8">
+    <Stack
+      style={
+        {
+          // couldn't get the tailwind ones to look right, so just hardcoding this (from Fey)
+          // boxShadow: "rgba(0, 0, 0, 0.33) 0px 20px 20px",
+        }
+      }
+      className="gap-8 max-w-5xl ring-1 ring-zinc-950/50 shadow-[rgba(0,0,0,0.33)_0px_20px_20px] rounded overflow-hidden bg-zinc-900"
+    >
       <MovieHeader movie={movie} />
       <div className="grid">
-        <Card>
+        <div>
           <span className="text-lg tracking-tight font-semibold text-center">
             Ranking History
           </span>
@@ -48,7 +56,7 @@ export function Movie({
             {/* line chart */}
             <RankingChart data={[movie]} />
           </div>
-        </Card>
+        </div>
       </div>
     </Stack>
   );
