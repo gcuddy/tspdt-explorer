@@ -21,8 +21,17 @@ export function Movie({
         title: "Add to Watchlist",
         icon: PlusCircle,
         disabled: false,
-        category: "Movie",
+        category: "Selection",
         run: () => {},
+      },
+      {
+        title: "Compare to...",
+        icon: PlusCircle,
+        disabled: false,
+        category: "Selection",
+        run: () => {
+          // TODO: Filter just movies
+        },
       },
     ];
   });

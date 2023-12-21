@@ -30,7 +30,7 @@ export function RankingChart({
 
   const router = useRouter();
 
-  const { ticks } = useMemo(() => {
+  const { ticks, minYear, maxYear } = useMemo(() => {
     const years = new Set<number>();
     data.forEach((movie) => {
       movie.rankings.forEach((r) => {
@@ -77,9 +77,11 @@ export function RankingChart({
       }))}
       xScale={{
         type: "linear",
-        min: ticks[0],
-        max: ticks[ticks.length - 1],
-        stacked: false,
+        min: minYear,
+        max: maxYear,
+        // min: ticks[0],
+        // max: ticks[ticks.length - 1],
+        // stacked: false,
         // clamp: true,
         // nice: true,
       }}
@@ -212,18 +214,18 @@ export function RankingChart({
       //       data.data.length;
       //     return positionToColor(avg, 1, 22_900);
       //   }}
-      colors={
-        colors ?? [
-          "#64748b",
-          "#7e8ea6",
-          "#a0aec0",
-          "#cbd5e1",
-          "#e2e8f0",
-          "#edf2f7",
-          "#f7fafc",
-        ]
-      }
-      //   colors={["#fff"]}
+      //   colors={
+      //     colors ?? [
+      //       "#64748b",
+      //       "#7e8ea6",
+      //       "#a0aec0",
+      //       "#cbd5e1",
+      //       "#e2e8f0",
+      //       "#edf2f7",
+      //       "#f7fafc",
+      //     ]
+      //   }
+      colors={["#fff"]}
       pointSymbol={
         enablePoints
           ? (props) => {

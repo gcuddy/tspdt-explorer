@@ -100,6 +100,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       <MovieList list={director.directorsToMovies.map(({ movie }) => movie)} />
       <div className="h-72">
         <RankingChart
+          colors={["hsl(240"]}
           enablePoints={true}
           data={director.directorsToMovies
             .map(({ movie }) => movie)
