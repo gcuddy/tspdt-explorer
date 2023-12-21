@@ -307,9 +307,9 @@ export function RankingChart({
       tooltip={({ point }) => {
         const movie = data.find((d) => d.id === point.serieId);
         return (
-          <div className="flex flex-col p-2 gap-1 text-xs text-zinc-200 rounded-lg bg-zinc-900 border-zinc-700 shadow">
+          <div className="flex flex-col p-2 gap-1 text-xs text-zinc-200 rounded-lg bg-black border-zinc-700 shadow-2xl">
             {movie && (
-              <span className="font-semibold">
+              <span className="font-semibold text-white">
                 {movie.title} ({movie.year})
               </span>
             )}

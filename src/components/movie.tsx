@@ -1,4 +1,4 @@
-import { Directors } from "@/app/movie/[id]/movie-header";
+import { Directors } from "@/app/(movie)/movie/[id]/movie-header";
 import { Director, Movie } from "@/db/schema";
 import Image from "next/image";
 import Link from "next/link";
@@ -47,7 +47,7 @@ export const MovieListItem = ({
 
 export const MoviePoster = ({ src }: { src?: string }) => {
   return (
-    <div className="w-[70px] h-[105px] rounded ring-1 ring-zinc-700">
+    <div className="w-[70px] h-[105px] rounded ring-1 ring-white/5">
       {src ? (
         <Image
           src={src}

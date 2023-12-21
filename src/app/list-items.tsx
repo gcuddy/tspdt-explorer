@@ -1,6 +1,6 @@
 "use client";
 
-import { getData } from "./page";
+import { getData } from "./(default)/page";
 import ListItem from "@/components/list-item";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React from "react";

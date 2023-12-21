@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Director } from "./director";
 import { MovieList } from "./movie-list";
 import { cache } from "react";
-import { RankingChart } from "@/app/movie/[id]/ranking-chart";
+import { RankingChart } from "@/app/(movie)/movie/[id]/ranking-chart";
 import { asc } from "drizzle-orm";
 import { Card } from "@/components/ui/card";
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getData } from "@/app/page";
+import { getData } from "@/app/(default)/page";
 import { MovieListItem } from "./movie";
 import { Instrument_Serif } from "next/font/google";
 
@@ -13,8 +13,10 @@ type Movie = Awaited<ReturnType<typeof getData>>[0];
 
 export default function ListItem({ movie }: { movie: Movie }) {
   return (
-    <li className="flex items-center gap-1">
-      <span className="text-gray-500 text-sm">{movie.ranking}</span>
+    <li className="flex items-center gap-1 relative">
+      <span className="text-gray-500 text-sm absolute tabular-nums -left-2 -translate-x-full">
+        {movie.ranking}
+      </span>
       <MovieListItem
         movie={movie}
         director={movie.director}
