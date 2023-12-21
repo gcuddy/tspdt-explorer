@@ -43,6 +43,13 @@
       "when": 1703128415666,
       "tag": "0005_next_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1703181470644,
+      "tag": "0006_eager_cerise",
+      "breakpoints": true
     }
   ]
 }
