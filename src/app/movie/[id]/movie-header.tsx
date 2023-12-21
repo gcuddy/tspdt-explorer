@@ -64,28 +64,31 @@ function DirectorLink({ director }: { director: Director }) {
 function Directors({ directors }: { directors: Array<Director> }) {
   if (directors.length === 1) {
     return (
-      <p>
+      <span>
         Directed by <DirectorLink director={directors[0]} />
-      </p>
+      </span>
     );
   }
 
   return (
-    <p>
+    <span>
       Directed by{" "}
-      {directors
-        .map((director, index) => {
-          if (index === directors.length - 1) {
-            return (
-              <span>
-                and <DirectorLink director={director} />
-              </span>
-            );
-          }
+      {directors.map((director, index) => {
+        if (index === directors.length - 1) {
+          return (
+            <span key={director.id}>
+              and <DirectorLink director={director} />
+            </span>
+          );
+        }
 
-          return <DirectorLink director={director} />;
-        })
-        .join(", ")}
-    </p>
+        return (
+          <>
+            <DirectorLink key={director.id} director={director} />
+            {", "}
+          </>
+        );
+      })}
+    </span>
   );
 }

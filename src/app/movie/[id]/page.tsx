@@ -32,7 +32,16 @@ export const getMovie = cache(async (id: string) => {
       query: movie.title,
       year: movie.year ?? undefined,
     })
-    .then((res) => res.results.at(0));
+    .then((res) => {
+      // get the result with matching title + year, or the first result
+      return (
+        res.results.find(
+          (r) =>
+            r.title === movie.title &&
+            (!movie.year || r.release_date?.startsWith(movie.year.toString()))
+        ) ?? res.results[0]
+      );
+    });
 
   return {
     ...movie,

@@ -12,13 +12,13 @@ export function MovieList({
         <li className="text-sm" key={movie.id}>
           <span className="tabular-nums">{movie.year}</span>
           {" - "}
-          {(movie.rankings[0].ranking ?? 99999) <= 1000
+          {(movie.rankings.at(-1)?.ranking ?? 99999) <= 1000
             ? "★ "
-            : (movie.rankings[0].ranking ?? 99999) <= 2500
-              ? "● "
-              : ""}
+            : (movie.rankings.at(-1)?.ranking ?? 99999) <= 2500
+            ? "● "
+            : ""}
           <Link href={`/movie/${movie.id}`}>{movie.title}</Link> (
-          {movie.rankings[0].ranking})
+          {movie.rankings.at(-1)?.ranking})
         </li>
       ))}
     </ul>

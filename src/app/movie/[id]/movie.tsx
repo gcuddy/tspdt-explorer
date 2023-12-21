@@ -30,14 +30,14 @@ export function Movie({
   return (
     <Stack className="gap-8">
       <MovieHeader movie={movie} />
-      <div className="grid lg:grid-cols-2">
+      <div className="grid">
         <Card>
           <span className="text-lg tracking-tight font-semibold text-center">
             Ranking History
           </span>
           <div className="h-72">
             {/* line chart */}
-            <RankingChart rankings={movie.rankings} />
+            <RankingChart data={[movie]} />
           </div>
         </Card>
       </div>

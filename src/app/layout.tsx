@@ -24,9 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <R>
         <CommandBar>
-          <body
-            className={`${inter.className} bg-zinc-900 text-zinc-50 mx-auto flex flex-col gap-4 px-1`}
-          >
+          <body className={`${inter.className} bg-zinc-900 text-zinc-50`}>
             <GlobalCommands>
               <header className="flex justify-center w-full grow">
                 <Link href="/">

@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { Director } from "./director";
 import { MovieList } from "./movie-list";
 import { cache } from "react";
+import { RankingChart } from "@/app/movie/[id]/ranking-chart";
+import { asc } from "drizzle-orm";
 
 const getDirector = cache(async (id: string) => {
   const director = await db.query.directors.findFirst({
@@ -14,9 +16,9 @@ const getDirector = cache(async (id: string) => {
             with: {
               rankings: {
                 orderBy(fields, { desc }) {
-                  return desc(fields.year);
+                  return asc(fields.year);
                 },
-                limit: 1,
+                // limit: 1,
               },
             },
           },
@@ -96,6 +98,14 @@ export default async function Page({ params }: { params: { id: string } }) {
         <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1>
       )}
       <MovieList list={director.directorsToMovies.map(({ movie }) => movie)} />
+      <div className="h-72">
+        <RankingChart
+          enablePoints={true}
+          data={director.directorsToMovies
+            .map(({ movie }) => movie)
+            .filter((m) => m.rankings.length > 0)}
+        />
+      </div>
     </div>
   );
 }
