@@ -1,11 +1,12 @@
 "use client";
 
 import { Movie, Ranking } from "@/db/schema";
-import { Datum, Point, ResponsiveLine } from "@nivo/line";
+import { ResponsiveLine } from "@nivo/line";
+import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { range } from "remeda";
-
+const inter = Inter({ weight: "400", subsets: ["latin"] });
 function positionToColor(position: number, min = 1, max = 20_000) {
   // get normalized position as expressed as number between 0 and 50
   console.log({ position, max });
@@ -17,6 +18,19 @@ function positionToColor(position: number, min = 1, max = 20_000) {
 
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
+
+function getItemAtIndex<T>(arr: T[], index: number) {
+  return arr[index % arr.length];
+}
+
+const COLORS = [
+  "hsla(40, 50%, 72%, 1.00)",
+  "hsla(80, 50%, 72%, 0.75)",
+  "hsla(160, 50%, 72%, 0.75)",
+  "hsla(220, 50%, 72%, 0.75)",
+  "hsla(300, 50%, 72%, 0.75)",
+];
+
 export function RankingChart({
   data,
   enablePoints = true,
@@ -144,10 +158,10 @@ export function RankingChart({
         // nice: true,
       }}
       margin={{
-        top: 40,
-        bottom: 50,
-        right: 100,
-        left: 100,
+        top: 50,
+        bottom: 70,
+        right: 60,
+        left: 60,
       }}
       enablePoints={enablePoints}
       //   enablePointLabel={true}
@@ -199,6 +213,24 @@ export function RankingChart({
             stroke: "#1e293b",
           },
         },
+        legends: {
+          hidden: {
+            symbol: {
+              opacity: 0.5,
+            },
+            text: {
+              ...inter.style,
+              fill: "#64748b",
+              fontSize: 12,
+              outlineColor: "#64748b",
+              outlineWidth: 0,
+              textDecoration: "line-through",
+            },
+          },
+          text: {
+            ...inter.style,
+          },
+        },
         crosshair: {
           line: {
             stroke: "#64748b",
@@ -225,7 +257,7 @@ export function RankingChart({
       //       "#f7fafc",
       //     ]
       //   }
-      colors={["#fff"]}
+      colors={colors ?? (data.length === 1 ? ["#fff"] : COLORS)}
       pointSymbol={
         enablePoints
           ? (props) => {
@@ -243,7 +275,32 @@ export function RankingChart({
             }
           : undefined
       }
-      lineWidth={data.length > 5 ? 0.5 : 1}
+      legends={
+        data.length === 1
+          ? undefined
+          : [
+              // TODO: this is not great, probably shuold implement own
+              //   {
+              //     anchor: "top",
+              //     direction: "row",
+              //     itemWidth: 50,
+              //     // itemWidth: ,
+              //     toggleSerie: true,
+              //     itemHeight: 25,
+              //     translateY: -25,
+              //     // translateX: 100,
+              //     symbolSize: 6,
+              //     symbolShape: "circle",
+              //     itemTextColor: "#fff",
+              //     data: data.map((movie, index) => ({
+              //       id: movie.id,
+              //       label: movie.title,
+              //       fill: getItemAtIndex(COLORS, index),
+              //     })),
+              //   },
+            ]
+      }
+      lineWidth={data.length > 30 ? 0.5 : 1}
       //   pointColor={(point: Point) => {
       //     console.log({ point });
       //     return Number(point.data.yFormatted) <= 1000 ? "#f56565" : "#fff";

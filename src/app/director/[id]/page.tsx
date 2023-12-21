@@ -6,6 +6,7 @@ import { MovieList } from "./movie-list";
 import { cache } from "react";
 import { RankingChart } from "@/app/movie/[id]/ranking-chart";
 import { asc } from "drizzle-orm";
+import { Card } from "@/components/ui/card";
 
 const getDirector = cache(async (id: string) => {
   const director = await db.query.directors.findFirst({
@@ -98,15 +99,19 @@ export default async function Page({ params }: { params: { id: string } }) {
         <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1>
       )}
       <MovieList list={director.directorsToMovies.map(({ movie }) => movie)} />
-      <div className="h-72">
-        <RankingChart
-          colors={["hsl(240"]}
-          enablePoints={true}
-          data={director.directorsToMovies
-            .map(({ movie }) => movie)
-            .filter((m) => m.rankings.length > 0)}
-        />
-      </div>
+      <Card>
+        <span className="text-lg tracking-tight font-semibold text-center">
+          Movie Ranking History
+        </span>
+        <div className="h-72">
+          <RankingChart
+            enablePoints={true}
+            data={director.directorsToMovies
+              .map(({ movie }) => movie)
+              .filter((m) => m.rankings.length > 0)}
+          />
+        </div>
+      </Card>
     </div>
   );
 }

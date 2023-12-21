@@ -34,7 +34,9 @@ export function MovieHeader({ movie }: Props) {
           />
         </div> */}
         <div className="col-span-6 col-start-4 gap-2 relative text-center flex flex-col items-center justify-center">
-          <h1 className={`text-6xl ${serif.className}`}>{movie.title}</h1>
+          <h1 className={`text-6xl text-balance ${serif.className}`}>
+            {movie.title}
+          </h1>
           <div className="flex gap-2 text-zinc-400">
             <Link href={`/year/${movie.year}`}>{movie.year}</Link>
             <span>·</span>
