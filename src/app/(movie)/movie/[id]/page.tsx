@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { Ranking, movies, rankings } from "@/db/schema";
+import { Ranking, movies, rankings } from "@/core/movie/movie.sql";
 import { asc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { RankingChart } from "./ranking-chart";

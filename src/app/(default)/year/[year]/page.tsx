@@ -4,7 +4,7 @@ import { Stack } from "@/components/ui/layout";
 import { Tag } from "@/components/ui/tag";
 import { PeopleList } from "@/components/utility";
 import { db } from "@/db/client";
-import { movies, rankings } from "@/db/schema";
+import { movies, rankings } from "@/core/movie/movie.sql";
 import { and, asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";

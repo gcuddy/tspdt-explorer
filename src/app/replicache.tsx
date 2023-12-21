@@ -1,6 +1,6 @@
 "use client";
 
-import { Director, Movie } from "@/db/schema";
+import { Director, Movie } from "@/core/movie/movie.sql";
 import { env } from "@/env.mjs";
 import React, { createContext } from "react";
 import {
@@ -25,8 +25,10 @@ export const DirectorsContext = createContext<
 >([]);
 
 export const MoviesContext = createContext<
-  (readonly [string, DeepReadonlyObject<Movie>])[]
+  (readonly [string, DeepReadonlyObject<SimplifiedMovie>])[]
 >([]);
+
+type SimplifiedMovie = Omit<Movie, "tmdbData">;
 
 export function R({ children }: { children: React.ReactNode }) {
   const directors = useSubscribe(
@@ -47,13 +49,13 @@ export function R({ children }: { children: React.ReactNode }) {
     rep,
     async (tx) => {
       const movies = await tx
-        .scan<Movie>({ prefix: "movie/" })
+        .scan<SimplifiedMovie>({ prefix: "movie/" })
         .entries()
         .toArray();
       return movies;
     },
     {
-      default: [] as (readonly [string, DeepReadonlyObject<Movie>])[],
+      default: [] as (readonly [string, DeepReadonlyObject<SimplifiedMovie>])[],
     }
   );
 

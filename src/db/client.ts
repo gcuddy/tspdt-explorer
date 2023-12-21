@@ -1,4 +1,5 @@
-import * as schema from "./schema";
+import * as movie from "@/core/movie/movie.sql";
+import * as user from "@/core/user/user.sql";
 
 // import { drizzle } from "drizzle-orm/libsql";
 // import { createClient } from "@libsql/client";
@@ -17,5 +18,8 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 export const serverID = 1;
 const sqlite = new Database("db.db");
 export const db = drizzle(sqlite, {
-  schema,
+  schema: {
+    ...movie,
+    ...user,
+  },
 });

@@ -1,5 +1,5 @@
 import { Directors } from "@/app/(movie)/movie/[id]/movie-header";
-import { Director, Movie } from "@/db/schema";
+import { Director, Movie } from "@/core/movie/movie.sql";
 import Image from "next/image";
 import Link from "next/link";
 

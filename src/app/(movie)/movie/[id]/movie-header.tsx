@@ -1,4 +1,4 @@
-import { Director } from "@/db/schema";
+import { Director } from "@/core/movie/movie.sql";
 import { getMovie } from "./page";
 
 import { Instrument_Serif } from "next/font/google";

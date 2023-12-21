@@ -4,7 +4,7 @@ import { eq, isNull } from "drizzle-orm";
 import { chunk } from "remeda";
 import { TMDB } from "tmdb-ts";
 import { Database } from "bun:sqlite";
-import { Movie } from "@/db/schema";
+import { Movie } from "@/core/movie/movie.sql";
 export const serverID = 1;
 const db = new Database("db.db");
 

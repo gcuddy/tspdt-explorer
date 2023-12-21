@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { directors, movies } from "@/db/schema";
+import { directors, movies } from "@/core/movie/movie.sql";
 import { NextResponse } from "next/server";
 import { PatchOperation, PullResponseOKV1 } from "replicache";
 export async function POST(request: Request) {

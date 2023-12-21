@@ -5,7 +5,7 @@ import {
   movies,
   moviesToDirectors,
   rankings,
-} from "@/db/schema";
+} from "@/core/movie/movie.sql";
 import { desc, eq, sql } from "drizzle-orm";
 import { cache } from "react";
 

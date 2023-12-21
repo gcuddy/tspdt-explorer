@@ -1,4 +1,4 @@
-import { Movie, Ranking } from "@/db/schema";
+import { Movie, Ranking } from "@/core/movie/movie.sql";
 import Link from "next/link";
 
 export function MovieList({

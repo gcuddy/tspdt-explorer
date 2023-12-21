@@ -1,6 +1,11 @@
 import { db } from "@/db/client";
 import { asc, eq, sql } from "drizzle-orm";
-import { rankings, movies, directors, moviesToDirectors } from "@/db/schema";
+import {
+  rankings,
+  movies,
+  directors,
+  moviesToDirectors,
+} from "@/core/movie/movie.sql";
 import { cache } from "react";
 import { List } from "../list-items";
 

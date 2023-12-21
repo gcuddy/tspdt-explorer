@@ -1,6 +1,6 @@
 "use client";
 
-import { Movie, Ranking } from "@/db/schema";
+import { Movie, Ranking } from "@/core/movie/movie.sql";
 import { ResponsiveLine } from "@nivo/line";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
