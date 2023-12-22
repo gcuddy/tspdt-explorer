@@ -27,6 +27,9 @@ export async function POST(request: Request) {
     });
   }
 
+
+  console.log("patches", patches);
+
   return NextResponse.json<PullResponseOKV1>({
     cookie: 42,
     lastMutationIDChanges: {},

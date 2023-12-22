@@ -13,6 +13,7 @@ import {
   ArrowFatLineDown,
   ArrowFatLineUp,
   CheckCircle,
+  FilmReel,
   Heart,
   ListPlus,
   PlusCircle,
@@ -24,6 +25,9 @@ import { objectEntries } from "@antfu/utils";
 import { Button } from "@/components/ui/button";
 import { useActions } from "@/app/action-provider";
 import Header from "@/app/header";
+import { useReplicache } from "@/app/replicache";
+import { useSubscribe } from "replicache-react";
+import { Movie as M } from "@/core/movie";
 
 export function Movie({
   movie,
@@ -77,6 +81,14 @@ export function Movie({
 
   const actions = useActions();
 
+  const replicache = useReplicache();
+
+  const userMovie = useSubscribe(replicache, async (tx) => {
+    return tx.get<M.InfoWithNumber>(`userMovie/${movie.id}`);
+  });
+
+  console.log({ userMovie });
+
   //   actions.setSlot(
   // <div className="flex sticky justify-end gap-3 top-0 bg-zinc-925 z-10 h-20 items-center">
   //   <Button>Seen</Button>
@@ -91,9 +103,18 @@ export function Movie({
       <Header />
       <main className="mx-auto max-w-5xl">
         <div className="flex sticky justify-end gap-3 top-0 bg-zinc-925 z-10 h-16 items-center">
-          <Button>
-            <CheckCircle className="mr-1.5" />
-            Seen
+          <Button
+            className={userMovie?.timeSeen ? "opacity-50" : ""}
+            onClick={() => {
+              replicache.mutate.movie_seen([movie.id]);
+            }}
+          >
+            {userMovie?.timeSeen ? (
+              <CheckCircle className="mr-1.5" />
+            ) : (
+              <FilmReel className="mr-1.5" />
+            )}
+            {userMovie?.timeSeen ? "Seen" : "Mark Seen"}
           </Button>
           <Button>
             <ListPlus className="mr-1.5" />

@@ -45,6 +45,7 @@ export const movies = sqliteTable("movies", {
 });
 
 export type Movie = InferSelectModel<typeof movies>;
+export type SimplifiedMovie = Omit<Movie, "tmdbData">;
 
 export const movieRelations = relations(movies, ({ many }) => ({
   moviesToDirectors: many(moviesToDirectors),
