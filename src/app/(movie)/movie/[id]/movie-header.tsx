@@ -44,19 +44,46 @@ export function MovieHeader({ movie }: Props) {
           <h1 className={`text-6xl text-balance ${serif.className}`}>
             {movie.title}
           </h1>
+          {movie.tmdbData?.original_title !== movie.title && (
+            <h2 className="text-xl text-balance">
+              {movie.tmdbData?.original_title}
+            </h2>
+          )}
           <div className="flex gap-2 text-zinc-400 items-center">
+            <span>
+              {movie.tmdb?.production_countries.map((c, i) => {
+                return (
+                  <span className="" key={c.iso_3166_1}>
+                    <Link href={`/country/${c.iso_3166_1}`}>
+                      {c.name === "United States of America"
+                        ? "United States"
+                        : c.name}
+                      {(movie.tmdb?.production_countries?.length ?? 0) > 1 &&
+                      i !== (movie.tmdb?.production_countries?.length ?? 0) - 1
+                        ? ", "
+                        : ", "}
+                    </Link>
+                  </span>
+                );
+              })}
+              <Link href={`/year/${movie.year}`}>{movie.year}</Link>
+            </span>
+            <span>·</span>
+            <p className="text-zinc-400">
+              <Directors
+                directors={movie.moviesToDirectors.map(
+                  ({ director }) => director
+                )}
+              />
+            </p>
+          </div>
+          <span className="flex gap-2">
             {ranking && ranking <= 2500 && (
               <>
-                <Tag
-                  className={
-                    ranking <= 1000
-                      ? "bg-orange-100 text-orange-950"
-                      : undefined
-                  }
-                >
+                <Tag className={ranking <= 1000 ? "" : undefined}>
                   {/* <Star className="text-zinc-600 fill-zinc-600" /> */}
                   {ranking <= 1000 ? (
-                    <span>★</span>
+                    <span className="mr-1">★ </span>
                   ) : (
                     // <svg
                     //   xmlns="http://www.w3.org/2000/svg"
@@ -70,32 +97,30 @@ export function MovieHeader({ movie }: Props) {
                     //     clipRule="evenodd"
                     //   />
                     // </svg>
-                    <span>●</span>
+                    <span className="mr-1">● </span>
                     // <Dot className="w-4 h-4 text-zinc-400 relative -top-px" />
-                  )}
-                  <span>{ranking}</span>
+                  )}{" "}
+                  <span> {ranking}</span>
                 </Tag>
-                <span>·</span>
+                {/* <span className="text-zinc-400">·</span> */}
               </>
             )}
-            <Link href={`/year/${movie.year}`}>{movie.year}</Link>
-            <span>·</span>
-            <p className="text-zinc-400">
-              <Directors
-                directors={movie.moviesToDirectors.map(
-                  ({ director }) => director
-                )}
-              />
-            </p>
-          </div>
-          <span className="flex gap-2">
-            {movie.tmdb?.genres.map((g) => {
-              return (
-                <span className="text-base text-zinc-400" key={g.id}>
-                  <Link href={`/genre/${g.id}`}>{g.name}</Link>
-                </span>
-              );
-            })}
+            {/* TODO: move genres, runtime etc into their own details box */}
+            {/* <div>
+              {movie.tmdb?.genres.map((g, i) => {
+                return (
+                  <span className="text-sm text-zinc-400" key={g.id}>
+                    <Link href={`/genre/${g.id}`}>
+                      {g.name}
+                      {(movie.tmdb?.genres?.length ?? 0) > 1 &&
+                      i !== (movie.tmdb?.genres?.length ?? 0) - 1
+                        ? ", "
+                        : ""}
+                    </Link>
+                  </span>
+                );
+              })}
+            </div> */}
           </span>
         </div>
       </div>
