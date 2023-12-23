@@ -19,6 +19,7 @@ const mutators = new Client<ServerType>()
   .mutation("movie_seen", async (tx, input) => {
     // TODO: update
     // probably could optimize this
+    console.log("seen", tx, input);
     for (const id of input) {
       const movie = await tx.get<M.InfoWithNumber>(`userMovie/${id}`);
       if (!movie) {
@@ -27,9 +28,76 @@ const mutators = new Client<ServerType>()
       }
       await tx.set(`userMovie/${id}`, {
         ...movie,
+        // also remove from watchlist
+        timeAdded: null,
         timeSeen: Date.now(),
       } satisfies M.InfoWithNumber);
     }
+  })
+  .mutation("movie_unseen", async (tx, input) => {
+    for (const id of input) {
+      const movie = await tx.get(`userMovie/${id}`);
+      const newData = {
+        ...movie,
+        timeSeen: null,
+      };
+      await tx.set(`userMovie/${id}`, newData);
+    }
+  })
+  .mutation("movie_favorite", async (tx, input) => {
+    console.log("fav", tx, input);
+    for (const id of input) {
+      const movie = await tx.get(`userMovie/${id}`);
+      const newData = {
+        ...movie,
+        timeFavorited: Date.now(),
+      };
+      await tx.set(`userMovie/${id}`, newData);
+    }
+  })
+  .mutation("movie_unfavorite", async (tx, input) => {
+    console.log("unfav", tx, input);
+    for (const id of input) {
+      const movie = await tx.get(`userMovie/${id}`);
+      const newData = {
+        ...movie,
+        timeFavorited: null,
+      };
+      await tx.set(`userMovie/${id}`, newData);
+    }
+  })
+  .mutation("movie_marktowatch", async (tx, input) => {
+    console.log("mark", tx, input);
+    for (const id of input) {
+      const movie = await tx.get(`userMovie/${id}`);
+      const newData = {
+        ...movie,
+        timeAdded: Date.now(),
+      };
+      await tx.set(`userMovie/${id}`, newData);
+    }
+  })
+  .mutation("movie_unmarktowatch", async (tx, input) => {
+    console.log("unmark", tx, input);
+    for (const id of input) {
+      const movie = await tx.get(`userMovie/${id}`);
+      const newData = {
+        ...movie,
+        timeAdded: null,
+      };
+      await tx.set(`userMovie/${id}`, newData);
+    }
+  })
+  .mutation("movie_poster_path", async (tx, { id, posterPath }) => {
+    const movie = await tx.get<M.InfoWithNumber>(`userMovie/${id}`);
+    if (!movie) {
+      // throw new Error(`Movie ${id} not found`);
+      // make new one
+    }
+    await tx.set(`userMovie/${id}`, {
+      ...movie,
+      posterPath,
+    });
   })
   .build();
 

@@ -17,6 +17,7 @@ const serif = Instrument_Serif({ weight: "400", subsets: ["latin"] });
 export function MovieHeader({ movie }: Props) {
   const ranking = movie.rankings.at(-1)?.ranking;
 
+  console.log({ movie });
   return (
     <div className="grid grid-cols-12 w-full gap-4">
       {!!movie.tmdb && (
@@ -87,6 +88,15 @@ export function MovieHeader({ movie }: Props) {
               />
             </p>
           </div>
+          <span className="flex gap-2">
+            {movie.tmdb?.genres.map((g) => {
+              return (
+                <span className="text-base text-zinc-400" key={g.id}>
+                  <Link href={`/genre/${g.id}`}>{g.name}</Link>
+                </span>
+              );
+            })}
+          </span>
         </div>
       </div>
     </div>

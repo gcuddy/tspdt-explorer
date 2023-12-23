@@ -104,6 +104,7 @@ export function RankingChart({
         tickPadding: 8,
         tickRotation: 0,
         ticksPosition: "before",
+        format: (v) => (Math.floor(v) === v ? v : ""),
         // legend: "Ranking",
         // legendOffset: -32,
         // legendPosition: "middle",

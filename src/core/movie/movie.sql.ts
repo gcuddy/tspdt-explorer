@@ -14,6 +14,7 @@ export const userMovie = sqliteTable(
     ...userID,
     ...timestamps,
     movieID: cuid("movie_id").notNull(),
+    posterPath: text("poster_path"),
     //   could get more complex with activity, but we'll keep it like this for now
     timeSeen: timestamp("time_seen"),
     timeFavorited: timestamp("time_favorited"),

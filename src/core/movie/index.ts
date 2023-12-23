@@ -6,6 +6,7 @@ import { userMovie } from "./movie.sql";
 import { db } from "@/db/client";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { useActor, useUser } from "../actor";
+import { z } from "zod";
 
 export const Info = createSelectSchema(userMovie, {});
 export type Info = typeof userMovie.$inferSelect;
@@ -39,3 +40,73 @@ export const seen = zod(Info.shape.id.array(), async (input) => {
       )
   );
 });
+
+export const unseen = zod(Info.shape.id.array(), async (input) => {
+  db.transaction(async (tx) =>
+    tx
+      .update(userMovie)
+      .set({
+        timeSeen: null,
+        timeUpdated: sql`now()`,
+      })
+      .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
+  );
+});
+
+export const marktowatch = zod(Info.shape.id.array(), async (input) => {
+  db.transaction(async (tx) =>
+    tx
+      .update(userMovie)
+      .set({
+        timeAdded: sql`now()`,
+        timeUpdated: sql`now()`,
+      })
+      .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
+  );
+});
+
+export const unmarktowatch = zod(Info.shape.id.array(), async (input) => {
+  db.transaction(async (tx) =>
+    tx
+      .update(userMovie)
+      .set({
+        timeAdded: null,
+        timeUpdated: sql`now()`,
+      })
+      .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
+  );
+});
+
+export const favorite = zod(Info.shape.id.array(), async (input) => {
+  db.transaction(async (tx) =>
+    tx
+      .update(userMovie)
+      .set({
+        timeFavorited: sql`now()`,
+        timeUpdated: sql`now()`,
+      })
+      .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
+  );
+});
+
+export const unfavorite = zod(Info.shape.id.array(), async (input) => {
+  db.transaction(async (tx) =>
+    tx
+      .update(userMovie)
+      .set({
+        timeFavorited: null,
+        timeUpdated: sql`now()`,
+      })
+      .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
+  );
+});
+
+export const setPosterPath = zod(
+  Info.pick({
+    id: true,
+    posterPath: true,
+  }),
+  async (input) => {
+    // TODO
+  }
+);

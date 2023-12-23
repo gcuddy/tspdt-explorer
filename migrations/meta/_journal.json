@@ -50,6 +50,13 @@
       "when": 1703181470644,
       "tag": "0006_eager_cerise",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1703224354577,
+      "tag": "0007_useful_rockslide",
+      "breakpoints": true
     }
   ]
 }
