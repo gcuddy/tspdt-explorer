@@ -22,6 +22,10 @@ const buttonVariants = cva(
       size: {
         default: "h-8 px-2",
       },
+
+      squishy: {
+        true: "hover:scale-105 transition active:scale-95",
+      },
     },
     defaultVariants: {
       variant: "default",
@@ -31,11 +35,11 @@ const buttonVariants = cva(
 );
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, className, variant, size, ...props }, ref) => {
+  ({ children, className, variant, size, squishy, ...props }, ref) => {
     return (
       <button
         ref={ref}
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className, squishy }))}
         {...props}
       >
         {children}

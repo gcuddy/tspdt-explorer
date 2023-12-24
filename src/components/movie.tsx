@@ -1,9 +1,11 @@
+"use client";
 import { Directors } from "@/app/(movie)/movie/[id]/movie-header";
 import { Director, Movie } from "@/core/movie/movie.sql";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Instrument_Serif } from "next/font/google";
+import { Button } from "./ui/button";
 
 const instrument = Instrument_Serif({
   weight: "400",
@@ -23,7 +25,7 @@ export const MovieListItem = ({
   return (
     <div className="flex gap-4">
       <MoviePoster src={posterSrc} />
-      <div className="flex flex-col">
+      <div className="flex flex-col group">
         <div className="leading-tight">
           <Link
             href={`/movie/${movie.id}`}
@@ -40,6 +42,9 @@ export const MovieListItem = ({
             <Directors directors={director} />
           </div>
         )}
+        <div className="opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition">
+          <Button>Add</Button>
+        </div>
       </div>
     </div>
   );

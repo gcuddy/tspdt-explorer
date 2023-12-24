@@ -109,31 +109,33 @@ export function Movie({
       <main className="mx-auto max-w-5xl">
         <div className="flex sticky justify-end gap-3 top-0 bg-zinc-925 z-10 h-16 items-center">
           {/* TODO: think through this interface, there's to many buttons here */}
-          <Dialog.Root>
-            <Dialog.Trigger asChild>
-              <Button variant="ghost">
-                <Play className="mr-1.5" size={12} weight="fill" />
-                Trailer
-              </Button>
-            </Dialog.Trigger>
-            <Dialog.Portal>
-              <Dialog.Overlay />
-              <Dialog.Content>
-                <Dialog.Title>Trailer</Dialog.Title>
-                <div className="flex justify-center">
-                  {/* TODO: make this bigger */}
-                  <iframe
-                    width="560"
-                    height="315"
-                    src={`https://www.youtube.com/embed/${movie.tmdb?.videos.results[0].key}?autoplay=1&rel=0&controls=1&showinfo=0&modestbranding=1`}
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  />
-                </div>
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog.Root>
+          {movie.tmdb?.videos.results?.length ? (
+            <Dialog.Root>
+              <Dialog.Trigger asChild>
+                <Button variant="ghost">
+                  <Play className="mr-1.5" size={12} weight="fill" />
+                  Trailer
+                </Button>
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay />
+                <Dialog.Content>
+                  <Dialog.Title>Trailer</Dialog.Title>
+                  <div className="flex justify-center">
+                    {/* TODO: make this bigger */}
+                    <iframe
+                      width="560"
+                      height="315"
+                      src={`https://www.youtube.com/embed/${movie.tmdb?.videos.results[0].key}?autoplay=1&rel=0&controls=1&showinfo=0&modestbranding=1`}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  </div>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+          ) : null}
           <Button
             className={userMovie?.timeSeen ? "opacity-50" : ""}
             onClick={() => {

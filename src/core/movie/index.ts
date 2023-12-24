@@ -2,7 +2,7 @@ export * as Movie from "./index";
 
 import { zod } from "@/utils/zod";
 import { createSelectSchema } from "drizzle-zod";
-import { userMovie } from "./movie.sql";
+import { movies, userMovie } from "./movie.sql";
 import { db } from "@/db/client";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { useActor, useUser } from "../actor";

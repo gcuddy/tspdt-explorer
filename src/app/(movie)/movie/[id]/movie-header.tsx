@@ -76,6 +76,24 @@ export function MovieHeader({ movie }: Props) {
                 )}
               />
             </p>
+            <span>·</span>
+            <span className="text-zinc-400">{movie.tmdb?.runtime} min</span>
+            <span>·</span>
+            <div>
+              {movie.tmdb?.genres.map((g, i) => {
+                return (
+                  <span className="text-sm text-zinc-400" key={g.id}>
+                    <Link href={`/genre/${g.id}`}>
+                      {g.name}
+                      {(movie.tmdb?.genres?.length ?? 0) > 1 &&
+                      i !== (movie.tmdb?.genres?.length ?? 0) - 1
+                        ? ", "
+                        : ""}
+                    </Link>
+                  </span>
+                );
+              })}
+            </div>
           </div>
           <span className="flex gap-2">
             {ranking && ranking <= 2500 && (

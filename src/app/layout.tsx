@@ -6,6 +6,7 @@ import { GlobalCommands } from "./global-commands";
 import { R } from "./replicache";
 import { BodyProvider } from "./body-provider";
 import { ActionProvider } from "./action-provider";
+import { FilterProvider } from "./filter-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,7 +30,9 @@ export default function RootLayout({
         <CommandBar>
           <BodyProvider>
             <ActionProvider>
-              <GlobalCommands>{children}</GlobalCommands>
+              <FilterProvider>
+                <GlobalCommands>{children}</GlobalCommands>
+              </FilterProvider>
             </ActionProvider>
           </BodyProvider>
         </CommandBar>

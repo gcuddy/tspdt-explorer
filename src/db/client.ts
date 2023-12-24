@@ -18,6 +18,7 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 export const serverID = 1;
 const sqlite = new Database("db.db");
 export const db = drizzle(sqlite, {
+  logger: true,
   schema: {
     ...movie,
     ...user,

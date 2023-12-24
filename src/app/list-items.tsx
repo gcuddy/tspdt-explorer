@@ -4,6 +4,7 @@ import { getData } from "./(default)/page";
 import ListItem from "@/components/list-item";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React from "react";
+import { useFilter } from "./filter-provider";
 
 export function List({
   movies,
@@ -12,13 +13,26 @@ export function List({
   movies: Awaited<ReturnType<typeof getData>>;
   component?: JSX.Element;
 }) {
+  const { filter } = useFilter();
+
+  const filteredMovies = React.useMemo(() => {
+    if (!filter) return movies;
+    return movies.filter(
+      (movie) =>
+        movie.title.toLowerCase().includes(filter.toLowerCase()) ||
+        movie.director.some((director) =>
+          director.name.toLowerCase().includes(filter.toLowerCase())
+        )
+    );
+  }, [movies, filter]);
+
   const listRef = React.useRef<HTMLDivElement>(null);
   const virtualizer = useWindowVirtualizer({
-    count: movies.length,
+    count: filteredMovies.length,
     estimateSize: () => 120,
     overscan: 10,
     scrollMargin: listRef.current?.offsetTop ?? 0,
-    getItemKey: (index) => movies[index].id,
+    getItemKey: (index) => filteredMovies[index].id,
   });
   return (
     <>
@@ -45,7 +59,7 @@ export function List({
               key={item.key}
             >
               {/* <component movie={movies[item.index]} /> */}
-              <ListItem movie={movies[item.index]} />
+              <ListItem movie={filteredMovies[item.index]} />
             </div>
           ))}
         </div>

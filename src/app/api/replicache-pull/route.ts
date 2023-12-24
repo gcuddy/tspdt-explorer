@@ -2,10 +2,20 @@ import { db } from "@/db/client";
 import { directors, movies } from "@/core/movie/movie.sql";
 import { NextResponse } from "next/server";
 import { PatchOperation, PullResponseOKV1 } from "replicache";
+import { rankings } from "@/db/schema";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 export async function POST(request: Request) {
   // TODO: transaction or something here
   const dirs = await db.select().from(directors);
-  const ms = await db.select().from(movies);
+
+  const { tmdbData, ...movieColumns } = getTableColumns(movies);
+  const ms = await db.select(movieColumns).from(movies);
+  const sq = db
+    .select({
+      year: sql`max(${rankings.year})`,
+    })
+    .from(rankings);
+  const rs = await db.select().from(rankings).where(eq(rankings.year, sq));
 
   // initially, let's create dummy data
 
@@ -19,7 +29,7 @@ export async function POST(request: Request) {
     });
   }
 
-  for (const { tmdbData, ...m } of ms) {
+  for (const m of ms) {
     patches.push({
       op: "put",
       key: `movie/${m.id}`,
@@ -27,8 +37,16 @@ export async function POST(request: Request) {
     });
   }
 
+  for (const r of rs) {
+    patches.push({
+      op: "put",
+      key: `movie/${r.movieId}/ranking`,
+      value: r,
+    });
+  }
 
-  console.log("patches", patches);
+  //   console.log("patches", patches);
+  console.log("returning patch of length: ", patches.length);
 
   return NextResponse.json<PullResponseOKV1>({
     cookie: 42,
