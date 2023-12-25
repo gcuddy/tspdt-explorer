@@ -55,6 +55,8 @@ export default function Me() {
       .slice(0, 10);
   }, [watchListMovies]);
 
+  console.log({ moviesSeen });
+
   const amountOfMoviesInTop1000 = useMemo(() => {
     return moviesSeen.filter(
       (m) => m.ranking?.ranking && m.ranking?.ranking <= 10000
@@ -62,7 +64,7 @@ export default function Me() {
   }, [moviesSeen]);
 
   const tspdtWatchedPercent = useMemo(() => {
-    return (amountOfMoviesInTop1000 / 1000) * 100;
+    return Math.floor((amountOfMoviesInTop1000 / 1000) * 100);
   }, [amountOfMoviesInTop1000]);
 
   console.log({ userMovies });
