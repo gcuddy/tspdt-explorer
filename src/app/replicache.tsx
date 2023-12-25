@@ -28,6 +28,7 @@ const mutators = new Client<ServerType>()
       }
       await tx.set(`userMovie/${id}`, {
         ...movie,
+        movieID: id,
         // also remove from watchlist
         timeAdded: null,
         timeSeen: Date.now(),
@@ -39,6 +40,7 @@ const mutators = new Client<ServerType>()
       const movie = await tx.get(`userMovie/${id}`);
       const newData = {
         ...movie,
+        movieID: id,
         timeSeen: null,
       };
       await tx.set(`userMovie/${id}`, newData);
@@ -49,6 +51,7 @@ const mutators = new Client<ServerType>()
     for (const id of input) {
       const movie = await tx.get(`userMovie/${id}`);
       const newData = {
+        movieID: id,
         ...movie,
         timeFavorited: Date.now(),
       };
@@ -60,6 +63,7 @@ const mutators = new Client<ServerType>()
     for (const id of input) {
       const movie = await tx.get(`userMovie/${id}`);
       const newData = {
+        movieID: id,
         ...movie,
         timeFavorited: null,
       };
@@ -71,6 +75,7 @@ const mutators = new Client<ServerType>()
     for (const id of input) {
       const movie = await tx.get(`userMovie/${id}`);
       const newData = {
+        movieID: id,
         ...movie,
         timeAdded: Date.now(),
       };
@@ -82,6 +87,7 @@ const mutators = new Client<ServerType>()
     for (const id of input) {
       const movie = await tx.get(`userMovie/${id}`);
       const newData = {
+        movieID: id,
         ...movie,
         timeAdded: null,
       };

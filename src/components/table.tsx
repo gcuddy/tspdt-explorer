@@ -1,8 +1,17 @@
 "use client";
 
+import { useReplicache } from "@/app/replicache";
+import { Movie } from "@/core/movie";
 import { SimplifiedMovie } from "@/core/movie/movie.sql";
 import { cn } from "@/utils/tailwind";
-import { ArrowDown, ArrowUp, Clock } from "@phosphor-icons/react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Clock,
+  ClockCountdown,
+  Heart,
+} from "@phosphor-icons/react";
 import {
   createColumnHelper,
   flexRender,
@@ -14,6 +23,7 @@ import {
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React from "react";
+import { useSubscribe } from "replicache-react";
 
 export function DefaultTableView({
   movies,
@@ -23,6 +33,23 @@ export function DefaultTableView({
   // TODO: use virtual
 
   const searchParams = useSearchParams();
+
+  const rep = useReplicache();
+
+  const userMovies = useSubscribe(
+    rep,
+    async (tx) => {
+      return tx
+        .scan<Movie.InfoWithNumber>({ prefix: "userMovie/" })
+        .entries()
+        .toArray();
+    },
+    {
+      default: [],
+    }
+  );
+
+  console.log({ userMovies });
 
   const sort = searchParams.has("sort")
     ? (JSON.parse(searchParams.get("sort")!!) as SortingState)
@@ -36,14 +63,31 @@ export function DefaultTableView({
 
   const columns = [
     columnHelper.display({
+      id: "user",
+      cell: (p) => {
+        const um = userMovies.find((um) => um[1].movieID === p.row.original.id);
+        if (!um) return <span />;
+        return (
+          <span className="flex items-center gap-0.5 h-full">
+            {!!um[1].timeFavorited && <Heart weight="fill" />}
+            {!!um[1].timeAdded && <ClockCountdown />}
+            {/* {!!um[1].timeSeen && <Check />} */}
+          </span>
+        );
+      },
+    }),
+    columnHelper.display({
       id: "marker",
-      cell: (p) =>
-        p.row.original.ranking &&
-        (p.row.original.ranking <= 1000
-          ? "★"
-          : p.row.original.ranking <= 2500
-          ? "●"
-          : ""),
+      cell: (p) => (
+        <span>
+          {p.row.original.ranking &&
+            (p.row.original.ranking <= 1000
+              ? "★"
+              : p.row.original.ranking <= 2500
+              ? "●"
+              : "")}
+        </span>
+      ),
     }),
     columnHelper.accessor("title", {
       header: "Title",
@@ -89,7 +133,7 @@ export function DefaultTableView({
 
   return (
     <div className="p-2">
-      <table className="rounded-md overflow-hidden">
+      <table className="rounded-md overflow-hidden w-full">
         <thead className="bg-zinc-950 px-8">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="">
@@ -103,7 +147,7 @@ export function DefaultTableView({
                         ? "pl-8"
                         : index === arr.length - 1
                         ? "pr-8"
-                        : "pr-6",
+                        : "pl-2 pr-6",
                       header.column.getCanSort()
                         ? "cursor-pointer hover:text-zinc-400 select-none transition"
                         : undefined
@@ -134,7 +178,14 @@ export function DefaultTableView({
         </thead>
         <tbody className="bg-zinc-925 px-8">
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr
+              key={row.id}
+              className={cn(
+                userMovies.some(
+                  (m) => m[1].timeSeen && m[1].movieID === row.original.id
+                ) && "opacity-50 hover:opacity-100 transition"
+              )}
+            >
               {row.getVisibleCells().map((cell, index, arr) => (
                 <td
                   key={cell.id}
@@ -145,7 +196,7 @@ export function DefaultTableView({
                       ? "pl-8"
                       : index === arr.length - 1
                       ? "pr-8"
-                      : "pr-6"
+                      : "pl-2 pr-6"
                   )}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

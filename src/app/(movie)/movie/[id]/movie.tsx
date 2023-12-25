@@ -81,6 +81,15 @@ export function Movie({
           // TODO: Filter just movies
         },
       },
+      {
+        title: "Fix Metadata",
+        icon: PlusCircle,
+        disabled: false,
+        category: "Selection",
+        run: () => {
+          // TODO
+        },
+      },
     ];
   });
 
