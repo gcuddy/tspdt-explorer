@@ -1,0 +1,1 @@
+CREATE INDEX `runtime_idx` ON `movies` (`runtime`);

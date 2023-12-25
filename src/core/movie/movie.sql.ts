@@ -4,6 +4,7 @@ import {
   integer,
   sqliteTable,
   primaryKey,
+  index,
 } from "drizzle-orm/sqlite-core";
 import { Credits, MovieDetails } from "tmdb-ts";
 import { userID, timestamps, cuid, timestamp } from "@/utils/sql";
@@ -28,22 +29,31 @@ export const userMovie = sqliteTable(
   })
 );
 
-export const movies = sqliteTable("movies", {
-  id: text("id").primaryKey(),
-  title: text("title").notNull(),
-  year: integer("year"),
-  tmdbId: integer("tmdb_id"),
-  tspdtId: integer("tspdt_id"),
-  //   just taken from tmdb, for easy access
-  posterPath: text("poster_path"),
-  tmdbData: text("tmdb_data", {
-    mode: "json",
-  }).$type<
-    MovieDetails & {
-      credits: Omit<Credits, "id">;
-    }
-  >(),
-});
+export const movies = sqliteTable(
+  "movies",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    year: integer("year"),
+    tmdbId: integer("tmdb_id"),
+    tspdtId: integer("tspdt_id"),
+    //   just taken from tmdb, for easy access
+    posterPath: text("poster_path"),
+    runtime: integer("runtime"),
+    tmdbData: text("tmdb_data", {
+      mode: "json",
+    }).$type<
+      MovieDetails & {
+        credits: Omit<Credits, "id">;
+      }
+    >(),
+  },
+  (table) => {
+    return {
+      runtimeIdx: index("runtime_idx").on(table.runtime),
+    };
+  }
+);
 
 export type Movie = InferSelectModel<typeof movies>;
 export type SimplifiedMovie = Omit<Movie, "tmdbData">;
