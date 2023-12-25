@@ -7,6 +7,7 @@ import { cache } from "react";
 import { RankingChart } from "@/app/(movie)/movie/[id]/ranking-chart";
 import { asc } from "drizzle-orm";
 import { Card } from "@/components/ui/card";
+import { DefaultTableView } from "@/components/table";
 
 const getDirector = cache(async (id: string) => {
   const director = await db.query.directors.findFirst({
@@ -90,6 +91,8 @@ export default async function Page({ params }: { params: { id: string } }) {
     director.tmdbId ?? undefined
   );
 
+  const movies = director.directorsToMovies.map(({ movie }) => movie);
+
   // TODO
   return (
     <div className="flex flex-col gap-4">
@@ -98,7 +101,14 @@ export default async function Page({ params }: { params: { id: string } }) {
       ) : (
         <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1>
       )}
-      <MovieList list={director.directorsToMovies.map(({ movie }) => movie)} />
+      <MovieList list={movies} />
+
+      <DefaultTableView
+        movies={movies.map((m) => ({
+          ...m,
+          ranking: m.rankings.at(-1)?.ranking ?? undefined,
+        }))}
+      />
       <Card>
         <span className="text-lg tracking-tight font-semibold text-center">
           Movie Ranking History
