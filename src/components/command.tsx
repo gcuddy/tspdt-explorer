@@ -56,13 +56,22 @@ function useControl() {
         ) as HTMLElement;
       },
       actions() {
-        return [...control.root.querySelectorAll("[data-element='action']")];
+        return [
+          ...control.root.querySelectorAll("[data-element='action']"),
+        ] as HTMLElement[];
+      },
+      reset() {
+        control.setActive(control.actions()[0]);
       },
       setActive(el: HTMLElement, disableScroll = false) {
         if (!el) return;
         const current = control.active();
-        if (current) current.classList.remove("active");
+        if (current) {
+          current.classList.remove("active");
+          current.removeAttribute("data-active");
+        }
         el.classList.add("active");
+        el.dataset.active = "true";
         if (!disableScroll) {
           const index = control.actions().indexOf(el);
           if (index === 0) {
@@ -76,6 +85,23 @@ function useControl() {
             block: "nearest",
           });
         }
+      },
+      move(direction: -1 | 1) {
+        const current = control.active();
+        const all = control.actions();
+        if (!current) {
+          control.setActive(all[0]);
+          return;
+        }
+        const index = all.indexOf(current);
+        const next = all[index + direction];
+        control.setActive(next ?? all[direction === 1 ? 0 : all.length - 1]);
+      },
+      next() {
+        return control.move(1);
+      },
+      back() {
+        return control.move(-1);
       },
     };
   }, [root]);
@@ -103,6 +129,26 @@ function useControl() {
   }, [visible]);
 
   useEffect(() => {
+    const el = root?.querySelector(`[data-element="results"]`)!;
+
+    if (!el) return;
+
+    const observer = new MutationObserver(() => {
+      console.log("mutation");
+      control.reset();
+      //   const active = control.active();
+      //   if (!active) return;
+      //   active.scrollIntoView({
+      //     block: "nearest",
+      //   });
+    });
+
+    observer.observe(el, { childList: true });
+
+    return () => observer.disconnect();
+  }, [root, control]);
+
+  useEffect(() => {
     function onKeydown(e: KeyboardEvent) {
       if (e.key === "k" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
@@ -118,6 +164,28 @@ function useControl() {
         // LOL YOLO
         const current = control.active();
         if (current) current.click();
+      }
+    }
+    document.addEventListener("keydown", onKeydown);
+
+    return () => {
+      document.removeEventListener("keydown", onKeydown);
+    };
+  }, [control, visible]);
+
+  useEffect(() => {
+    function onKeydown(e: KeyboardEvent) {
+      if (!visible) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        control.next();
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        control.back();
       }
     }
     document.addEventListener("keydown", onKeydown);
@@ -338,7 +406,7 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
                           control.setActive(target, true);
                         }, 0);
                       }}
-                      className="flex gap-1 py-0 px-3 h-12 items-center rounded text-base"
+                      className="flex gap-1 py-0 px-3 h-12 items-center rounded text-base data-[active=true]:bg-white/5"
                     >
                       <div className="grow-0 shrink-0 basis-auto w-4 h-4">
                         <action.icon />

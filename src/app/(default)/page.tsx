@@ -31,8 +31,8 @@ export const getData = cache(async () => {
     .leftJoin(directors, eq(moviesToDirectors.directorId, directors.id))
     .where(eq(rankings.year, 2023))
     .orderBy(asc(rankings.ranking))
-    .groupBy(movies.id) // You need to uncomment this line when using aggregate functions like GROUP_CONCAT
-    .limit(1000);
+    .groupBy(movies.id); // You need to uncomment this line when using aggregate functions like GROUP_CONCAT
+  // .limit(1000);
 
   return m.map(({ _director, ...movie }) => ({
     ...movie,

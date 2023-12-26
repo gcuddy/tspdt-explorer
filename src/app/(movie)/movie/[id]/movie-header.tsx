@@ -40,59 +40,66 @@ export function MovieHeader({ movie }: Props) {
             src={`https://image.tmdb.org/t/p/w500${movie.tmdb?.poster_path}`}
           />
         </div> */}
-        <div className="col-span-6 col-start-4 gap-2 relative text-center flex flex-col items-center justify-center">
+        <div className="col-span-6 col-start-4 relative text-center gap-2 flex flex-col items-center justify-center">
           <h1 className={`text-6xl text-balance ${serif.className}`}>
             {movie.title}
           </h1>
+        </div>
+        <div className="col-span-6 col-start-4 gap-2 relative text-sm text-center flex flex-col items-center justify-center">
           {movie.tmdbData?.original_title !== movie.title && (
             <h2 className="text-xl text-balance">
               {movie.tmdbData?.original_title}
             </h2>
           )}
-          <div className="flex gap-2 text-zinc-400 items-center">
-            <span>
-              {movie.tmdb?.production_countries.map((c, i) => {
-                return (
-                  <span className="" key={c.iso_3166_1}>
-                    <Link href={`/country/${c.iso_3166_1}`}>
-                      {c.name === "United States of America"
-                        ? "United States"
-                        : c.name}
-                      {(movie.tmdb?.production_countries?.length ?? 0) > 1 &&
-                      i !== (movie.tmdb?.production_countries?.length ?? 0) - 1
-                        ? ", "
-                        : ", "}
-                    </Link>
-                  </span>
-                );
-              })}
-              <Link href={`/year/${movie.year}`}>{movie.year}</Link>
-            </span>
-            <span>·</span>
-            <p className="text-zinc-400">
-              <Directors
-                directors={movie.moviesToDirectors.map(
-                  ({ director }) => director
-                )}
-              />
-            </p>
-            <span>·</span>
-            <span className="text-zinc-400">{movie.tmdb?.runtime} min</span>
-            <span>·</span>
-            <div>
-              {movie.tmdb?.genres.map((g, i) => {
-                return (
-                  <span className="text-sm text-zinc-400" key={g.id}>
-                    <Link href={`/genre/${g.id}`}>
-                      {g.name}
-                      {(movie.tmdb?.genres?.length ?? 0) > 1 &&
-                      i !== (movie.tmdb?.genres?.length ?? 0) - 1
-                        ? ", "
-                        : ""}
-                    </Link>
-                  </span>
-                );
-              })}
+          <div className="flex gap-2 flex-col text-zinc-400 items-center">
+            <div className="flex gap-2 items-center">
+              <span>
+                {movie.tmdb?.production_countries.map((c, i) => {
+                  return (
+                    <span className="" key={c.iso_3166_1}>
+                      <Link href={`/country/${c.iso_3166_1}`}>
+                        {c.name === "United States of America"
+                          ? "United States"
+                          : c.name}
+                        {(movie.tmdb?.production_countries?.length ?? 0) > 1 &&
+                        i !==
+                          (movie.tmdb?.production_countries?.length ?? 0) - 1
+                          ? ", "
+                          : ", "}
+                      </Link>
+                    </span>
+                  );
+                })}
+                <Link href={`/year/${movie.year}`}>{movie.year}</Link>
+              </span>
+              <span>·</span>
+              <p className="text-zinc-400">
+                <Directors
+                  directors={movie.moviesToDirectors.map(
+                    ({ director }) => director
+                  )}
+                />
+              </p>
+            </div>
+            {/* <span>·</span> */}
+            <div className="flex gap-2 items-center">
+              <span className="text-zinc-400">{movie.tmdb?.runtime} min</span>
+              <span>·</span>
+              <div>
+                {movie.tmdb?.genres.map((g, i) => {
+                  return (
+                    <span className="text-sm text-zinc-400" key={g.id}>
+                      <Link href={`/genre/${g.id}`}>
+                        {g.name}
+                        {(movie.tmdb?.genres?.length ?? 0) > 1 &&
+                        i !== (movie.tmdb?.genres?.length ?? 0) - 1
+                          ? ", "
+                          : ""}
+                      </Link>
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           </div>
           <span className="flex gap-2">

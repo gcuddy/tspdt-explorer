@@ -3,6 +3,7 @@
 import { useReplicache } from "@/app/replicache";
 import { Movie } from "@/core/movie";
 import { SimplifiedMovie } from "@/core/movie/movie.sql";
+import { useStickyState } from "@/utils/hooks";
 import { cn } from "@/utils/tailwind";
 import {
   ArrowDown,
@@ -57,7 +58,10 @@ export function DefaultTableView({
 
   const columnHelper = createColumnHelper<(typeof movies)[number]>();
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  //   TODO: instead of useLocalStorage, sync with url params
+
+  const [sorting, setSorting] = useStickyState<SortingState>([], "table-sort");
+  //   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   console.log({ sorting });
 

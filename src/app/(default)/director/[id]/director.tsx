@@ -1,8 +1,9 @@
 import { AppendToResponse, PersonDetails } from "tmdb-ts";
 import Markdown from "react-markdown";
 import Image from "next/image";
-import { ClampText } from "@/components/clamp";
+import { ClampText, ReadMoreDialog } from "@/components/clamp";
 import { clampText } from "@/utils/text";
+import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 export function Director({
   director,
@@ -29,7 +30,21 @@ export function Director({
         <p className="text-sm">
           Born: <span className="italic">{director.place_of_birth}</span>
         </p>
-        <ClampText
+        {/* TODO: dialog */}
+        <ReadMoreDialog
+          header={
+            <>
+              <DialogTitle>{director.name}</DialogTitle>
+              <DialogDescription>
+                {new Date(director.birthday).getFullYear()} -{" "}
+                {director.deathday
+                  ? new Date(director.deathday).getFullYear()
+                  : ""}
+                <br />
+                Born: <span className="italic">{director.place_of_birth}</span>
+              </DialogDescription>
+            </>
+          }
           collapsed={
             <Markdown className="prose prose-sm prose-invert prose-zinc">
               {clampText(director.biography, 210)}
@@ -41,6 +56,18 @@ export function Director({
             </Markdown>
           }
         />
+        {/* <ClampText
+          collapsed={
+            <Markdown className="prose prose-sm prose-invert prose-zinc">
+              {clampText(director.biography, 210)}
+            </Markdown>
+          }
+          expanded={
+            <Markdown className="prose prose-sm prose-invert prose-zinc">
+              {director.biography}
+            </Markdown>
+          }
+        /> */}
       </div>
     </div>
   );
