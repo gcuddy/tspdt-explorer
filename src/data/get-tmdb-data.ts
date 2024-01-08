@@ -8,7 +8,7 @@ import { Movie } from "@/core/movie/movie.sql";
 export const serverID = 1;
 const db = new Database("db.db");
 
-const getMovie = async ({ title, year, tmdbId }) => {
+export const getMovie = async ({ title, year, tmdbId }) => {
   if (!tmdbId) {
     const u = `https://api.themoviedb.org/3/search/movie?api_key=${
       process.env.TMDB_API_KEY

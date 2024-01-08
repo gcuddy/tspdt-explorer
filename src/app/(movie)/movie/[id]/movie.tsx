@@ -369,7 +369,9 @@ function MovieCreditsCard({
                   className="text-sm rounded-md  text-zinc-400 font-semibold hover:text-zinc-50 transition"
                   key={c.id}
                 >
-                  <span>{c.name}</span>
+                  <Link href={`/actor/${c.id}`}>
+                    <span>{c.name}</span>
+                  </Link>
                   {/* <span>{c.character}</span> */}
                 </div>
               ))}

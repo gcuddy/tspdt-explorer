@@ -294,7 +294,7 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
   control.register("movies", async () => {
     return movies.map(([id, movie]) =>
       NavigationAction({
-        title: movie.title ?? "Unknown",
+        title: `${movie.title} (${movie.year})` ?? "Unknown",
         category: "Movies",
         path: `/movie/${movie.id}`,
         disabled: false,

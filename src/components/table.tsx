@@ -28,8 +28,15 @@ import { useSubscribe } from "replicache-react";
 
 export function DefaultTableView({
   movies,
+  showDirectors = false,
 }: {
-  movies: Array<SimplifiedMovie & { ranking?: number }>;
+  movies: Array<
+    SimplifiedMovie & {
+      ranking?: number;
+      director?: { id: number; name: string }[];
+    }
+  >;
+  showDirectors?: boolean;
 }) {
   // TODO: use virtual
 
@@ -116,6 +123,22 @@ export function DefaultTableView({
       ),
       header: "Runtime",
     }),
+    ...(showDirectors
+      ? [
+          columnHelper.accessor("director", {
+            cell: (info) => (
+              <span className="flex h-full items-center gap-1">
+                {info.getValue()?.map((director) => (
+                  <Link href={`/director/${director.id}`}>
+                    <a className="hover:underline">{director.name}</a>
+                  </Link>
+                ))}
+              </span>
+            ),
+            header: "Director",
+          }),
+        ]
+      : []),
   ];
 
   const table = useReactTable({
