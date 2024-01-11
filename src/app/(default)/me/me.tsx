@@ -71,7 +71,6 @@ export default function Me() {
 
   return (
     <div className="flex flex-col min-h-screen py-2">
-      <h1 className="text-2xl font-bold">Hey, (USER)</h1>
       <span>
         You've watched {tspdtWatchedPercent}% percent of the TSPDT Top 1000
         movies.

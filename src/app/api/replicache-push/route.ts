@@ -50,11 +50,27 @@ export async function POST(request: Request) {
       const push = pushRequestSchema.parse(body);
       try {
         await processPush(push as PushRequestV1, userID.value);
-      } catch (e) {}
+      } catch (e) {
+        switch (e) {
+          case authError:
+            return new Response("Unauthorized", {
+              status: 401,
+            });
+          case clientStateNotFoundError:
+            return new Response("Client state not found", {
+              status: 404,
+            });
+          default:
+            console.error(e);
+            return new Response("Internal Server Error", {
+              status: 500,
+            });
+        }
+      }
     }
   );
 
-  return new Response(`Cookie: ${JSON.stringify(userID)}`, {
+  return new Response("OK", {
     status: 200,
   });
 }
