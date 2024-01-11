@@ -20,7 +20,7 @@ export const replicache_client_group = sqliteTable("replicache_client_group", {
 export const replicache_client = sqliteTable("replicache_client", {
   ...id,
   // The ClientGroup this client is part of.
-  clientGroupID: text("", { length: 36 }).notNull(), // references => replicache_client_group(id)
+  clientGroupID: text("client_group_id", { length: 36 }).notNull(), // references => replicache_client_group(id)
   // Last mutation the server has processed from this client.
   lastMutationID: integer("last_mutation_id").default(0).notNull(),
   // The global version this client was last modified at.

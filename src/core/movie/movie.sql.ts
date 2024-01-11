@@ -21,6 +21,9 @@ export const userMovie = sqliteTable(
     timeFavorited: timestamp("time_favorited"),
     //   to watchlist...
     timeAdded: timestamp("time_added"),
+
+    // should these go here?
+    lastModifiedVersion: integer("last_modified_version").notNull(),
   },
   (table) => ({
     primary: primaryKey({
@@ -40,6 +43,7 @@ export const movies = sqliteTable(
     //   just taken from tmdb, for easy access
     posterPath: text("poster_path"),
     runtime: integer("runtime"),
+    lastModifiedVersion: integer("last_modified_version").notNull(),
     tmdbData: text("tmdb_data", {
       mode: "json",
     }).$type<
@@ -67,6 +71,7 @@ export const directors = sqliteTable("directors", {
   id: text("id").primaryKey(),
   name: text("name"),
   tmdbId: integer("tmdb_id"),
+  lastModifiedVersion: integer("last_modified_version").notNull(),
 });
 
 export type Director = InferSelectModel<typeof directors>;
@@ -77,6 +82,7 @@ export const rankings = sqliteTable("rankings", {
   // refers to tspdt year (probably want to make this more generic)
   year: integer("year"),
   ranking: integer("ranking"),
+  lastModifiedVersion: integer("last_modified_version").notNull(),
 });
 
 export type Ranking = InferSelectModel<typeof rankings>;

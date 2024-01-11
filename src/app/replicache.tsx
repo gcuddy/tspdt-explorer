@@ -1,10 +1,11 @@
 "use client";
 
+import { getCookie, setCookie } from "cookies-next";
 import { Director, Movie } from "@/core/movie/movie.sql";
 import { env } from "@/env.mjs";
 import { Client } from "@/functions/replicache/framework";
 import { ServerType } from "@/functions/replicache/server";
-import React, { createContext } from "react";
+import React, { createContext, useEffect } from "react";
 import {
   DeepReadonlyObject,
   Replicache,
@@ -14,6 +15,7 @@ import {
 } from "replicache";
 import { useSubscribe } from "replicache-react";
 import { Movie as M } from "@/core/movie";
+import { nanoid } from "@/utils/nanoid";
 
 const mutators = new Client<ServerType>()
   .mutation("movie_seen", async (tx, input) => {
@@ -111,7 +113,7 @@ const rep = process.browser
   ? new Replicache({
       licenseKey: env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY,
       name: "tspdt-user-id",
-      //   pushURL: "/api/replicache-push",
+      pushURL: "/api/replicache-push",
       pullURL: "/api/replicache-pull",
       // TODO: a much better system for this
       //   TODO: user id
@@ -132,6 +134,15 @@ export const MoviesContext = createContext<
 type SimplifiedMovie = Omit<Movie, "tmdbData">;
 
 export function R({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    let userID = getCookie("userID");
+
+    if (!userID) {
+      userID = nanoid();
+      setCookie("userID", userID);
+    }
+  });
+
   const directors = useSubscribe(
     rep,
     async (tx) => {

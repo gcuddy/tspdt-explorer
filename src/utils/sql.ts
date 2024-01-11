@@ -8,7 +8,9 @@ export const id = {
   },
 };
 
-export const timestamp = (name: string) => integer(name, { mode: "timestamp" });
+
+// drizzle supports mode timestamp, but replicache complains
+export const timestamp = (name: string) => integer(name);
 
 export const userID = {
   get id() {

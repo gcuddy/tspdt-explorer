@@ -24,11 +24,21 @@ const ActorContext = Context.create<Actor>("actor");
 export const useActor = ActorContext.use;
 export const withActor = ActorContext.with;
 
-export function useUser() {
-  const actor = useActor();
-  if ("userID" in actor.properties) return actor.properties.userID;
-  throw new Error(`Expected actor to have workspaceID`);
-}
+const UserContext = Context.create<{ userID?: string }>("user");
+export const withUser = UserContext.with;
+// export const useUser = UserContext.use;
+
+export const useUser = () => {
+  const u = UserContext.use();
+  if (!u.userID) throw new Error(`Expected user to have userID`);
+  return u.userID;
+};
+
+// export function useUser() {
+//   const actor = useActor();
+//   if ("userID" in actor.properties) return actor.properties.userID;
+//   throw new Error(`Expected actor to have workspaceID`);
+// }
 
 // TODO
 // export function useActor() {

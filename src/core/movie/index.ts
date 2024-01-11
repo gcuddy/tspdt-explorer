@@ -25,8 +25,8 @@ export const seen = zod(Info.shape.id.array(), async (input) => {
     tx
       .update(userMovie)
       .set({
-        timeSeen: sql`now()`,
-        timeUpdated: sql`now()`,
+        timeSeen: sql`current_timestamp`,
+        timeUpdated: sql`current_timestamp`,
       })
       .where(
         and(
@@ -47,7 +47,7 @@ export const unseen = zod(Info.shape.id.array(), async (input) => {
       .update(userMovie)
       .set({
         timeSeen: null,
-        timeUpdated: sql`now()`,
+        timeUpdated: sql`current_timestamp`,
       })
       .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
   );
@@ -58,8 +58,8 @@ export const marktowatch = zod(Info.shape.id.array(), async (input) => {
     tx
       .update(userMovie)
       .set({
-        timeAdded: sql`now()`,
-        timeUpdated: sql`now()`,
+        timeAdded: sql`current_timestamp`,
+        timeUpdated: sql`current_timestamp`,
       })
       .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
   );
@@ -71,7 +71,7 @@ export const unmarktowatch = zod(Info.shape.id.array(), async (input) => {
       .update(userMovie)
       .set({
         timeAdded: null,
-        timeUpdated: sql`now()`,
+        timeUpdated: sql`current_timestamp`,
       })
       .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
   );
@@ -82,8 +82,8 @@ export const favorite = zod(Info.shape.id.array(), async (input) => {
     tx
       .update(userMovie)
       .set({
-        timeFavorited: sql`now()`,
-        timeUpdated: sql`now()`,
+        timeFavorited: sql`current_timestamp`,
+        timeUpdated: sql`current_timestamp`,
       })
       .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
   );
@@ -95,7 +95,7 @@ export const unfavorite = zod(Info.shape.id.array(), async (input) => {
       .update(userMovie)
       .set({
         timeFavorited: null,
-        timeUpdated: sql`now()`,
+        timeUpdated: sql`current_timestamp`,
       })
       .where(and(eq(userMovie.userID, useUser()), inArray(userMovie.id, input)))
   );

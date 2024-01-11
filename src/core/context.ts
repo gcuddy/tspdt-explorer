@@ -1,6 +1,7 @@
 // taken directly from https://github.com/sst/sst/blob/6536297da9f9c3ed7b0014763c5f44a2df67ad57/packages/sst/src/context/context2.ts
 
 import { AsyncLocalStorage } from "async_hooks";
+AsyncLocalStorage;
 
 export class ContextNotFoundError extends Error {
   constructor(public name: string) {
