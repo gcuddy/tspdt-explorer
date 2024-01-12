@@ -5,19 +5,19 @@ import { Director } from "./director";
 import { MovieList } from "./movie-list";
 import { cache } from "react";
 import { RankingChart } from "@/app/(movie)/movie/[id]/ranking-chart";
-import { asc } from "drizzle-orm";
+import { asc, sql } from "drizzle-orm";
 import { Card } from "@/components/ui/card";
 import { DefaultTableView } from "@/components/table";
 
-const getDirector = cache(async (id: string) => {
-  const director = await db.query.directors.findFirst({
+const prepared = db.query.directors
+  .findFirst({
     with: {
       directorsToMovies: {
         with: {
           movie: {
             with: {
               rankings: {
-                orderBy(fields, { desc }) {
+                orderBy(fields, { asc }) {
                   return asc(fields.year);
                 },
                 // limit: 1,
@@ -27,8 +27,12 @@ const getDirector = cache(async (id: string) => {
         },
       },
     },
-    where: (director, { eq }) => eq(director.id, id),
-  });
+    where: (director, { eq }) => eq(director.id, sql.placeholder("id")),
+  })
+  .prepare();
+
+const getDirector = cache(async (id: string) => {
+  const director = prepared.get({ id });
 
   if (!director) {
     notFound();
@@ -80,28 +84,30 @@ async function lookupDirector(
 }
 
 export default async function Page({ params }: { params: { id: string } }) {
+  console.time("getDirector");
   const director = await getDirector(params.id);
+  console.timeEnd("getDirector");
 
   if (!director.name) {
     notFound();
   }
-  const data = await lookupDirector(
-    director.name,
-    director.directorsToMovies.map((directorToMovie) => directorToMovie.movie),
-    director.tmdbId ?? undefined
-  );
+  //   const data = await lookupDirector(
+  //     director.name,
+  //     director.directorsToMovies.map((directorToMovie) => directorToMovie.movie),
+  //     director.tmdbId ?? undefined
+  //   );
 
   const movies = director.directorsToMovies.map(({ movie }) => movie);
 
   // TODO
   return (
     <div className="flex flex-col gap-4">
-      {data ? (
+      <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1>
+      {/* {data ? (
         <Director director={data} />
       ) : (
-        <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1>
-      )}
-      <MovieList list={movies} />
+      )} */}
+      {/* <MovieList list={movies} /> */}
 
       <DefaultTableView
         movies={movies.map((m) => ({
@@ -109,7 +115,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           ranking: m.rankings.at(-1)?.ranking ?? undefined,
         }))}
       />
-      <Card>
+      {/* <Card>
         <span className="text-lg tracking-tight font-semibold text-center">
           Movie Ranking History
         </span>
@@ -121,7 +127,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               .filter((m) => m.rankings.length > 0)}
           />
         </div>
-      </Card>
+      </Card> */}
     </div>
   );
 }

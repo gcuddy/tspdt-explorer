@@ -93,16 +93,6 @@ export function Movie({
     ];
   });
 
-  const actions = useActions();
-
-  const replicache = useReplicache();
-
-  const userMovie = useSubscribe(replicache, async (tx) => {
-    return tx.get<M.InfoWithNumber>(`userMovie/${movie.id}`);
-  });
-
-  console.log({ userMovie, movie });
-
   //   actions.setSlot(
   // <div className="flex sticky justify-end gap-3 top-0 bg-zinc-925 z-10 h-20 items-center">
   //   <Button>Seen</Button>
@@ -145,56 +135,7 @@ export function Movie({
               </Dialog.Portal>
             </Dialog.Root>
           ) : null}
-          <Button
-            className={userMovie?.timeSeen ? "opacity-50" : ""}
-            onClick={() => {
-              console.log("click", userMovie?.timeSeen);
-              userMovie?.timeSeen
-                ? replicache.mutate.movie_unseen([movie.id])
-                : replicache.mutate.movie_seen([movie.id]);
-            }}
-          >
-            {userMovie?.timeSeen ? (
-              <CheckCircle className="mr-1.5" />
-            ) : (
-              <FilmReel className="mr-1.5" />
-            )}
-            {userMovie?.timeSeen ? "Seen" : "Mark Seen"}
-          </Button>
-          <Button
-            onClick={() => {
-              userMovie?.timeAdded
-                ? replicache.mutate.movie_unmarktowatch([movie.id])
-                : replicache.mutate.movie_marktowatch([movie.id]);
-            }}
-            className={userMovie?.timeAdded ? "opacity-50" : ""}
-          >
-            {userMovie?.timeAdded ? (
-              <CheckCircle className="mr-1.5" />
-            ) : (
-              <ListPlus className="mr-1.5" />
-            )}
-            {userMovie?.timeAdded ? "On Watchlist" : "Watchlist"}
-          </Button>
-          <Button
-            onClick={() => {
-              userMovie?.timeFavorited
-                ? replicache.mutate.movie_unfavorite([movie.id])
-                : replicache.mutate.movie_favorite([movie.id]);
-            }}
-            className={cn(
-              "hover:scale-105 transition active:scale-95",
-              userMovie?.timeFavorited ? "bg-white/[.02] border-white/5" : ""
-            )}
-          >
-            <Heart
-              weight={userMovie?.timeFavorited ? "fill" : "regular"}
-              className={
-                userMovie?.timeFavorited ? "text-red-500" : "text-white"
-              }
-            />
-            <span className="sr-only">Favorite</span>
-          </Button>
+          <ActionBar movie={movie} />
         </div>
         <Stack
           style={
@@ -221,7 +162,8 @@ export function Movie({
                       {/* this makes distance 32, outer radius is 8 so 8 - 32 is negative - no radius needed */}
                       <Poster
                         poster_path={
-                          userMovie?.posterPath ?? movie.tmdb?.poster_path ?? ""
+                          movie.tmdb?.poster_path ?? ""
+                          //   userMovie?.posterPath ?? movie.tmdb?.poster_path ?? ""
                         }
                       />
                     </Dialog.Trigger>
@@ -235,10 +177,10 @@ export function Movie({
                               {/* {JSON.stringify(p)} */}
                               <button
                                 onClick={() => {
-                                  replicache.mutate.movie_poster_path({
-                                    id: movie.id,
-                                    posterPath: p.file_path,
-                                  });
+                                  //   replicache.mutate.movie_poster_path({
+                                  //     id: movie.id,
+                                  //     posterPath: p.file_path,
+                                  //   });
                                 }}
                               >
                                 <Poster
@@ -521,5 +463,70 @@ function Poster({
       //   height={288}
       //   width={288 / (16 / 9)}
     />
+  );
+}
+
+function ActionBar({ movie }: { movie: { id: string } }) {
+  const replicache = useReplicache();
+
+  const userMovie = useSubscribe(replicache, async (tx) => {
+    return tx.get<M.InfoWithNumber>(`userMovie/${movie.id}`);
+  });
+
+  console.log({ replicache });
+
+  if (!replicache) return null;
+
+  return (
+    <>
+      <Button
+        className={userMovie?.timeSeen ? "opacity-50" : ""}
+        onClick={() => {
+          console.log("click", userMovie?.timeSeen);
+          userMovie?.timeSeen
+            ? replicache.mutate.movie_unseen([movie.id])
+            : replicache.mutate.movie_seen([movie.id]);
+        }}
+      >
+        {userMovie?.timeSeen ? (
+          <CheckCircle className="mr-1.5" />
+        ) : (
+          <FilmReel className="mr-1.5" />
+        )}
+        {userMovie?.timeSeen ? "Seen" : "Mark Seen"}
+      </Button>
+      <Button
+        onClick={() => {
+          userMovie?.timeAdded
+            ? replicache.mutate.movie_unmarktowatch([movie.id])
+            : replicache.mutate.movie_marktowatch([movie.id]);
+        }}
+        className={userMovie?.timeAdded ? "opacity-50" : ""}
+      >
+        {userMovie?.timeAdded ? (
+          <CheckCircle className="mr-1.5" />
+        ) : (
+          <ListPlus className="mr-1.5" />
+        )}
+        {userMovie?.timeAdded ? "On Watchlist" : "Watchlist"}
+      </Button>
+      <Button
+        onClick={() => {
+          userMovie?.timeFavorited
+            ? replicache.mutate.movie_unfavorite([movie.id])
+            : replicache.mutate.movie_favorite([movie.id]);
+        }}
+        className={cn(
+          "hover:scale-105 transition active:scale-95",
+          userMovie?.timeFavorited ? "bg-white/[.02] border-white/5" : ""
+        )}
+      >
+        <Heart
+          weight={userMovie?.timeFavorited ? "fill" : "regular"}
+          className={userMovie?.timeFavorited ? "text-red-500" : "text-white"}
+        />
+        <span className="sr-only">Favorite</span>
+      </Button>
+    </>
   );
 }

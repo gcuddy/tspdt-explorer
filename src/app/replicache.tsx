@@ -16,6 +16,7 @@ import {
 import { useSubscribe } from "replicache-react";
 import { Movie as M } from "@/core/movie";
 import { nanoid } from "@/utils/nanoid";
+import { useUser } from "./user-session";
 
 const mutators = new Client<ServerType>()
   .mutation("movie_seen", async (tx, input) => {
@@ -109,19 +110,40 @@ const mutators = new Client<ServerType>()
   })
   .build();
 
-const rep = process.browser
-  ? new Replicache({
-      licenseKey: env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY,
-      name: "tspdt-user-id",
-      pushURL: "/api/replicache-push",
-      pullURL: "/api/replicache-pull",
-      // TODO: a much better system for this
-      //   TODO: user id
-      mutators,
-    })
-  : null;
+type MD = typeof mutators;
 
-const ReplicacheContext = createContext<typeof rep | null>(null);
+function createReplicache(userId: string, token: string): Replicache<MD> {
+  return new Replicache({
+    licenseKey: env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY,
+    name: userId,
+    pushURL: "/api/replicache-push",
+    pullURL: "/api/replicache-pull",
+    auth: `Bearer ${token}`,
+    indexes: {
+      id: {
+        allowEmpty: true,
+        jsonPointer: "/id",
+      },
+    },
+    mutators,
+  });
+}
+
+// const rep = process.browser
+//   ? new Replicache({
+//       licenseKey: env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY,
+//       name: "tspdt-user-id",
+//       pushURL: "/api/replicache-push",
+//       pullURL: "/api/replicache-pull",
+//       // TODO: a much better system for this
+//       //   TODO: user id
+//       mutators,
+//     })
+//   : null;
+
+const ReplicacheContext = createContext<ReturnType<
+  typeof createReplicache
+> | null>(null);
 
 export const DirectorsContext = createContext<
   (readonly [string, DeepReadonlyObject<Director>])[]
@@ -134,14 +156,23 @@ export const MoviesContext = createContext<
 type SimplifiedMovie = Omit<Movie, "tmdbData">;
 
 export function R({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    let userID = getCookie("userID");
+  const user = useUser();
 
-    if (!userID) {
-      userID = nanoid();
-      setCookie("userID", userID);
+  const rep = React.useMemo(() => {
+    if (!user) {
+      return null;
     }
-  });
+    return createReplicache(user.user.userId, user.token);
+  }, [user]);
+
+  //   useEffect(() => {
+  //     let userID = getCookie("userID");
+
+  //     if (!userID) {
+  //       userID = nanoid();
+  //       setCookie("userID", userID);
+  //     }
+  //   });
 
   const directors = useSubscribe(
     rep,
@@ -203,7 +234,7 @@ function listen() {
 }
 export function useReplicache() {
   const result = React.useContext(ReplicacheContext);
-  if (!result) {
+  if (result === undefined) {
     throw new Error("useReplicache must be used within a ReplicacheProvider");
   }
 

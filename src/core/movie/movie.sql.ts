@@ -109,7 +109,9 @@ export const moviesToDirectors = sqliteTable(
       .references(() => directors.id),
   },
   (t) => ({
-    pk: primaryKey(t.movieId, t.directorId),
+    pk: primaryKey({
+      columns: [t.movieId, t.directorId],
+    }),
   })
 );
 

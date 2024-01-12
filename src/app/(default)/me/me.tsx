@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { useSubscribe } from "replicache-react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useUser } from "@/app/user-session";
 
 export default function Me() {
   const rep = useReplicache();
@@ -69,8 +70,11 @@ export default function Me() {
 
   console.log({ userMovies });
 
+  const user = useUser();
+
   return (
     <div className="flex flex-col min-h-screen py-2">
+      <h1 className="text-4xl font-bold">{JSON.stringify(user)}</h1>
       <span>
         You've watched {tspdtWatchedPercent}% percent of the TSPDT Top 1000
         movies.
