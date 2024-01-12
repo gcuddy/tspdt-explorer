@@ -31,6 +31,7 @@
     "d3": "^7.8.5",
     "drizzle-orm": "^0.29.1",
     "drizzle-zod": "^0.5.1",
+    "framer-motion": "^10.18.0",
     "immer": "^10.0.3",
     "lucia": "^2.7.6",
     "million": "latest",
