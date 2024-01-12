@@ -55,6 +55,7 @@ export const movies = sqliteTable(
   (table) => {
     return {
       runtimeIdx: index("runtime_idx").on(table.runtime),
+      year: index("year_idx").on(table.year),
     };
   }
 );
@@ -76,14 +77,22 @@ export const directors = sqliteTable("directors", {
 
 export type Director = InferSelectModel<typeof directors>;
 
-export const rankings = sqliteTable("rankings", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  movieId: integer("movie_id"),
-  // refers to tspdt year (probably want to make this more generic)
-  year: integer("year"),
-  ranking: integer("ranking"),
-  lastModifiedVersion: integer("last_modified_version").notNull(),
-});
+export const rankings = sqliteTable(
+  "rankings",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    movieId: integer("movie_id"),
+    // refers to tspdt year (probably want to make this more generic)
+    year: integer("year"),
+    ranking: integer("ranking"),
+    lastModifiedVersion: integer("last_modified_version").notNull(),
+  },
+  (table) => ({
+    movieIdx: index("movie_idx").on(table.movieId),
+    movieIdxYear: index("movie_idx_year").on(table.movieId, table.year),
+    yearIdx: index("year_idx").on(table.year),
+  })
+);
 
 export type Ranking = InferSelectModel<typeof rankings>;
 

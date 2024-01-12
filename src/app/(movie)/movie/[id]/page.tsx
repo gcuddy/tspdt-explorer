@@ -11,6 +11,8 @@ import { Movie } from "./movie";
 import * as tmdb from "@/app/api/tmdb";
 
 export const getMovie = cache(async (id: string) => {
+  console.time("getMovie");
+  console.time("getMovie:db");
   const movie = await db.query.movies.findFirst({
     where: eq(movies.id, id),
     with: {
@@ -25,9 +27,13 @@ export const getMovie = cache(async (id: string) => {
     },
   });
 
+  console.timeEnd("getMovie:db");
+
   if (!movie) {
     notFound();
   }
+
+  console.time("getMovie:tmdb");
 
   const tmovie = await tmdb.getMovie(movie);
 
@@ -37,6 +43,10 @@ export const getMovie = cache(async (id: string) => {
       tmdbId: tmovie.id,
     });
   }
+
+  console.timeEnd("getMovie:tmdb");
+
+  console.timeEnd("getMovie");
 
   return {
     ...movie,

@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 const getMoviesFromYear = cache(async (year: number) => {
+  console.time("getMovies");
   const moviesForYear = await db.query.movies.findMany({
     where: and(eq(movies.year, year)),
     with: {
@@ -23,6 +24,7 @@ const getMoviesFromYear = cache(async (year: number) => {
       },
     },
   });
+  console.timeEnd("getMovies");
 
   return moviesForYear.sort((a, b) => {
     const aRanking = a.rankings[0].ranking;
@@ -55,8 +57,6 @@ export default async function Page({ params }: { params: { year: string } }) {
   }
 
   const movies = await getMoviesFromYear(year);
-
-  console.dir({ movies }, { depth: null });
 
   return (
     <Stack className="gap-4">
