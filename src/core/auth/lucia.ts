@@ -23,6 +23,7 @@ export const auth = lucia({
   getUserAttributes(databaseUser) {
     return {
       discordUsername: databaseUser.username,
+      email: databaseUser.email,
     };
   },
 });
@@ -31,6 +32,7 @@ export const discordAuth = discord(auth, {
   clientId: env.DISCORD_ID,
   clientSecret: env.DISCORD_SECRET,
   redirectUri: "http://localhost:3000/login/discord/callback",
+  scope: ["identify", "email"],
 });
 
 export type Auth = typeof auth;

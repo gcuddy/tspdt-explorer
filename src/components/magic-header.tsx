@@ -55,11 +55,11 @@ export function MagicHeader() {
           {!isFocused && (
             <motion.div
               className="flex gap-4 items-center"
-              transition={SPRING}
+              //   transition={SPRING}
               layout
-              initial={{
-                opacity: 0,
-              }}
+              //   initial={{
+              //     opacity: 0,
+              //   }}
               animate={{
                 opacity: 1,
               }}
@@ -84,8 +84,6 @@ export function MagicHeader() {
             </motion.div>
           )}
         </AnimatePresence>
-      </LayoutGroup>
-      <LayoutGroup>
         <motion.input
           ref={inputRef}
           transition={SPRING}
@@ -104,16 +102,13 @@ export function MagicHeader() {
             //   width: "100%",
             height: "48px",
             // borderRadius: "0px",
-            borderRadius: "0px",
+            // borderRadius: "0px",
             // width: "100%",
             backgroundColor: "transparent",
             // position: "absolute",
             flexGrow: 1,
             //   scale: 1.1,
           }}
-          //   initial={{
-          //     borderRadius: "4px",
-          //   }}
           // layout
           // transition={{
           //   type: "tween",
@@ -127,7 +122,8 @@ export function MagicHeader() {
           //     // delay: 0.1,
           //   }}
           style={{
-            borderRadius: "12px",
+            // borderRadius: isFocused ? "0px" : "12px",
+            borderRadius: "0px",
             height: "36px",
             // width: "240px",
             backgroundColor: `rgb(39 39 42 / var(--tw-bg-opacity))`,

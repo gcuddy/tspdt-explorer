@@ -1,14 +1,20 @@
 "use client";
 
+import { useCommandBar } from "@/components/command";
+import { Card } from "@/components/ui/card";
+import { Stack } from "@/components/ui/layout";
+import * as Tabs from "@radix-ui/react-tabs";
+import { MovieHeader } from "./movie-header";
 import { getMovie } from "./page";
 import { RankingChart } from "./ranking-chart";
-import { Card } from "@/components/ui/card";
-import { MovieHeader } from "./movie-header";
-import { Stack } from "@/components/ui/layout";
-import { useCommandBar } from "@/components/command";
-import * as Tabs from "@radix-ui/react-tabs";
-import { produce } from "immer";
 
+import Header from "@/app/header";
+import { useReplicache } from "@/app/replicache";
+import { Button } from "@/components/ui/button";
+import * as Dialog from "@/components/ui/dialog";
+import { Movie as M } from "@/core/movie";
+import { cn } from "@/utils/tailwind";
+import { objectEntries } from "@antfu/utils";
 import {
   ArrowFatLineDown,
   ArrowFatLineUp,
@@ -20,18 +26,10 @@ import {
   PlusCircle,
 } from "@phosphor-icons/react";
 import Image from "next/image";
-import { use, useMemo, useState } from "react";
-import { groupBy } from "remeda";
-import { objectEntries } from "@antfu/utils";
-import { Button } from "@/components/ui/button";
-import { useActions } from "@/app/action-provider";
-import Header from "@/app/header";
-import { useReplicache } from "@/app/replicache";
-import { useSubscribe } from "replicache-react";
-import { Movie as M } from "@/core/movie";
-import { cn } from "@/utils/tailwind";
-import * as Dialog from "@/components/ui/dialog";
 import Link from "next/link";
+import { useMemo, useState } from "react";
+import { groupBy } from "remeda";
+import { useSubscribe } from "replicache-react";
 // import * as Dialog from "@radix-ui/react-dialog";
 
 export function Movie({

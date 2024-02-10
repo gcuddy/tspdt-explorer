@@ -6,13 +6,14 @@ import {
 import { db } from "@/db/client";
 import { InferSelectModel, eq } from "drizzle-orm";
 import { SQLiteTransaction } from "drizzle-orm/sqlite-core";
-import { cookies } from "next/headers";
+import * as context from "next/headers";
 import { PushRequest, PushRequestV1 } from "replicache";
 import { z } from "zod";
 
 import { Replicache } from "@/core/replicache";
 import { server } from "@/functions/replicache/server";
 import { withUser } from "@/core/actor";
+import { auth } from "@/core/auth/lucia";
 
 const mutationSchema = z.object({
   id: z.number(),
@@ -34,22 +35,29 @@ const authError = {};
 const clientStateNotFoundError = {};
 
 export async function POST(request: Request) {
-  const cookieStore = cookies();
-  const userID = cookieStore.get("userID");
+  //   const cookieStore = cookies();
+  //   const userID = cookieStore.get("userID");
 
-  if (!userID) {
+  const authRequest = auth.handleRequest(request.method, context);
+  const session = await authRequest.validateBearerToken();
+
+  if (!session) {
     throw authError;
   }
 
+  const {
+    user: { userId },
+  } = session;
+
   withUser(
     {
-      userID: userID.value,
+      userID: userId,
     },
     async () => {
       const body = await request.json();
       const push = pushRequestSchema.parse(body);
       try {
-        await processPush(push as PushRequestV1, userID.value);
+        await processPush(push as PushRequestV1, userId);
       } catch (e) {
         switch (e) {
           case authError:
@@ -146,7 +154,7 @@ async function processPush(push: PushRequestV1, userID: string) {
       ...[...clients.values()].map(({ clientGroupID, id, ...c }) =>
         tx.update(replicache_client).set(c).where(eq(replicache_client.id, id))
       ),
-      async () => tx.update(replicache_space).set({ version: nextVersion }),
+      tx.update(replicache_space).set({ version: nextVersion }),
     ]);
   });
   // poke?

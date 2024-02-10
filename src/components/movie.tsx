@@ -52,7 +52,7 @@ export const MovieListItem = ({
 
 export const MoviePoster = ({ src }: { src?: string }) => {
   return (
-    <div className="w-[70px] h-[105px] rounded ring-1 ring-white/5">
+    <div className="w-[70px] h-[105px] rounded ring-1 ring-white/5 transition">
       {src ? (
         <Image
           src={src}

@@ -25,12 +25,15 @@ export const GET = async (request: NextRequest) => {
 
     // console.log("GET", request, getExistingUser, discordUser, createUser);
 
+    console.dir(discordUser, { depth: null });
+
     const getUser = async () => {
       const existingUser = await getExistingUser();
       if (existingUser) return existingUser;
       const user = await createUser({
         attributes: {
           username: discordUser.username,
+          email: discordUser.email,
         },
       });
       return user;

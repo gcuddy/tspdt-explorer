@@ -91,22 +91,19 @@ export default async function Page({ params }: { params: { id: string } }) {
   if (!director.name) {
     notFound();
   }
-  //   const data = await lookupDirector(
-  //     director.name,
-  //     director.directorsToMovies.map((directorToMovie) => directorToMovie.movie),
-  //     director.tmdbId ?? undefined
-  //   );
+  const data = await lookupDirector(
+    director.name,
+    director.directorsToMovies.map((directorToMovie) => directorToMovie.movie),
+    director.tmdbId ?? undefined
+  );
 
   const movies = director.directorsToMovies.map(({ movie }) => movie);
 
   // TODO
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1>
-      {/* {data ? (
-        <Director director={data} />
-      ) : (
-      )} */}
+      {/* <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1> */}
+      {data ? <Director director={data} /> : null}
       {/* <MovieList list={movies} /> */}
 
       <DefaultTableView
@@ -115,11 +112,11 @@ export default async function Page({ params }: { params: { id: string } }) {
           ranking: m.rankings.at(-1)?.ranking ?? undefined,
         }))}
       />
-      {/* <Card>
+      <Card>
         <span className="text-lg tracking-tight font-semibold text-center">
           Movie Ranking History
         </span>
-        <div className="h-72">
+        <div className="h-72 w-full">
           <RankingChart
             enablePoints={true}
             data={director.directorsToMovies
@@ -127,7 +124,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               .filter((m) => m.rankings.length > 0)}
           />
         </div>
-      </Card> */}
+      </Card>
     </div>
   );
 }

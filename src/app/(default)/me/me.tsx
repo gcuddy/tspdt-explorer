@@ -10,11 +10,20 @@ import Image from "next/image";
 import { useMemo } from "react";
 import { useSubscribe } from "replicache-react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "@phosphor-icons/react";
+import { ArrowRight, SignOut } from "@phosphor-icons/react";
 import { useUser } from "@/app/user-session";
+import Form from "@/components/form";
+import { useRouter } from "next/navigation";
+import { Session } from "lucia";
 
-export default function Me() {
+export default function Me({ session }: { session?: Session | null }) {
+  const router = useRouter();
   const rep = useReplicache();
+
+  if (!session) {
+    router.replace("/login");
+    return null;
+  }
 
   const userMovies = useSubscribe(rep, async (tx) => {
     const userMovies = await tx
@@ -74,7 +83,20 @@ export default function Me() {
 
   return (
     <div className="flex flex-col min-h-screen py-2">
-      <h1 className="text-4xl font-bold">{JSON.stringify(user)}</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-4xl font-bold">Me</h1>
+          <span className="text-xl text-white/50">{user?.user.email}</span>
+        </div>
+        <div>
+          <Form action="/api/logout">
+            <Button variant="ghost" className="text-white/90">
+              Sign Out
+              <SignOut className="ml-1.5" />
+            </Button>
+          </Form>
+        </div>
+      </div>
       <span>
         You've watched {tspdtWatchedPercent}% percent of the TSPDT Top 1000
         movies.

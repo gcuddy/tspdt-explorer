@@ -16,7 +16,7 @@ const buttonVariants = cva(
         outline:
           "bg-transparent border border-white/[.08] hover:border-white/10 hover:bg-white/[.08] shadow-lg rounded-md h-8 px-2 flex items-center transition text-sm text-white",
         ghost:
-          "bg-transparent hover:border-white/10 hover:bg-white/[.08] shadow-lg rounded-md h-8 px-2 flex items-center transition text-sm text-white",
+          "bg-transparent hover:border-white/10 hover:bg-white/[.08] rounded-md h-8 px-2 flex items-center transition text-sm text-white",
       },
 
       size: {

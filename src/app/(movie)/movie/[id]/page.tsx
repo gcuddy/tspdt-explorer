@@ -1,14 +1,10 @@
+import * as tmdb from "@/app/api/tmdb";
+import { movies, rankings } from "@/core/movie/movie.sql";
 import { db } from "@/db/client";
-import { Ranking, movies, rankings } from "@/core/movie/movie.sql";
 import { asc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { RankingChart } from "./ranking-chart";
-import { Card } from "@/components/ui/card";
-import { MovieHeader } from "./movie-header";
-import { Stack } from "@/components/ui/layout";
 import { cache } from "react";
 import { Movie } from "./movie";
-import * as tmdb from "@/app/api/tmdb";
 
 export const getMovie = cache(async (id: string) => {
   console.time("getMovie");

@@ -1,15 +1,17 @@
 import { db } from "@/db/client";
 import { directors, movies, userMovie, rankings } from "@/core/movie/movie.sql";
 import { NextResponse } from "next/server";
+
 import { PatchOperation, PullResponse, PullResponseOKV1 } from "replicache";
 import { and, eq, getTableColumns, gt, sql } from "drizzle-orm";
-import { cookies } from "next/headers";
+import * as context from "next/headers";
 import { z } from "zod";
 import {
   replicache_client,
   replicache_client_group,
   replicache_space,
 } from "@/core/replicache/replicache.sql";
+import { auth } from "@/core/auth/lucia";
 
 const authError = {};
 
@@ -29,12 +31,25 @@ const maxRanking = db
   .from(rankings);
 
 export async function POST(request: Request) {
-  const cookieStore = cookies();
-  const userID = cookieStore.get("userID");
+  const cookieStore = context.cookies();
 
-  if (!userID) {
-    throw authError;
+  const authRequest = auth.handleRequest(request.method, context);
+  const session = await authRequest.validateBearerToken();
+
+  console.log("session: ", session);
+
+  if (!session) {
+    return new Response("Unauthorized", {
+      status: 401,
+    });
   }
+  //   const userID = cookieStore.get("userID");
+
+  //   if (!userID) {
+  //     return new Response("Unauthorized", {
+  //       status: 401,
+  //     });
+  //   }
 
   const body = await request.json();
 
@@ -45,8 +60,9 @@ export async function POST(request: Request) {
   let pullResponse: PullResponse;
 
   try {
-    pullResponse = await processPull(pullRequest, userID.value);
+    pullResponse = await processPull(pullRequest, session.user.userId);
   } catch (e) {
+    console.error(e);
     if (e === authError) {
       return new Response("Unauthorized", {
         status: 401,
@@ -59,58 +75,6 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json<PullResponseOKV1>(pullResponse);
-
-  // TODO: transaction or something here
-  const dirs = await db.select().from(directors);
-
-  //   TODO: cache tspdt/tmdb data - i don't need to look it up every time! maybe redis is good here?
-  const { tmdbData, ...movieColumns } = getTableColumns(movies);
-  const ms = await db.select(movieColumns).from(movies);
-  const sq = db
-    .select({
-      year: sql`max(${rankings.year})`,
-    })
-    .from(rankings);
-  const rs = await db.select().from(rankings).where(eq(rankings.year, sq));
-
-  // initially, let's create dummy data
-
-  const patches: PatchOperation[] = [];
-
-  for (const dir of dirs) {
-    patches.push({
-      op: "put",
-      key: `director/${dir.id}`,
-      value: dir,
-    });
-  }
-
-  for (const m of ms) {
-    patches.push({
-      op: "put",
-      key: `movie/${m.id}`,
-      value: m,
-    });
-  }
-
-  for (const r of rs) {
-    patches.push({
-      op: "put",
-      key: `movie/${r.movieId}/ranking`,
-      value: r,
-    });
-  }
-
-  //   console.log("patches", patches);
-  console.log("returning patch of length: ", patches.length);
-
-  return NextResponse.json<PullResponseOKV1>({
-    cookie: 42,
-    lastMutationIDChanges: {},
-    patch: [{ op: "clear" }, ...patches],
-  });
-
-  // initially, statically provide directors
 }
 
 async function processPull(

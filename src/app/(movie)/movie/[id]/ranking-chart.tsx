@@ -42,6 +42,8 @@ export function RankingChart({
 }) {
   const currentYear = new Date().getFullYear();
 
+  console.log("rankingn chart", { data, enablePoints, colors });
+
   const router = useRouter();
 
   const { ticks, minYear, maxYear } = useMemo(() => {
@@ -69,6 +71,20 @@ export function RankingChart({
 
   console.log({ ticks });
 
+  const actualData = useMemo(() => {
+    return data.map((movie) => ({
+      id: movie.id,
+      data: movie.rankings
+        .filter((r) => r.year)
+        .map((r) => ({
+          x: r.year,
+          y: r.ranking,
+        })),
+    }));
+  }, [data]);
+
+  console.log({ actualData });
+
   return (
     <ResponsiveLine
       // [
@@ -80,15 +96,7 @@ export function RankingChart({
       //     })),
       //   },
       // ]
-      data={data.map((movie) => ({
-        id: movie.id,
-        data: movie.rankings
-          .filter((r) => r.year)
-          .map((r) => ({
-            x: r.year,
-            y: r.ranking,
-          })),
-      }))}
+      data={actualData}
       xScale={{
         type: "linear",
         min: minYear,

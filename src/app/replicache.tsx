@@ -162,7 +162,7 @@ export function R({ children }: { children: React.ReactNode }) {
     if (!user) {
       return null;
     }
-    return createReplicache(user.user.userId, user.token);
+    return createReplicache(user.user.userId, user.sessionId);
   }, [user]);
 
   //   useEffect(() => {
