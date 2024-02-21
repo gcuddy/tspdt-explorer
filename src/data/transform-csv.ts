@@ -5,6 +5,12 @@ import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
+import {
+  movies as MoviesTable,
+  directors as DirectorsTable,
+  rankings as RankingsTable,
+  moviesToDirectors,
+} from "@/db/schema2";
 
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -122,23 +128,27 @@ for (const p of moviesWithTmdbId.slice(0, 0)) {
   i++;
   const movie = await imdbToTmdb(p.IMDB_ID);
   if (movie) {
-    db.query(
-      `insert into movies (id, title, year, imdb_id, tmdb_id, tmdb_poster_path, tmdb_backdrop_path) values (?, ?, ?, ?, ?, ?, ?)`
-    ).all(
-      p.idTSPDT,
-      p.Title,
-      p.Year,
-      p.IMDB_ID,
-      movie.id,
-      movie.poster_path,
-      movie.backdrop_path
-    );
+    db.insert(MoviesTable)
+      .values({
+        id: p.idTSPDT,
+        title: p.Title,
+        year: +p.Year,
+        imdbId: p.IMDB_ID,
+        tmdbId: movie.id,
+        tmdbPosterPath: movie.poster_path,
+        tmdbBackdropPath: movie.backdrop_path,
+      })
+      .run();
   }
   const rankingKeys = Object.keys(p).filter(isRankingKey);
   for (const key of rankingKeys) {
-    db.query(
-      `insert into rankings (movie_id, year, ranking) values (?, ?, ?)`
-    ).all(p.idTSPDT, p.Year, p[key]);
+    db.insert(RankingsTable)
+      .values({
+        movieId: p.idTSPDT,
+        year: +key,
+        ranking: +p[key],
+      })
+      .run();
   }
   // lookup director...? seems wasteful to not cache rest of data in some way. could also just parse director name from csv, but then we won't have tmdb id. could look this up just in time, and then cache it.
   const directors: string[] = [];
@@ -156,7 +166,6 @@ for (const p of moviesWithTmdbId.slice(0, 0)) {
     directors.push(reverseName(p["Director(s)"].trim()));
   }
 
-  //   TODO: handle directors. either create a map for ids to director. or look up director in tmdb via movie.credits.crew.
   for (const director of directors) {
     let id = directorToIdLookup.get(director);
     if (!id) {
@@ -164,18 +173,20 @@ for (const p of moviesWithTmdbId.slice(0, 0)) {
       directorToIdLookup.set(director, id);
     }
 
-    db.query(
-      `insert or ignore into directors (id, name, tmdb_id) values (?, ?, ?)`
-    ).run(
-      id,
-      director,
-      //   for now
-      null
-    );
+    db.insert(DirectorsTable)
+      .values({
+        id,
+        name: director,
+        tmdbId: null,
+      })
+      .run();
 
-    db.query(
-      `insert into movies_to_directors (movie_id, director_id) values (?, ?)`
-    ).run(p.idTSPDT, id);
+    db.insert(moviesToDirectors)
+      .values({
+        movieId: p.idTSPDT,
+        directorId: id,
+      })
+      .run();
   }
   if (i % 40 === 0) {
     console.log("sleeping for 1 second");
