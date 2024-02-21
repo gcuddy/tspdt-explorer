@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1708550101947,
+      "tag": "0000_crazy_big_bertha",
+      "breakpoints": true
+    }
+  ]
+}

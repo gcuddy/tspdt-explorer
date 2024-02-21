@@ -3,6 +3,8 @@ import Database from "bun:sqlite";
 import { csvParse } from "d3";
 import { customAlphabet } from "nanoid";
 import { z } from "zod";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -10,60 +12,11 @@ const nanoid = customAlphabet(alphabet, 9);
 
 const text = await Bun.file(Bun.argv.slice(2)[0]).text();
 
-const db = new Database("2024.db");
+const sqlite = new Database("2024.db");
 
-function setup_schema() {
-  db.query(`drop table if exists movies`).run();
-  db.query(
-    `create table movies (
-        id text primary key,
-        title text not null,
-        year integer not null,
-        country text,
-        color text,
-        genre text,
-        tmdb_id integer,
-        imdb_id text,
-        tmdb_poster_path text,
-        tmdb_backdrop_path text
-        )
-        `
-  ).run();
+const db = drizzle(sqlite);
 
-  db.query(`drop table if exists directors`).run();
-  db.query(
-    `create table directors (
-            id text primary key,
-            name text,
-            tmdb_id integer
-            )
-            `
-  ).run();
-
-  db.query(`drop table if exists movies_to_directors`).run();
-  db.query(
-    `create table movies_to_directors (
-              movie_id text,
-              director_id text
-              )
-              `
-  ).run();
-
-  db.query(`drop table if exists rankings`).run();
-  db.query(
-    `create table rankings (
-                    id integer primary key autoincrement,
-                    movie_id text,
-                    year integer,
-                    ranking integer
-                    )
-                    `
-  ).run();
-
-  //   TODO: cast, crew, etc - but i think these would be lookups?
-}
-
-setup_schema();
+migrate(db, { migrationsFolder: "./migrations2" });
 
 const FindByIdResultSchema = z.object({
   movie_results: z.array(MovieResultSchema),
@@ -164,7 +117,7 @@ const directorToIdLookup = new Map<string, string>();
 
 let i = 0;
 // let's get first 1000
-for (const p of moviesWithTmdbId.slice(0, 1000)) {
+for (const p of moviesWithTmdbId.slice(0, 0)) {
   if (!p.IMDB_ID) continue;
   i++;
   const movie = await imdbToTmdb(p.IMDB_ID);
