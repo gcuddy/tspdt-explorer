@@ -20,7 +20,7 @@ const text = await Bun.file(Bun.argv.slice(2)[0]).text();
 
 const sqlite = new Database("2024.db");
 
-const db = drizzle(sqlite, { logger: true });
+const db = drizzle(sqlite);
 
 migrate(db, { migrationsFolder: "./migrations2" });
 
@@ -97,6 +97,19 @@ async function imdbToTmdb(imdbId: string) {
   }
 }
 
+async function run(model: string, input: { text: string | string[] }) {
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${Bun.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`,
+    {
+      headers: { Authorization: `Bearer ${Bun.env.CLOUDFLARE_API_TOKEN}` },
+      method: "POST",
+      body: JSON.stringify(input),
+    }
+  );
+  const result = await response.json();
+  return result as { shape: number[]; data: number[][] };
+}
+
 const reverseName = (name: string) =>
   name
     .split(",")
@@ -121,11 +134,15 @@ const directorToIdLookup = new Map<string, string>();
 
 let i = 0;
 // let's get first 1000
-for (const p of moviesWithTmdbId.slice(0, 100)) {
+for (const p of moviesWithTmdbId.slice(0, 3)) {
   if (!p.IMDB_ID) continue;
   i++;
   const movie = await imdbToTmdb(p.IMDB_ID);
   if (movie) {
+    const vector = await run("@cf/baai/bge-base-en-v1.5", {
+      text: movie.overview,
+    });
+    console.log({ vector });
     db.insert(MoviesTable)
       .values({
         id: p.idTSPDT,
@@ -155,6 +172,7 @@ for (const p of moviesWithTmdbId.slice(0, 100)) {
   const directors: string[] = [];
   const twoDirectors = p["Director(s)"].split("&");
   const manyDirectors = p["Director(s)"].split("/");
+
   if (twoDirectors.length > 1) {
     for (const director of twoDirectors) {
       directors.push(reverseName(director.trim()));
