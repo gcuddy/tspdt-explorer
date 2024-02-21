@@ -19,8 +19,10 @@ function setup_schema() {
         id text primary key,
         title text not null,
         year integer not null,
+        country text,
+        color text,
+        genre text,
         tmdb_id integer,
-        tspdt_id integer,
         imdb_id text,
         tmdb_poster_path text,
         tmdb_backdrop_path text
@@ -102,6 +104,8 @@ type MovieData = {
 
 type MovieColumn = keyof MovieData;
 
+const parsed = csvParse<MovieColumn>(text);
+
 type RankingKey = {
   [k in keyof MovieData]: k extends `${number}` | "Dec-06" | "Mar-06"
     ? k
@@ -134,17 +138,15 @@ async function imdbToTmdb(imdbId: string) {
   }
 }
 
-const parsed = csvParse<MovieColumn>(text);
-
 const imdb_regex = /tt\d{7,8}/;
 
-function reverseName(name: string) {
-  return name
+const reverseName = (name: string) =>
+  name
     .split(",")
     .map((n) => n.trim())
     .reverse()
     .join(" ");
-}
+
 // first let's deal with everything that has tmdb id... then we'll deal with everything else
 const moviesWithTmdbId = parsed
   .filter((p) => p.IMDB_ID && p.IMDB_ID !== "#N/A" && +p["2024"])
@@ -158,13 +160,14 @@ const delay = async (ms: number) =>
 
 const directorToIdLookup = new Map<string, string>();
 
+// TODO: amidst all this is to ingest data into vector database.
+
 let i = 0;
 // let's get first 1000
 for (const p of moviesWithTmdbId.slice(0, 1000)) {
   if (!p.IMDB_ID) continue;
   i++;
   const movie = await imdbToTmdb(p.IMDB_ID);
-  const directors: string[] = [];
   if (movie) {
     db.query(
       `insert into movies (id, title, year, imdb_id, tmdb_id, tmdb_poster_path, tmdb_backdrop_path) values (?, ?, ?, ?, ?, ?, ?)`
@@ -184,8 +187,9 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
       `insert into rankings (movie_id, year, ranking) values (?, ?, ?)`
     ).all(p.idTSPDT, p.Year, p[key]);
   }
-  const twoDirectors = p["Director(s)"].split("&");
   // lookup director...? seems wasteful to not cache rest of data in some way. could also just parse director name from csv, but then we won't have tmdb id. could look this up just in time, and then cache it.
+  const directors: string[] = [];
+  const twoDirectors = p["Director(s)"].split("&");
   const manyDirectors = p["Director(s)"].split("/");
   if (twoDirectors.length > 1) {
     for (const director of twoDirectors) {
@@ -209,7 +213,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
 
     db.query(
       `insert or ignore into directors (id, name, tmdb_id) values (?, ?, ?)`
-    ).all(
+    ).run(
       id,
       director,
       //   for now
@@ -218,7 +222,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
 
     db.query(
       `insert into movies_to_directors (movie_id, director_id) values (?, ?)`
-    ).all(p.idTSPDT, id);
+    ).run(p.idTSPDT, id);
   }
   if (i % 40 === 0) {
     console.log("sleeping for 1 second");
