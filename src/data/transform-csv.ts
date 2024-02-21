@@ -20,7 +20,7 @@ const text = await Bun.file(Bun.argv.slice(2)[0]).text();
 
 const sqlite = new Database("2024.db");
 
-const db = drizzle(sqlite);
+const db = drizzle(sqlite, { logger: true });
 
 migrate(db, { migrationsFolder: "./migrations2" });
 
@@ -97,8 +97,6 @@ async function imdbToTmdb(imdbId: string) {
   }
 }
 
-const imdb_regex = /tt\d{7,8}/;
-
 const reverseName = (name: string) =>
   name
     .split(",")
@@ -123,7 +121,7 @@ const directorToIdLookup = new Map<string, string>();
 
 let i = 0;
 // let's get first 1000
-for (const p of moviesWithTmdbId.slice(0, 0)) {
+for (const p of moviesWithTmdbId.slice(0, 100)) {
   if (!p.IMDB_ID) continue;
   i++;
   const movie = await imdbToTmdb(p.IMDB_ID);
@@ -138,14 +136,17 @@ for (const p of moviesWithTmdbId.slice(0, 0)) {
         tmdbPosterPath: movie.poster_path,
         tmdbBackdropPath: movie.backdrop_path,
       })
+      .onConflictDoNothing()
       .run();
   }
   const rankingKeys = Object.keys(p).filter(isRankingKey);
   for (const key of rankingKeys) {
+    // for clarity, we'll just use 2006 for Dec-06 and 2005 for Mar-06
+    const year = key === "Dec-06" ? 2006 : key === "Mar-06" ? 2005 : +key;
     db.insert(RankingsTable)
       .values({
         movieId: p.idTSPDT,
-        year: +key,
+        year,
         ranking: +p[key],
       })
       .run();
@@ -179,6 +180,7 @@ for (const p of moviesWithTmdbId.slice(0, 0)) {
         name: director,
         tmdbId: null,
       })
+      .onConflictDoNothing()
       .run();
 
     db.insert(moviesToDirectors)
