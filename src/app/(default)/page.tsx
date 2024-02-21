@@ -29,7 +29,7 @@ const prepared = db
   .where(eq(rankings.year, 2023))
   .orderBy(asc(rankings.ranking))
   .groupBy(movies.id)
-  //   .limit(1000);
+  .limit(1000)
   .prepare();
 
 export const getData = cache(async () => {
@@ -44,6 +44,7 @@ export const getData = cache(async () => {
 });
 
 // export const runtime = "edge";
+// TODO: streaming or loading state
 
 export default async function Home() {
   const movies = await getData();

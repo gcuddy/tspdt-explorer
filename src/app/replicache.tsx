@@ -1,21 +1,13 @@
 "use client";
 
-import { getCookie, setCookie } from "cookies-next";
+import { Movie as M } from "@/core/movie";
 import { Director, Movie } from "@/core/movie/movie.sql";
 import { env } from "@/env.mjs";
 import { Client } from "@/functions/replicache/framework";
 import { ServerType } from "@/functions/replicache/server";
-import React, { createContext, useEffect } from "react";
-import {
-  DeepReadonlyObject,
-  Replicache,
-  ScanResult,
-  TEST_LICENSE_KEY,
-  WriteTransaction,
-} from "replicache";
+import React, { createContext } from "react";
+import { DeepReadonlyObject, Replicache } from "replicache";
 import { useSubscribe } from "replicache-react";
-import { Movie as M } from "@/core/movie";
-import { nanoid } from "@/utils/nanoid";
 import { useUser } from "./user-session";
 
 const mutators = new Client<ServerType>()
