@@ -8,6 +8,7 @@
     "noEmit": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
+    "noUnusedLocals": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
