@@ -5,6 +5,10 @@ compatibility_date = "2023-12-01"
 [ai]
 binding = "AI"
 
+[[vectorize]]
+binding = "VECTORIZE_INDEX" # available within your Worker on env.VECTORIZE_INDEX
+index_name = "tspdt-index"
+
 # [vars]
 # MY_VARIABLE = "production_value"
 
