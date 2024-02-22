@@ -23,13 +23,21 @@ const routes = app
     const db = createDb(c.env.DB);
     return c.json(
       await db.query.movies.findMany({
-        limit: 100,
+        limit: 1000,
         orderBy: asc(movies.currentRanking),
+        with: {
+          moviesToDirectors: {
+            with: {
+              director: true,
+            },
+          },
+        },
       })
     );
   })
   .get("/movie/:id", async (c) => {
     const db = createDb(c.env.DB);
+    console.log("getting movie with id", c.req.param("id"));
     const movie = await db.query.movies.findFirst({
       where: eq(movies.id, c.req.param("id")),
       with: {
@@ -43,6 +51,7 @@ const routes = app
         },
       },
     });
+    console.log("movie", movie);
     return c.json(movie);
   })
   .post(
@@ -113,12 +122,13 @@ const routes = app
       "json",
       z.object({
         overview: z.string(),
+        id: z.string().optional(),
       })
     ),
     async (c) => {
       const ai = new Ai(c.env.AI);
 
-      const { overview } = c.req.valid("json");
+      const { overview, id } = c.req.valid("json");
 
       const embeddings = (await ai.run("@cf/baai/bge-base-en-v1.5", {
         text: overview,
@@ -135,12 +145,13 @@ const routes = app
 
       console.log(JSON.stringify(vectorQuery, null, 2));
 
-      //   const vecIds = vectorQuery.matches
-      //     .filter((vec) => vec.score > SIMILARITY_CUTOFF)
-      //     .map((vec) => vec.id);
+      const vecIds = vectorQuery.matches.filter(
+        (vec) => vec.score > SIMILARITY_CUTOFF && vec.id !== id
+      );
+      // .map((vec) => vec.id);
 
       return c.json({
-        vectorQuery,
+        vectorQuery: vecIds,
       });
     }
   );

@@ -1,11 +1,11 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "b5033ab3-2ea0-4551-8626-fb195eb78fde",
+  "id": "6c31768f-aa13-47f0-8797-c8d02ed359d5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "directors": {
-      "name": "directors",
+    "tspdt_directors": {
+      "name": "tspdt_directors",
       "columns": {
         "id": {
           "name": "id",
@@ -30,8 +30,8 @@
         }
       },
       "indexes": {
-        "directors_tmdb_id_unique": {
-          "name": "directors_tmdb_id_unique",
+        "tspdt_directors_tmdb_id_unique": {
+          "name": "tspdt_directors_tmdb_id_unique",
           "columns": [
             "tmdb_id"
           ],
@@ -42,8 +42,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "movies": {
-      "name": "movies",
+    "tspdt_movies": {
+      "name": "tspdt_movies",
       "columns": {
         "id": {
           "name": "id",
@@ -138,15 +138,15 @@
         }
       },
       "indexes": {
-        "movies_tmdb_id_unique": {
-          "name": "movies_tmdb_id_unique",
+        "tspdt_movies_tmdb_id_unique": {
+          "name": "tspdt_movies_tmdb_id_unique",
           "columns": [
             "tmdb_id"
           ],
           "isUnique": true
         },
-        "movies_imdb_id_unique": {
-          "name": "movies_imdb_id_unique",
+        "tspdt_movies_imdb_id_unique": {
+          "name": "tspdt_movies_imdb_id_unique",
           "columns": [
             "imdb_id"
           ],
@@ -171,8 +171,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "movies_to_directors": {
-      "name": "movies_to_directors",
+    "tspdt_movies_to_directors": {
+      "name": "tspdt_movies_to_directors",
       "columns": {
         "movie_id": {
           "name": "movie_id",
@@ -192,18 +192,18 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "movies_to_directors_movie_id_director_id_pk": {
+        "tspdt_movies_to_directors_movie_id_director_id_pk": {
           "columns": [
             "director_id",
             "movie_id"
           ],
-          "name": "movies_to_directors_movie_id_director_id_pk"
+          "name": "tspdt_movies_to_directors_movie_id_director_id_pk"
         }
       },
       "uniqueConstraints": {}
     },
-    "rankings": {
-      "name": "rankings",
+    "tspdt_rankings": {
+      "name": "tspdt_rankings",
       "columns": {
         "id": {
           "name": "id",

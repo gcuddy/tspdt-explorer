@@ -11,4 +11,5 @@ export default {
   },
   verbose: true,
   strict: true,
+  tablesFilter: ["tspdt_*"],
 } satisfies Config;

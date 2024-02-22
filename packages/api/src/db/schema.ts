@@ -2,11 +2,13 @@ import { InferSelectModel, relations } from "drizzle-orm";
 import {
   text,
   integer,
-  sqliteTable,
+  sqliteTableCreator,
   primaryKey,
   index,
 } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-zod";
+
+const sqliteTable = sqliteTableCreator((name) => `tspdt_${name}`);
 
 export const movies = sqliteTable(
   "movies",
@@ -19,7 +21,10 @@ export const movies = sqliteTable(
     runtime: integer("runtime"),
     overview: text("overview"),
     color: text("color", { enum: ["col", "bw", "col-bw"] }),
-    currentRanking: integer("current_ranking"),
+    currentRanking: integer("current_ranking"), // this could be a generated field?
+    // rankings: text("rankings", { mode: "json" }).$type<
+    //   { year: number; ranking: number }[]
+    // >(),
     tmdbId: integer("tmdb_id").unique(),
     imdbId: text("imdb_id").unique(),
     //   just taken from tmdb, for easy access (TODO: store in r2)
@@ -47,6 +52,8 @@ export const directors = sqliteTable("directors", {
   name: text("name").notNull(),
   tmdbId: integer("tmdb_id").unique(),
 });
+
+export type Director = InferSelectModel<typeof directors>;
 
 export const directorRelations = relations(directors, ({ many }) => ({
   moviesToDirectors: many(moviesToDirectors),

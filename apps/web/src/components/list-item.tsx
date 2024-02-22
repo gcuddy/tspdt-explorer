@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getData } from "@/app/(default)/page";
 import { MovieListItem } from "./movie";
 import { Instrument_Serif } from "next/font/google";
+import { Movie, Director } from "tspdt-api/src/db/schema";
 
 const instrument = Instrument_Serif({
   weight: "400",
@@ -9,20 +10,35 @@ const instrument = Instrument_Serif({
   subsets: ["latin"],
 });
 
-type Movie = Awaited<ReturnType<typeof getData>>[0];
-
-export default function ListItem({ movie }: { movie: Movie }) {
+export default function ListItem({
+  movie,
+}: {
+  movie: Movie & {
+    moviesToDirectors: {
+      director: Director;
+    }[];
+  };
+}) {
   return (
     <li className="flex items-center gap-1 relative">
       <span className="text-gray-500 text-sm absolute tabular-nums -left-2 -translate-x-full">
-        {movie.ranking}
+        {movie.currentRanking}
       </span>
+      {/* {JSON.stringify(movie.moviesToDirectors)} */}
+
+      {movie.moviesToDirectors.map(({ director }) => {
+        return (
+          <Link href={`/director/${director.id}`} key={director.id}>
+            <span>{director.name}</span>
+          </Link>
+        );
+      })}
       <MovieListItem
         movie={movie}
         director={movie.director}
         posterSrc={
-          movie.posterPath
-            ? `https://image.tmdb.org/t/p/w154${movie.posterPath}`
+          movie.tmdbPosterPath
+            ? `https://image.tmdb.org/t/p/w154${movie.tmdbPosterPath}`
             : undefined
         }
       />

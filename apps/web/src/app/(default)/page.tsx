@@ -35,8 +35,10 @@ import { client } from "@/lib/hono";
 
 async function getData() {
   // todo: cache? or can get url and fetch
+  console.time("getData");
   const res = await client.movies.list.$get();
   const movies = await res.json();
+  console.timeEnd("getData");
   return movies;
 }
 
@@ -46,6 +48,7 @@ async function getData() {
 export default async function Home() {
   const movies = await getData();
 
+  //   console.log("movies", movies);
   return (
     <div className="flex flex-col">
       <List movies={movies} />

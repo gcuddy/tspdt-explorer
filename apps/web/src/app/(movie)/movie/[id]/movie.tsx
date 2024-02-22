@@ -30,6 +30,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { groupBy } from "remeda";
 import { useSubscribe } from "replicache-react";
+import { useQuery } from "@tanstack/react-query";
+import { getRecommendations } from "@/server/data-layer";
 // import * as Dialog from "@radix-ui/react-dialog";
 
 export function Movie({
@@ -266,10 +268,53 @@ export function Movie({
                 </div>
               </div>
             </div>
+            <div>
+              <span className="text-lg tracking-tight font-semibold text-center">
+                Recommendations
+              </span>
+              <div className="h-72">
+                {/* line chart */}
+                <Reccomendations movie={movie} />
+              </div>
+            </div>
           </div>
         </Stack>
       </main>
     </>
+  );
+}
+
+function Reccomendations({
+  movie,
+}: {
+  movie: Awaited<ReturnType<typeof getMovie>>;
+}) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["recommendations", movie.id],
+    queryFn: () => getRecommendations(movie),
+  });
+
+  if (!data || isLoading) return <div>Loading...</div>;
+
+  return (
+    <div className="grid grid-cols-4 w-full mt-4">
+      {data.vectorQuery.map((movie) => {
+        return (
+          <a
+            href={`/movie/${movie.id}`}
+            className="flex flex-col gap-2 items-center min-w-0 truncate"
+            key={movie.id}
+          >
+            <div className="rounded overflow-hidden w-fit">
+              <Poster poster_path={movie.metadata.posterPath} />
+            </div>
+            <span className="text-sm text-zinc-400 whitespace-normal">
+              {movie.metadata.title}
+            </span>
+          </a>
+        );
+      })}
+    </div>
   );
 }
 

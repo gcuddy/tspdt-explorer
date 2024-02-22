@@ -10,9 +10,13 @@ import { client } from "@/lib/hono";
 export const getMovie = cache(async (id: string) => {
   console.time("getMovie");
   console.time("getMovie:db");
-  const movie = await client.movie[":id"]
-    .$get({ param: { id } })
-    .then((res) => res.json());
+  const res = await client.movie[":id"].$get({ param: { id } });
+
+  console.log("movie", res);
+
+  const movie = await res.json().catch(() => {
+    return notFound();
+  });
   console.timeEnd("getMovie:db");
 
   if (!movie) {

@@ -9,6 +9,7 @@ import { ActionProvider } from "./action-provider";
 import { FilterProvider } from "./filter-provider";
 import { getPageSession } from "@/core/auth/validate";
 import { UserProvider } from "./user-session";
+import Providers from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,15 +33,17 @@ export default async function RootLayout({
     <html lang="en">
       {/* <UserProvider session={session}> */}
       {/* <R> */}
-      <CommandBar>
-        <BodyProvider>
-          {/* <ActionProvider> */}
-          <FilterProvider>
-            <GlobalCommands>{children}</GlobalCommands>
-          </FilterProvider>
-          {/* </ActionProvider> */}
-        </BodyProvider>
-      </CommandBar>
+      <Providers>
+        <CommandBar>
+          <BodyProvider>
+            {/* <ActionProvider> */}
+            <FilterProvider>
+              <GlobalCommands>{children}</GlobalCommands>
+            </FilterProvider>
+            {/* </ActionProvider> */}
+          </BodyProvider>
+        </CommandBar>
+      </Providers>
       {/* </R> */}
       {/* </UserProvider> */}
     </html>

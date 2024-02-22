@@ -170,14 +170,23 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
 
   if (twoDirectors.length > 1) {
     for (const director of twoDirectors) {
-      directors.push(reverseName(director.trim()));
+      const name = reverseName(director.trim());
+      if (!directors.includes(name)) {
+        directors.push(name);
+      }
     }
   } else if (manyDirectors.length > 1) {
     for (const director of manyDirectors) {
-      directors.push(reverseName(director.trim()));
+      const name = reverseName(director.trim());
+      if (!directors.includes(name)) {
+        directors.push(name);
+      }
     }
   } else {
-    directors.push(reverseName(p["Director(s)"].trim()));
+    const name = reverseName(p["Director(s)"].trim());
+    if (!directors.includes(name)) {
+      directors.push(name);
+    }
   }
 
   if (movie) {
