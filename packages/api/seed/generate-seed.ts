@@ -164,7 +164,8 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
 
   //   TODO: fix title if not in tmdb
 
-  const directors: string[] = [];
+  let directors: string[] = [];
+  const directorToTmdbId = new Map<string, number>();
   const twoDirectors = p["Director(s)"].split("&");
   const manyDirectors = p["Director(s)"].split("/");
 
@@ -187,6 +188,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
     if (!directors.includes(name)) {
       directors.push(name);
     }
+    directors.push(reverseName(p["Director(s)"].trim()));
   }
 
   if (movie) {
@@ -202,6 +204,14 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
     console.log({ tmovie });
 
     console.log({ genres });
+    const tdirectors = tmovie?.credits.crew.filter((c) => c.job === "Director");
+
+    if (tdirectors) {
+      directors = tdirectors.map((d) => d.name);
+      for (const director of tdirectors) {
+        directorToTmdbId.set(director.name, director.id);
+      }
+    }
 
     // const res = await client.movie.$post({
     //   json: {
@@ -261,6 +271,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
 
   for (const director of directors) {
     let id = directorToIdLookup.get(director);
+    let tmdbId = directorToTmdbId.get(director);
     if (!id) {
       id = nanoid();
       directorToIdLookup.set(director, id);
@@ -270,7 +281,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
       .values({
         id,
         name: director,
-        tmdbId: null,
+        tmdbId,
       })
       .onConflictDoNothing()
       .run();
@@ -280,6 +291,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
         movieId: p.idTSPDT,
         directorId: id,
       })
+      .onConflictDoNothing()
       .run();
   }
   if (i % 40 === 0) {
