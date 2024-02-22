@@ -12,6 +12,12 @@ import {
   moviesToDirectors,
 } from "@/db/schema2";
 
+import { hc } from "hono/client";
+import { AppType } from "tspdt-api/src/index";
+import { tmdbGenres } from "./tmdb-data";
+
+const client = hc<AppType>("http://localhost:8787");
+
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 9);
@@ -134,15 +140,37 @@ const directorToIdLookup = new Map<string, string>();
 
 let i = 0;
 // let's get first 1000
-for (const p of moviesWithTmdbId.slice(0, 3)) {
+for (const p of moviesWithTmdbId.slice(0, 100)) {
   if (!p.IMDB_ID) continue;
   i++;
   const movie = await imdbToTmdb(p.IMDB_ID);
+
+  const genres = p.Genre.split("-").map((g) => g.trim());
+  //   TODO: fix title if not in tmdb
   if (movie) {
-    const vector = await run("@cf/baai/bge-base-en-v1.5", {
-      text: movie.overview,
+    // https://tspdt-api.floral-violet-deef.workers.dev
+
+    // const vector = await run("@cf/baai/bge-base-en-v1.5", {
+    //   text: movie.overview,
+    // });
+    // console.log({ vector });
+    // const movieDetails =
+
+    console.log({ genres });
+
+    const res = await client.movie.$post({
+      json: {
+        overview: movie.overview,
+        title: movie.title,
+        year: +p.Year,
+        tspdtId: p.idTSPDT,
+        tmdbId: movie.id,
+        genres,
+      },
     });
-    console.log({ vector });
+
+    console.log({ res });
+
     db.insert(MoviesTable)
       .values({
         id: p.idTSPDT,
@@ -152,6 +180,16 @@ for (const p of moviesWithTmdbId.slice(0, 3)) {
         tmdbId: movie.id,
         tmdbPosterPath: movie.poster_path,
         tmdbBackdropPath: movie.backdrop_path,
+        color:
+          p.Colour === "BW"
+            ? "bw"
+            : p.Colour === "Col" || p.Colour === "Colour"
+            ? "col"
+            : "col-bw",
+        country: p.Country.split("-").map((c) => c.trim()),
+        genre: genres,
+        overview: movie.overview,
+        runtime: p.Length ? +p.Length : null,
       })
       .onConflictDoNothing()
       .run();

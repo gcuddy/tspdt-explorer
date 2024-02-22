@@ -1,6 +1,6 @@
 // Genres: Action, Adventure, Animation, Comedy, Crime, Documentary, Drama, Family, Fantasy, History, Horror, Music, Mystery, Romance, Science Fiction, Thriller, TV Movie, War, and Western.
 // via https://www.themoviedb.org/bible/movie/ and the api: https://developer.themoviedb.org/reference/genre-movie-list
-export const tmdbGenres = {
+export const tmdbGenres: Record<number, string> = {
   28: "Action",
   12: "Adventure",
   16: "Animation",

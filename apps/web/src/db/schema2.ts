@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   text,
   integer,
@@ -6,6 +6,7 @@ import {
   primaryKey,
   index,
 } from "drizzle-orm/sqlite-core";
+import { createSelectSchema } from "drizzle-zod";
 
 export const movies = sqliteTable(
   "movies",
@@ -13,7 +14,10 @@ export const movies = sqliteTable(
     id: text("id").primaryKey(),
     title: text("title").notNull(),
     year: integer("year").notNull(),
-    country: text("country"),
+    country: text("country", { mode: "json" }).$type<string[]>(),
+    genre: text("genre", { mode: "json" }).$type<string[]>(),
+    runtime: integer("runtime"),
+    overview: text("overview"),
     color: text("color", { enum: ["col", "bw", "col-bw"] }),
     tmdbId: integer("tmdb_id").unique(),
     imdbId: text("imdb_id").unique(),
@@ -27,6 +31,10 @@ export const movies = sqliteTable(
     tmdbIdIdx: index("tmdb_id_idx").on(m.tmdbId),
   })
 );
+
+export const MoviesSchema = createSelectSchema(movies);
+
+export type Movie = InferSelectModel<typeof movies>;
 
 export const movieRelations = relations(movies, ({ many }) => ({
   rankings: many(rankings),
