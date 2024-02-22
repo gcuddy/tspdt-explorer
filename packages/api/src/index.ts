@@ -4,10 +4,14 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { transformMovieIntoTextEmbedding } from "./utils";
 import { MovieEmbeddingSchema } from "./schemas";
+import { createDb } from "./db/client";
+import { asc, eq } from "drizzle-orm";
+import { movies, rankings } from "./db/schema";
 
 type Bindings = {
   AI: any;
   VECTORIZE_INDEX: VectorizeIndex;
+  DB: D1Database;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -15,6 +19,32 @@ const app = new Hono<{ Bindings: Bindings }>();
 // TODO: for ingesting, get keywords
 
 const routes = app
+  .get("/movies/list", async (c) => {
+    const db = createDb(c.env.DB);
+    return c.json(
+      await db.query.movies.findMany({
+        limit: 100,
+        orderBy: asc(movies.currentRanking),
+      })
+    );
+  })
+  .get("/movie/:id", async (c) => {
+    const db = createDb(c.env.DB);
+    const movie = await db.query.movies.findFirst({
+      where: eq(movies.id, c.req.param("id")),
+      with: {
+        moviesToDirectors: {
+          with: {
+            director: true,
+          },
+        },
+        rankings: {
+          orderBy: asc(rankings.year),
+        },
+      },
+    });
+    return c.json(movie);
+  })
   .post(
     "/movie",
     zValidator(

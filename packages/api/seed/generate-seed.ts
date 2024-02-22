@@ -1,4 +1,4 @@
-import { MovieDetailSchema, MovieResultSchema } from "@/lib/schemas";
+import { MovieDetailSchema, MovieResultSchema } from "../src/zod";
 import Database from "bun:sqlite";
 import { csvParse } from "d3";
 import { customAlphabet } from "nanoid";
@@ -10,24 +10,24 @@ import {
   directors as DirectorsTable,
   rankings as RankingsTable,
   moviesToDirectors,
-} from "@/db/schema2";
+} from "../src/db/schema";
 
 import { hc } from "hono/client";
 import { AppType } from "tspdt-api/src/index";
 
-const client = hc<AppType>("http://localhost:8787");
+// const client = hc<AppType>("http://localhost:8787");
 
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 9);
 
-const text = await Bun.file(Bun.argv.slice(2)[0]).text();
+const text = await Bun.file("./tspdt-starting-list.csv").text();
 
-const sqlite = new Database("2024.db");
+const sqlite = new Database("./tspdt.db");
 
 const db = drizzle(sqlite);
 
-migrate(db, { migrationsFolder: "./migrations2" });
+migrate(db, { migrationsFolder: "./migrations" });
 
 const FindByIdResultSchema = z.object({
   movie_results: z.array(MovieResultSchema),
@@ -220,7 +220,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
     db.insert(MoviesTable)
       .values({
         id: p.idTSPDT,
-        title: p.Title,
+        title: movie.title ?? p.Title,
         year: +p.Year,
         imdbId: p.IMDB_ID,
         tmdbId: movie.id,
@@ -231,6 +231,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
         genre: genres,
         overview: movie.overview,
         runtime: p.Length ? +p.Length : null,
+        currentRanking: +p["2024"] ?? null,
       })
       .onConflictDoNothing()
       .run();

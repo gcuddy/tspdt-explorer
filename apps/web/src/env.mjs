@@ -6,6 +6,7 @@ export const env = createEnv({
     TMDB_TOKEN: z.string().min(1),
     DISCORD_ID: z.string().min(1),
     DISCORD_SECRET: z.string().min(1),
+    API_URL: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_REPLICACHE_LICENSE_KEY: z.string().min(1),
@@ -16,5 +17,6 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY,
     DISCORD_ID: process.env.DISCORD_ID,
     DISCORD_SECRET: process.env.DISCORD_SECRET,
+    API_URL: process.env.API_URL,
   },
 });

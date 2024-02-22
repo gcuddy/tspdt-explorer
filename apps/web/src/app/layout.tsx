@@ -26,23 +26,23 @@ export default async function RootLayout({
   children: React.ReactNode;
   actions: React.ReactNode;
 }) {
-  const session = await getPageSession();
+  //   const session = await getPageSession();
 
   return (
     <html lang="en">
-      <UserProvider session={session}>
-        <R>
-          <CommandBar>
-            <BodyProvider>
-              <ActionProvider>
-                <FilterProvider>
-                  <GlobalCommands>{children}</GlobalCommands>
-                </FilterProvider>
-              </ActionProvider>
-            </BodyProvider>
-          </CommandBar>
-        </R>
-      </UserProvider>
+      {/* <UserProvider session={session}> */}
+      {/* <R> */}
+      <CommandBar>
+        <BodyProvider>
+          {/* <ActionProvider> */}
+          <FilterProvider>
+            <GlobalCommands>{children}</GlobalCommands>
+          </FilterProvider>
+          {/* </ActionProvider> */}
+        </BodyProvider>
+      </CommandBar>
+      {/* </R> */}
+      {/* </UserProvider> */}
     </html>
   );
 }
