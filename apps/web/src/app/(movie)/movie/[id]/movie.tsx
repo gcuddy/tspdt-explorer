@@ -289,12 +289,50 @@ function Reccomendations({
 }: {
   movie: Awaited<ReturnType<typeof getMovie>>;
 }) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, failureReason } = useQuery({
     queryKey: ["recommendations", movie.id],
     queryFn: () => getRecommendations(movie),
   });
 
-  if (!data || isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {failureReason?.message}</div>;
+  if (!data || isLoading)
+    return (
+      <div className="grid grid-cols-4 w-full mt-4">
+        <div className="flex flex-col gap-2 items-center min-w-0 truncate">
+          <div className="rounded overflow-hidden w-fit">
+            <div className="bg-zinc-400 w-36 h-52 animate-pulse" />
+          </div>
+          <span className="text-sm text-zinc-400 whitespace-normal">
+            Loading...
+          </span>
+        </div>
+        <div className="flex flex-col gap-2 items-center min-w-0 truncate">
+          <div className="rounded overflow-hidden w-fit">
+            <div className="bg-zinc-400 w-36 h-52 animate-pulse" />
+          </div>
+          <span className="text-sm text-zinc-400 whitespace-normal">
+            Loading...
+          </span>
+        </div>
+        <div className="flex flex-col gap-2 items-center min-w-0 truncate">
+          <div className="rounded overflow-hidden w-fit">
+            <div className="bg-zinc-400 w-36 h-52 animate-pulse" />
+          </div>
+          <span className="text-sm text-zinc-400 whitespace-normal">
+            Loading...
+          </span>
+        </div>
+        <div className="flex flex-col gap-2 items-center min-w-0 truncate">
+          <div className="rounded overflow-hidden w-fit">
+            <div className="bg-zinc-400 w-36 h-52 animate-pulse" />
+          </div>
+          <span className="text-sm text-zinc-400 whitespace-normal">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+
 
   return (
     <div className="grid grid-cols-4 w-full mt-4">

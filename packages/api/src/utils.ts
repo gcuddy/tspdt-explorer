@@ -1,31 +1,48 @@
 import { MovieEmbedding } from "./schemas";
 
 export function transformMovieIntoTextEmbedding(movie: MovieEmbedding): string {
-  return `Title:
-${movie.title}
+    let output = `Title:
+${movie.title}`;
 
-Director:
-${movie.director}
+    if (movie.director) {
+      output += `Director:
+${movie.director}`;
+    }
 
-Overview:
-${movie.overview}
+    if (movie.overview) {
+      output += `Overview:
+${movie.overview}`;
+    }
 
-Cast:
-${movie.cast}
+    if (movie.cast) {
+      output += `Cast:
+${movie.cast}`;
+    }
 
-Year:
-${movie.year}
+    if (movie.year) {
+      output += `Year:
+${movie.year}`;
+    }
 
-Genres:
-${movie.genre}
+    if (movie.genre) {
+      output += `Genres:
+${movie.genre}`;
+    }
 
-Country:
-${movie.country}
+    if (movie.country) {
+      output += `Country:
+${movie.country}`;
+    }
 
-Color:
-${movie.color}
+    if (movie.color) {
+      output += `Color:
+${movie.color}`;
+    }
 
-Budget:
-${movie.budget}
-`;
+    if (movie.budget) {
+    output += `Budget:
+${movie.budget}`;
+    }
+
+    return output;
 }

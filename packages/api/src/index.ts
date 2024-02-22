@@ -116,45 +116,35 @@ const routes = app
       });
     }
   )
-  .post(
-    "/recommendations",
-    zValidator(
-      "json",
-      z.object({
-        overview: z.string(),
-        id: z.string().optional(),
-      })
-    ),
-    async (c) => {
-      const ai = new Ai(c.env.AI);
+  .post("/recommendations", zValidator("json", z.any()), async (c) => {
+    const ai = new Ai(c.env.AI);
 
-      const { overview, id } = c.req.valid("json");
+    const { overview, id } = c.req.valid("json");
 
-      const embeddings = (await ai.run("@cf/baai/bge-base-en-v1.5", {
-        text: overview,
-      })) as { shape: number[]; data: number[][] };
+    const embeddings = (await ai.run("@cf/baai/bge-base-en-v1.5", {
+      text: overview,
+    })) as { shape: number[]; data: number[][] };
 
-      const vectors = embeddings.data[0];
+    const vectors = embeddings.data[0];
 
-      const SIMILARITY_CUTOFF = 0.5;
+    const SIMILARITY_CUTOFF = 0.5;
 
-      const vectorQuery = await c.env.VECTORIZE_INDEX.query(vectors, {
-        topK: 5,
-        returnMetadata: true,
-      });
+    const vectorQuery = await c.env.VECTORIZE_INDEX.query(vectors, {
+      topK: 5,
+      returnMetadata: true,
+    });
 
-      console.log(JSON.stringify(vectorQuery, null, 2));
+    console.log(JSON.stringify(vectorQuery, null, 2));
 
-      const vecIds = vectorQuery.matches.filter(
-        (vec) => vec.score > SIMILARITY_CUTOFF && vec.id !== id
-      );
-      // .map((vec) => vec.id);
+    const vecIds = vectorQuery.matches.filter(
+      (vec) => vec.score > SIMILARITY_CUTOFF && vec.id !== id
+    );
+    // .map((vec) => vec.id);
 
-      return c.json({
-        vectorQuery: vecIds,
-      });
-    }
-  );
+    return c.json({
+      vectorQuery: vecIds,
+    });
+  });
 
 export default app;
 
