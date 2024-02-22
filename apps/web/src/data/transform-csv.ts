@@ -1,4 +1,4 @@
-import { MovieResultSchema } from "@/lib/schemas";
+import { MovieDetailSchema, MovieResultSchema } from "@/lib/schemas";
 import Database from "bun:sqlite";
 import { csvParse } from "d3";
 import { customAlphabet } from "nanoid";
@@ -14,7 +14,6 @@ import {
 
 import { hc } from "hono/client";
 import { AppType } from "tspdt-api/src/index";
-import { tmdbGenres } from "./tmdb-data";
 
 const client = hc<AppType>("http://localhost:8787");
 
@@ -103,17 +102,24 @@ async function imdbToTmdb(imdbId: string) {
   }
 }
 
-async function run(model: string, input: { text: string | string[] }) {
-  const response = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${Bun.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`,
+async function tmdbMovieDetails(tmdbId: number) {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/${tmdbId}?append_to_response=credits`,
     {
-      headers: { Authorization: `Bearer ${Bun.env.CLOUDFLARE_API_TOKEN}` },
-      method: "POST",
-      body: JSON.stringify(input),
+      headers: {
+        Authorization: `Bearer ${Bun.env.TMDB_TOKEN}`,
+        accept: "application/json",
+      },
     }
   );
-  const result = await response.json();
-  return result as { shape: number[]; data: number[][] };
+
+  try {
+    const json = await res.json();
+    const parsed = MovieDetailSchema.parse(json);
+    return parsed;
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 const reverseName = (name: string) =>
@@ -140,13 +146,38 @@ const directorToIdLookup = new Map<string, string>();
 
 let i = 0;
 // let's get first 1000
-for (const p of moviesWithTmdbId.slice(0, 100)) {
+for (const p of moviesWithTmdbId.slice(0, 1000)) {
   if (!p.IMDB_ID) continue;
   i++;
   const movie = await imdbToTmdb(p.IMDB_ID);
 
   const genres = p.Genre.split("-").map((g) => g.trim());
+  const color =
+    p.Colour === "BW"
+      ? "bw"
+      : p.Colour === "Col" || p.Colour === "Colour"
+      ? "col"
+      : "col-bw";
+  const country = p.Country.split("-").map((c) => c.trim());
+
   //   TODO: fix title if not in tmdb
+
+  const directors: string[] = [];
+  const twoDirectors = p["Director(s)"].split("&");
+  const manyDirectors = p["Director(s)"].split("/");
+
+  if (twoDirectors.length > 1) {
+    for (const director of twoDirectors) {
+      directors.push(reverseName(director.trim()));
+    }
+  } else if (manyDirectors.length > 1) {
+    for (const director of manyDirectors) {
+      directors.push(reverseName(director.trim()));
+    }
+  } else {
+    directors.push(reverseName(p["Director(s)"].trim()));
+  }
+
   if (movie) {
     // https://tspdt-api.floral-violet-deef.workers.dev
 
@@ -156,6 +187,9 @@ for (const p of moviesWithTmdbId.slice(0, 100)) {
     // console.log({ vector });
     // const movieDetails =
 
+    const tmovie = await tmdbMovieDetails(movie.id);
+    console.log({ tmovie });
+
     console.log({ genres });
 
     const res = await client.movie.$post({
@@ -163,9 +197,19 @@ for (const p of moviesWithTmdbId.slice(0, 100)) {
         overview: movie.overview,
         title: movie.title,
         year: +p.Year,
-        tspdtId: p.idTSPDT,
-        tmdbId: movie.id,
-        genres,
+        budget: tmovie?.budget ?? null,
+        cast: (tmovie?.credits.cast.map((c) => c.name) ?? []).join(", "),
+        color,
+        country: country.join(", "),
+        director: (
+          tmovie?.credits.crew
+            .filter((c) => c.job === "Director")
+            .map((c) => c.name) ?? directors
+        ).join(", "),
+        genre: genres.join(", "),
+        runtime: p.Length ? +p.Length : null,
+        id: p.idTSPDT,
+        tmdbPosterPath: movie.poster_path,
       },
     });
 
@@ -180,13 +224,8 @@ for (const p of moviesWithTmdbId.slice(0, 100)) {
         tmdbId: movie.id,
         tmdbPosterPath: movie.poster_path,
         tmdbBackdropPath: movie.backdrop_path,
-        color:
-          p.Colour === "BW"
-            ? "bw"
-            : p.Colour === "Col" || p.Colour === "Colour"
-            ? "col"
-            : "col-bw",
-        country: p.Country.split("-").map((c) => c.trim()),
+        color,
+        country,
         genre: genres,
         overview: movie.overview,
         runtime: p.Length ? +p.Length : null,
@@ -207,21 +246,6 @@ for (const p of moviesWithTmdbId.slice(0, 100)) {
       .run();
   }
   // lookup director...? seems wasteful to not cache rest of data in some way. could also just parse director name from csv, but then we won't have tmdb id. could look this up just in time, and then cache it.
-  const directors: string[] = [];
-  const twoDirectors = p["Director(s)"].split("&");
-  const manyDirectors = p["Director(s)"].split("/");
-
-  if (twoDirectors.length > 1) {
-    for (const director of twoDirectors) {
-      directors.push(reverseName(director.trim()));
-    }
-  } else if (manyDirectors.length > 1) {
-    for (const director of manyDirectors) {
-      directors.push(reverseName(director.trim()));
-    }
-  } else {
-    directors.push(reverseName(p["Director(s)"].trim()));
-  }
 
   for (const director of directors) {
     let id = directorToIdLookup.get(director);

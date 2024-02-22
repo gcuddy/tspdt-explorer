@@ -1,4 +1,3 @@
-import type { Movie } from "tspdt/src/db/schema2";
 import { MovieEmbedding } from "./schemas";
 
 export function transformMovieIntoTextEmbedding(movie: MovieEmbedding): string {
@@ -24,5 +23,9 @@ Country:
 ${movie.country}
 
 Color:
-${movie.color}`;
+${movie.color}
+
+Budget:
+${movie.budget}
+`;
 }

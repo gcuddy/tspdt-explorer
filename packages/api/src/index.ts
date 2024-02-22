@@ -2,6 +2,8 @@ import { Ai } from "@cloudflare/ai";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import { transformMovieIntoTextEmbedding } from "./utils";
+import { MovieEmbeddingSchema } from "./schemas";
 
 type Bindings = {
   AI: any;
@@ -10,38 +12,43 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+// TODO: for ingesting, get keywords
+
 const routes = app
   .post(
     "/movie",
     zValidator(
       "json",
-      z.object({
-        tspdtId: z.string(),
-        tmdbId: z.number().optional(),
-        title: z.string(),
-        year: z.number(),
-        overview: z.string(),
-        genres: z.array(z.string()),
-      })
+      MovieEmbeddingSchema
+      //   z.object({
+      //     tspdtId: z.string(),
+      //     tmdbId: z.number().optional(),
+      //     title: z.string(),
+      //     year: z.number(),
+      //     overview: z.string(),
+      //     genres: z.array(z.string()),
+      //   })
     ),
     async (c) => {
       const ai = new Ai(c.env.AI);
 
       const data = c.req.valid("json");
 
-      const { overview, tspdtId, ...rest } = data;
+      const { overview, id: tspdtId, ...rest } = data;
 
-      const text = `Overview:
-      ${overview}
+      const text = transformMovieIntoTextEmbedding(data);
 
-      Title:
-      ${data.title}
+      //   const text = `Overview:
+      //   ${overview}
 
-      Year:
-      ${data.year}
+      //   Title:
+      //   ${data.title}
 
-      Genres:
-      ${data.genres.join(", ")}`;
+      //   Year:
+      //   ${data.year}
+
+      //   Genres:
+      //   ${data.genres.join(", ")}`;
 
       const { data: vectorData } = (await ai.run("@cf/baai/bge-base-en-v1.5", {
         text,
@@ -55,7 +62,11 @@ const routes = app
         {
           id: tspdtId,
           values,
-          metadata: rest,
+          metadata: {
+            title: rest.title,
+            year: rest.year,
+            posterPath: rest.tmdbPosterPath ?? "",
+          },
         },
       ]);
 
