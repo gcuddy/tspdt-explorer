@@ -15,7 +15,7 @@ export default function ListItem({
 }: {
   movie: Movie & {
     moviesToDirectors: {
-      director: Director;
+      director?: Director | null;
     }[];
   };
 }) {
@@ -24,18 +24,13 @@ export default function ListItem({
       <span className="text-gray-500 text-sm absolute tabular-nums -left-2 -translate-x-full">
         {movie.currentRanking}
       </span>
-      {/* {JSON.stringify(movie.moviesToDirectors)} */}
-
-      {movie.moviesToDirectors.map(({ director }) => {
-        return (
-          <Link href={`/director/${director.id}`} key={director.id}>
-            <span>{director.name}</span>
-          </Link>
-        );
-      })}
       <MovieListItem
         movie={movie}
-        director={movie.director}
+        director={
+          movie.moviesToDirectors
+            .map((mtd) => mtd.director)
+            .filter(Boolean) as Director[]
+        }
         posterSrc={
           movie.tmdbPosterPath
             ? `https://image.tmdb.org/t/p/w154${movie.tmdbPosterPath}`

@@ -269,13 +269,15 @@ export function Movie({
               </div>
             </div>
             <div>
-              <span className="text-lg tracking-tight font-semibold text-center">
-                Recommendations
-              </span>
-              <div className="h-72">
-                {/* line chart */}
-                <Reccomendations movie={movie} />
-              </div>
+              <Card>
+                <span className="text-lg tracking-tight font-semibold text-center">
+                  Recommendations
+                </span>
+                <div className="h-72">
+                  {/* line chart */}
+                  <Reccomendations movie={movie} />
+                </div>
+              </Card>
             </div>
           </div>
         </Stack>
@@ -291,13 +293,13 @@ function Reccomendations({
 }) {
   const { data, isLoading, isError, failureReason } = useQuery({
     queryKey: ["recommendations", movie.id],
-    queryFn: () => getRecommendations(movie),
+    queryFn: () => getRecommendations(movie as Todo),
   });
 
   if (isError) return <div>Error: {failureReason?.message}</div>;
   if (!data || isLoading)
     return (
-      <div className="grid grid-cols-4 w-full mt-4">
+      <div className="grid grid-cols-4 w-full gap-4 mt-4">
         <div className="flex flex-col gap-2 items-center min-w-0 truncate">
           <div className="rounded overflow-hidden w-fit">
             <div className="bg-zinc-400 w-36 h-52 animate-pulse" />
@@ -333,9 +335,8 @@ function Reccomendations({
       </div>
     );
 
-
   return (
-    <div className="grid grid-cols-4 w-full mt-4">
+    <div className="grid grid-cols-4 gap-4 w-full mt-4">
       {data.vectorQuery.map((movie) => {
         return (
           <a

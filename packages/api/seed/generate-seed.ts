@@ -277,6 +277,7 @@ for (const p of moviesWithTmdbId.slice(0, 1000)) {
       directorToIdLookup.set(director, id);
     }
 
+
     db.insert(DirectorsTable)
       .values({
         id,

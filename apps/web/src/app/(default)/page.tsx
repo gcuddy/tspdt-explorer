@@ -33,7 +33,7 @@ import { client } from "@/lib/hono";
 //   .limit(1000)
 //   .prepare();
 
-async function getData() {
+export async function getData() {
   // todo: cache? or can get url and fetch
   console.time("getData");
   const res = await client.movies.list.$get();

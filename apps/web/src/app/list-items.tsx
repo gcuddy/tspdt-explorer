@@ -20,8 +20,8 @@ export function List({
     return movies.filter(
       (movie) =>
         movie.title.toLowerCase().includes(filter.toLowerCase()) ||
-        movie.director.some((director) =>
-          director.name.toLowerCase().includes(filter.toLowerCase())
+        movie.moviesToDirectors.some(({ director }) =>
+          director?.name.toLowerCase().includes(filter.toLowerCase())
         )
     );
   }, [movies, filter]);
