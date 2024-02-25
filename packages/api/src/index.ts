@@ -7,6 +7,7 @@ import { MovieEmbeddingSchema } from "./schemas";
 import { createDb } from "./db/client";
 import { asc, eq } from "drizzle-orm";
 import { movies, rankings } from "./db/schema";
+import { cache } from "hono/cache";
 
 type Bindings = {
   AI: any;
@@ -17,6 +18,14 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 
 // TODO: for ingesting, get keywords
+
+app.get(
+  "*",
+  cache({
+    cacheName: "movies",
+    cacheControl: "max-age=3600",
+  })
+);
 
 const routes = app
   .get("/movies/list", async (c) => {
@@ -116,35 +125,58 @@ const routes = app
       });
     }
   )
-  .post("/recommendations", zValidator("json", z.any()), async (c) => {
-    const ai = new Ai(c.env.AI);
+  .get(
+    "/recommendations",
+    zValidator(
+      "query",
+      z.object({
+        overview: z.string(),
+        id: z.string(),
+      })
+    ),
+    async (c) => {
+      const ai = new Ai(c.env.AI);
 
-    const { overview, id } = c.req.valid("json");
+      const { overview, id } = c.req.valid("query");
 
-    const embeddings = (await ai.run("@cf/baai/bge-base-en-v1.5", {
-      text: overview,
-    })) as { shape: number[]; data: number[][] };
+      const embeddings = (await ai.run("@cf/baai/bge-base-en-v1.5", {
+        text: overview,
+      })) as { shape: number[]; data: number[][] };
 
-    const vectors = embeddings.data[0];
+      const vectors = embeddings.data[0];
 
-    const SIMILARITY_CUTOFF = 0.5;
+      const SIMILARITY_CUTOFF = 0.5;
 
-    const vectorQuery = await c.env.VECTORIZE_INDEX.query(vectors, {
-      topK: 5,
-      returnMetadata: true,
-    });
+      const vectorQuery = await c.env.VECTORIZE_INDEX.query(vectors, {
+        topK: 5,
+        returnMetadata: true,
+      });
 
-    console.log(JSON.stringify(vectorQuery, null, 2));
+      console.log(JSON.stringify(vectorQuery, null, 2));
 
-    const vecIds = vectorQuery.matches.filter(
-      (vec) => vec.score > SIMILARITY_CUTOFF && vec.id !== id
-    );
-    // .map((vec) => vec.id);
+      const vecIds = vectorQuery.matches.filter(
+        (vec) => vec.score > SIMILARITY_CUTOFF && vec.id !== id
+      );
+      // .map((vec) => vec.id);
 
-    return c.json({
-      vectorQuery: vecIds,
-    });
-  });
+      return c.json({
+        vectorQuery: vecIds as {
+          id: string;
+          score: number;
+          metadata: {
+            title: string;
+            year: number;
+            posterPath: string;
+          };
+        }[],
+      });
+    }
+  );
+
+app.onError((err, c) => {
+  console.error(err);
+  return c.text("Internal Server Error", 500);
+});
 
 export default app;
 

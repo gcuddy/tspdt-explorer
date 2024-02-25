@@ -101,6 +101,8 @@ export const rankings = sqliteTable(
   })
 );
 
+export type Ranking = InferSelectModel<typeof rankings>;
+
 export const rankingsRelations = relations(rankings, ({ one }) => ({
   movie: one(movies, {
     fields: [rankings.movieId],

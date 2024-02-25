@@ -268,7 +268,7 @@ export function Movie({
                 </div>
               </div>
             </div>
-            <div>
+            <div className="pb-6">
               <Card>
                 <span className="text-lg tracking-tight font-semibold text-center">
                   Recommendations
@@ -337,9 +337,9 @@ function Reccomendations({
 
   return (
     <div className="grid grid-cols-4 gap-4 w-full mt-4">
-      {data.vectorQuery.map((movie) => {
+      {data?.vectorQuery?.map((movie) => {
         return (
-          <a
+          <Link
             href={`/movie/${movie.id}`}
             className="flex flex-col gap-2 items-center min-w-0 truncate"
             key={movie.id}
@@ -347,10 +347,10 @@ function Reccomendations({
             <div className="rounded overflow-hidden w-fit">
               <Poster poster_path={movie.metadata.posterPath} />
             </div>
-            <span className="text-sm text-zinc-400 whitespace-normal">
-              {movie.metadata.title}
+            <span className="text-xs text-zinc-400 whitespace-normal line-clamp-2 px-4 text-center">
+              {movie.metadata.title} ({movie.metadata.year})
             </span>
-          </a>
+          </Link>
         );
       })}
     </div>
@@ -377,6 +377,8 @@ function MovieCreditsCard({
   const groupedCrew = useMemo(() => {
     return objectEntries(groupBy(movie.tmdb?.credits.crew ?? [], (c) => c.job));
   }, [movie]);
+
+  console.log({ groupedCrew });
 
   return (
     <Card className={cn("col-span-8 p-6", className)}>
@@ -471,7 +473,10 @@ function MovieCreditsCard({
                 <Dialog.Title>The Crew</Dialog.Title>
                 <div className="flex flex-col gap-x-4 gap-y-1 text-lg font-normal leading-tight text-white max-h-80 overflow-y-auto">
                   {groupedCrew.map(([job, crew]) => (
-                    <div className="flex w-full justify-between min-w-0">
+                    <div
+                      key={job as string}
+                      className="flex w-full justify-between min-w-0"
+                    >
                       <span className="text-sm font-semibold text-zinc-400">
                         {job as string}
                       </span>

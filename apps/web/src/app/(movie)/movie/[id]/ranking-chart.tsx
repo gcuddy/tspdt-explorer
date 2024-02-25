@@ -1,27 +1,12 @@
 "use client";
 
-import { Movie, Ranking } from "@/core/movie/movie.sql";
+import { Movie, Ranking } from "tspdt-api/src/db/schema";
 import { ResponsiveLine } from "@nivo/line";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { range } from "remeda";
 const inter = Inter({ weight: "400", subsets: ["latin"] });
-function positionToColor(position: number, min = 1, max = 20_000) {
-  // get normalized position as expressed as number between 0 and 50
-  console.log({ position, max });
-  const np = (position / max) * 50;
-  console.log({ np });
-  const hue = 17;
-  const saturation = 100;
-  const lightness = 50 + np;
-
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-}
-
-function getItemAtIndex<T>(arr: T[], index: number) {
-  return arr[index % arr.length];
-}
 
 const COLORS = [
   "hsla(40, 50%, 72%, 1.00)",
@@ -50,7 +35,7 @@ export function RankingChart({
     const years = new Set<number>();
     data.forEach((movie) => {
       movie.rankings.forEach((r) => {
-        if (r.year) years.add(r.year);
+        if (r.year && r.ranking) years.add(r.year);
       });
     });
 
@@ -75,7 +60,7 @@ export function RankingChart({
     return data.map((movie) => ({
       id: movie.id,
       data: movie.rankings
-        .filter((r) => r.year)
+        .filter((r) => r.year && r.ranking)
         .map((r) => ({
           x: r.year,
           y: r.ranking,

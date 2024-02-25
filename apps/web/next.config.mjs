@@ -1,4 +1,4 @@
-import million from 'million/compiler';
+import million from "million/compiler";
 import "./src/env.mjs";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -14,9 +14,9 @@ const nextConfig = {
   },
 };
 
-export default million.next(
-  nextConfig, { auto: { rsc: true } }
-);
+export default million.next(nextConfig, {
+  auto: { rsc: true },
+});
 
 // if (process.env.NODE_ENV === "development") {
 //   // we import the utility from the next-dev submodule
