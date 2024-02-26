@@ -28,7 +28,7 @@ async function lookupDirector(
     tmdbId?: number
 ) {
     if (tmdbId) {
-        await tmdb.people.details(tmdbId, ["combined_credits"]);
+        return await tmdb.people.details(tmdbId, ["combined_credits"]);
     }
 
     const { results } = await tmdb.search.people({
@@ -90,7 +90,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 <span className="text-lg tracking-tight font-semibold text-center">
                     Movie Ranking History
                 </span>
-                <div className="h-72 w-full">
+                <div className="h-[600px] w-full">
                     <RankingChart
                         enablePoints={true}
                         data={director.moviesToDirectors
