@@ -62,8 +62,30 @@ const routes = app
     });
     console.log("movie", movie);
     return c.json(movie);
-  })
-  .post(
+})
+.get("/director/:id", async (c) => {
+    const db = createDb(c.env.DB);
+    console.log("getting director with id", c.req.param("id"));
+    const director = await db.query.directors.findFirst({
+        where: eq(movies.id, c.req.param("id")),
+        with: {
+            moviesToDirectors: {
+                with: {
+                    movie: {
+                        with: {
+                            rankings: {
+                                orderBy: asc(rankings.year),
+                            }
+                        }
+                    }
+                },
+            },
+        },
+    });
+    console.log("director", director);
+    return c.json(director);
+})
+.post(
     "/movie",
     zValidator(
       "json",

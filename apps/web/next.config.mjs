@@ -2,20 +2,21 @@ import million from "million/compiler";
 import "./src/env.mjs";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "image.tmdb.org",
-        port: "",
-        // path: "/t/p/w500/*",
-      },
-    ],
-  },
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "image.tmdb.org",
+                port: "",
+                // path: "/t/p/w500/*",
+            },
+        ],
+    },
 };
 
 export default million.next(nextConfig, {
-  auto: { rsc: true },
+    auto: { rsc: true },
+    rsc: true
 });
 
 // if (process.env.NODE_ENV === "development") {

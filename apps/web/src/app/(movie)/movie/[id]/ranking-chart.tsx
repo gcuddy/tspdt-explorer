@@ -27,8 +27,6 @@ export function RankingChart({
 }) {
   const currentYear = new Date().getFullYear();
 
-  console.log("rankingn chart", { data, enablePoints, colors });
-
   const router = useRouter();
 
   const { ticks, minYear, maxYear } = useMemo(() => {

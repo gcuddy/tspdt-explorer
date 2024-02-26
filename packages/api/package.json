@@ -2,7 +2,7 @@
   "name": "tspdt-api",
   "private": "true",
   "scripts": {
-    "dev": "wrangler dev src/index.ts",
+    "dev": "wrangler dev --remote src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts",
     "generate": "drizzle-kit generate:sqlite --schema=./src/db/schema.ts --out=./migrations",
     "migrate": "wrangler d1 migrations apply tspdt",
