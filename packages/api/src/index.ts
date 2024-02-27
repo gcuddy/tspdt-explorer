@@ -64,7 +64,7 @@ const routes = app
         return c.json(movie);
     })
     .get("/director/:id", async (c) => {
-        const db = createDb(c.env.DB);
+        const db = createDb(c.env.DB, { logger: true });
         const director = await db.query.directors.findFirst({
             where: eq(movies.id, c.req.param("id")),
             with: {
