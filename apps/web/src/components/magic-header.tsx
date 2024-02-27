@@ -73,7 +73,7 @@ export function MagicHeader() {
               >
                 <FilmStrip className="w-5 h-5" />
                 <span className="font-bold leading-tight tracking-tight drop-shadow-md">
-                  TSPDT
+                 TSPDT
                 </span>
               </Link>
               {user ? (
