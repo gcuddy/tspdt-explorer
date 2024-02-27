@@ -1,6 +1,6 @@
 import { tmdb } from "@/lib/tmdb";
 import { notFound } from "next/navigation";
-import { Director } from "./director";
+import { Person } from "@/components/person";
 import { cache } from "react";
 import { RankingChart } from "@/app/(movie)/movie/[id]/ranking-chart";
 import { Card } from "@/components/ui/card";
@@ -80,7 +80,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     return (
         <div className="flex flex-col gap-4">
             {/* <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1> */}
-            {data ? <Director director={data} /> : null}
+            {data ? <Person person={data} /> : null}
             {/* <MovieList list={movies} /> */}
 
             <DefaultTableView

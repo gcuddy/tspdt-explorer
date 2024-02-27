@@ -23,7 +23,7 @@ export function DefaultTableView({
     movies,
     showDirectors = false,
 }: {
-    movies: Array<Movie>;
+    movies: Array<Pick<Movie, "id" | "currentRanking" | "title" | "year" | "runtime">>;
     showDirectors?: boolean;
 }) {
     const columnHelper = createColumnHelper<(typeof movies)[number]>();
@@ -168,11 +168,11 @@ export function DefaultTableView({
                     {table.getRowModel().rows.map((row) => (
                         <tr
                             key={row.id}
-                            // className={cn(
-                            //     userMovies.some(
-                            //         (m) => m[1].timeSeen && m[1].movieID === row.original.id
-                            //     ) && "opacity-50 hover:opacity-100 transition"
-                            // )}
+                        // className={cn(
+                        //     userMovies.some(
+                        //         (m) => m[1].timeSeen && m[1].movieID === row.original.id
+                        //     ) && "opacity-50 hover:opacity-100 transition"
+                        // )}
                         >
                             {row.getVisibleCells().map((cell, index, arr) => (
                                 <td
