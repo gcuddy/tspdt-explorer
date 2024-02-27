@@ -94,7 +94,7 @@ export function Movie({
     return (
         <>
             {/* after doing all this, i'm not sure i want to do this header thing... lol */}
-            <Header />
+            {/* <Header /> */}
             <main className="mx-auto max-w-5xl">
                 <div className="flex sticky justify-end gap-3 top-0 bg-zinc-925 z-10 h-16 items-center">
                     {/* TODO: think through this interface, there's to many buttons here */}

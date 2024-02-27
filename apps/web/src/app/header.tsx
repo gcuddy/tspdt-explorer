@@ -58,7 +58,7 @@ export default function Header({
             <Link href="/">
               <h1
                 className={`${
-                  isMovie ? "text-xl" : "text-2xl"
+                  isMovie ? "text-2xl" : "text-2xl"
                 } border bg-zinc-50 leading-tight text-zinc-950 font-semibold tracking-tight drop-shadow-md`}
               >
                 TSPDT
@@ -70,7 +70,7 @@ export default function Header({
           </div>
           <div className="flex items-center">
             {children}
-            <SearchButton mini={!!children || isMovie} />
+            <SearchButton />
           </div>
         </>
       )}

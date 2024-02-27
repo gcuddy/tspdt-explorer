@@ -22,9 +22,11 @@ import React from "react";
 export function DefaultTableView({
     movies,
     showDirectors = false,
+    heading,
 }: {
     movies: Array<Pick<Movie, "id" | "currentRanking" | "title" | "year" | "runtime">>;
     showDirectors?: boolean;
+    heading?: React.ReactNode;
 }) {
     const columnHelper = createColumnHelper<(typeof movies)[number]>();
 
@@ -120,80 +122,85 @@ export function DefaultTableView({
     });
 
     return (
-        <div className="p-2">
-            <table className="rounded-md overflow-hidden w-full">
-                <thead className="bg-zinc-950 px-8">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id} className="">
-                            {headerGroup.headers.map((header, index, arr) => {
-                                const sort = header.column.getIsSorted();
-                                return (
-                                    <th
+        <div className="flex flex-col gap-2">
+            {heading ? (
+                <div className="text-lg tracking-tight font-medium text-center">{heading}</div>
+            ) : null}
+            <div className="px-2 py-1">
+                <table className="rounded-md overflow-hidden w-full">
+                    <thead className="bg-zinc-950 px-8">
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id} className="">
+                                {headerGroup.headers.map((header, index, arr) => {
+                                    const sort = header.column.getIsSorted();
+                                    return (
+                                        <th
+                                            className={cn(
+                                                "text-left relative text-sm font-medium text-zinc-500  h-9",
+                                                index === 0
+                                                    ? "pl-8"
+                                                    : index === arr.length - 1
+                                                        ? "pr-8"
+                                                        : "pl-2 pr-6",
+                                                header.column.getCanSort()
+                                                    ? "cursor-pointer hover:text-zinc-400 select-none transition"
+                                                    : undefined
+                                            )}
+                                            key={header.id}
+                                            onClick={header.column.getToggleSortingHandler()}
+                                        >
+                                            <span
+                                                className={cn(
+                                                    "w-fit relative flex h-full items-center gap-0.5",
+                                                    sort &&
+                                                    "before:absolute before:w-full before:-top-0 before:h-px before:bg-sky-400 before:z-10"
+                                                )}
+                                            >
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                                {sort && (sort === "asc" ? <ArrowUp /> : <ArrowDown />)}
+                                            </span>
+                                        </th>
+                                    );
+                                })}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody className="bg-zinc-925 px-8">
+                        {table.getRowModel().rows.map((row) => (
+                            <tr
+                                key={row.id}
+                            // className={cn(
+                            //     userMovies.some(
+                            //         (m) => m[1].timeSeen && m[1].movieID === row.original.id
+                            //     ) && "opacity-50 hover:opacity-100 transition"
+                            // )}
+                            >
+                                {row.getVisibleCells().map((cell, index, arr) => (
+                                    <td
+                                        key={cell.id}
                                         className={cn(
-                                            "text-left relative text-sm font-medium text-zinc-500  h-9",
+                                            "h-10 text-sm text-zinc-300 hover:text-zinc-50 truncate whitespace-nowrap tabular-nums",
+
                                             index === 0
                                                 ? "pl-8"
                                                 : index === arr.length - 1
                                                     ? "pr-8"
-                                                    : "pl-2 pr-6",
-                                            header.column.getCanSort()
-                                                ? "cursor-pointer hover:text-zinc-400 select-none transition"
-                                                : undefined
+                                                    : "pl-2 pr-6"
                                         )}
-                                        key={header.id}
-                                        onClick={header.column.getToggleSortingHandler()}
                                     >
-                                        <span
-                                            className={cn(
-                                                "w-fit relative flex h-full items-center gap-0.5",
-                                                sort &&
-                                                "before:absolute before:w-full before:-top-0 before:h-px before:bg-sky-400 before:z-10"
-                                            )}
-                                        >
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                            {sort && (sort === "asc" ? <ArrowUp /> : <ArrowDown />)}
-                                        </span>
-                                    </th>
-                                );
-                            })}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody className="bg-zinc-925 px-8">
-                    {table.getRowModel().rows.map((row) => (
-                        <tr
-                            key={row.id}
-                        // className={cn(
-                        //     userMovies.some(
-                        //         (m) => m[1].timeSeen && m[1].movieID === row.original.id
-                        //     ) && "opacity-50 hover:opacity-100 transition"
-                        // )}
-                        >
-                            {row.getVisibleCells().map((cell, index, arr) => (
-                                <td
-                                    key={cell.id}
-                                    className={cn(
-                                        "h-10 text-sm text-zinc-300 hover:text-zinc-50 truncate whitespace-nowrap tabular-nums",
-
-                                        index === 0
-                                            ? "pl-8"
-                                            : index === arr.length - 1
-                                                ? "pr-8"
-                                                : "pl-2 pr-6"
-                                    )}
-                                >
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
