@@ -296,18 +296,22 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
     });
 
     useEffect(() => {
-        if (directors.data) control.register("directors", async () => {
-            return directors.data.map((director) =>
-                NavigationAction({
-                    title: director.name ?? "Unknown",
-                    category: "Directors",
-                    path: `/director/${director.id}`,
-                    disabled: false,
-                    router,
-                    pathname,
-                })
-            );
-        });
+        console.log("registering directors and movies", JSON.stringify({ directors, movies }));
+        if (directors.data) {
+            console.log("mapping directors", directors.data);
+            control.register("directors", async () => {
+                return directors.data.map((director) =>
+                    NavigationAction({
+                        title: director.name ?? "Unknown",
+                        category: "Directors",
+                        path: `/director/${director.id}`,
+                        disabled: false,
+                        router,
+                        pathname,
+                    })
+                );
+            });
+        }
 
         if (movies.data) control.register("movies", async () => {
             return movies.data.map((movie) =>
@@ -321,11 +325,13 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
                 })
             );
         });
+        console.log(control);
     }, [directors, movies]);
 
 
     console.log({ movies });
 
+    console.log("control", control);
 
     // get count of all actions
     const mappedActions = useMemo(() => {
