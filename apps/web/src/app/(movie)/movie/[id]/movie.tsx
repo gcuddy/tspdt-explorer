@@ -8,7 +8,6 @@ import { MovieHeader } from "./movie-header";
 import { getMovie } from "./page";
 import { RankingChart } from "./ranking-chart";
 
-import Header from "@/app/header";
 import { useReplicache } from "@/app/replicache";
 import { Button } from "@/components/ui/button";
 import * as Dialog from "@/components/ui/dialog";
@@ -25,13 +24,13 @@ import {
     Play,
     PlusCircle,
 } from "@phosphor-icons/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { groupBy } from "remeda";
 import { useSubscribe } from "replicache-react";
 import { useQuery } from "@tanstack/react-query";
 import { getRecommendations } from "@/server/data-layer";
+import { Poster } from "@/components/poster";
 // import * as Dialog from "@radix-ui/react-dialog";
 
 export function Movie({
@@ -119,7 +118,7 @@ export function Movie({
                                             title="YouTube video player"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             style={{border: "0px"}}
-                                        />
+                                        />  
                                     </div>
                                 </Dialog.Content>
                             </Dialog.Portal>
@@ -523,25 +522,6 @@ function MovieCreditsCard({
     );
 }
 
-function Poster({
-    poster_path,
-    width,
-}: {
-    poster_path: string;
-    width?: number;
-}) {
-    return (
-        <Image
-            src={`https://image.tmdb.org/t/p/w500${poster_path}`}
-            alt=""
-            className="ring-1 ring-zinc-900"
-            width={width ?? 150}
-            height={(width ?? 150) * 1.5}
-        //   height={288}
-        //   width={288 / (16 / 9)}
-        />
-    );
-}
 
 function ActionBar({ movie }: { movie: { id: string } }) {
     const replicache = useReplicache();

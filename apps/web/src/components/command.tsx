@@ -16,7 +16,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowElbowDownRight } from "@phosphor-icons/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
-import { getMovies, searchDirector } from "@/server/data-layer";
+import { getMovies } from "@/server/data-layer";
+import { Poster } from "./poster";
 
 type Action = {
     icon: (props: any) => React.ReactNode;
@@ -206,10 +207,6 @@ function useControl() {
             filter(() => {
                 return true;
             }),
-            filter(() => {
-                // console.log("action", action);
-                return true;
-            }),
             filter((action) => !action.disabled),
             groupBy((a) => a.category)
         );
@@ -247,16 +244,6 @@ function useControl() {
         // hide
     };
 }
-function useDirectors(_search: string = "") {
-    return useQuery(
-        {
-            queryKey: ["directors", _search],
-            queryFn: async () => {
-                return searchDirector(_search);
-            },
-        }
-    )
-}
 
 export function useMovies() {
     return useQuery(
@@ -270,11 +257,30 @@ export function useMovies() {
 }
 export const CommandBarContext = createContext<Control | null>(null);
 
+
 export function CommandBar({ children }: { children: React.ReactNode }) {
+
+    const { data } = useMovies();
+
+
+
+    return (
+        <CommandBarInner movies={data ?? []}>
+            {children}
+        </CommandBarInner>
+    );
+}
+
+export function CommandBarInner({ children, movies }:
+    {
+        children: React.ReactNode,
+        movies: Awaited<ReturnType<typeof getMovies>>,
+    }) {
+
+
+    console.log("movies", movies);
     const control = useControl();
 
-    const directors = useDirectors();
-    const movies = useMovies();
 
     console.log("rendering command bar");
     let scrollingTimeout: number | null = null;
@@ -295,39 +301,20 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
         ];
     });
 
-    useEffect(() => {
-        console.log("registering directors and movies", JSON.stringify({ directors, movies }));
-        if (directors.data) {
-            console.log("mapping directors", directors.data);
-            control.register("directors", async () => {
-                return directors.data.map((director) =>
-                    NavigationAction({
-                        title: director.name ?? "Unknown",
-                        category: "Directors",
-                        path: `/director/${director.id}`,
-                        disabled: false,
-                        router,
-                        pathname,
-                    })
-                );
-            });
-        }
 
-        if (movies.data) control.register("movies", async () => {
-            return movies.data.map((movie) =>
-                NavigationAction({
-                    title: `${movie.title} (${movie.year})` ?? "Unknown",
-                    category: "Movies",
-                    path: `/movie/${movie.id}`,
-                    disabled: false,
-                    router,
-                    pathname,
-                })
-            );
-        });
-        console.log(control);
-    }, [directors, movies]);
-
+    control.register("movies", async (_input, _global) => {
+        return movies.map((movie) => {
+            return NavigationAction({
+                title: movie.title,
+                category: "Movies",
+                path: `/movie/${movie.id}`,
+                disabled: false,
+                router,
+                pathname,
+                icon: () => movie.tmdbPosterPath ? <Poster tWidth={92} width={48} poster_path={movie.tmdbPosterPath} /> : null,
+            })
+        })
+    })
 
     console.log({ movies });
 
@@ -435,7 +422,7 @@ export function CommandBar({ children }: { children: React.ReactNode }) {
                                                     control.setActive(target, true);
                                                 }, 0);
                                             }}
-                                            className="flex gap-1 py-0 px-3 h-12 items-center rounded text-base data-[active=true]:bg-white/5"
+                                            className="flex gap-2 py-0 px-3 h-12 items-center rounded text-base data-[active=true]:bg-white/5"
                                         >
                                             <div className="grow-0 shrink-0 basis-auto w-4 h-4">
                                                 <action.icon />
