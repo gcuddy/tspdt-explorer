@@ -21,9 +21,11 @@ import { Poster } from "./poster";
 
 type Action = {
     icon: (props: any) => React.ReactNode;
+    render?: () => React.ReactNode;
     disabled?: boolean;
     title: string;
     category?: string;
+    keywords?: string[];
     hotkeys?: string[];
     run: (control: Control) => void | Promise<void>;
 };
@@ -201,13 +203,10 @@ function useControl() {
             actions || [],
             filter(
                 (action) =>
-                    action.title.toLowerCase().includes(input.toLowerCase()) ||
-                    Boolean(action.category?.toLowerCase().includes(input.toLowerCase()))
+                    !action.disabled && (action.title.toLowerCase().includes(input.toLowerCase()) ||
+                        Boolean(action.category?.toLowerCase().includes(input.toLowerCase())) ||
+                        Boolean(action.keywords?.some((k) => k.toLowerCase().includes(input.toLowerCase()))))
             ),
-            filter(() => {
-                return true;
-            }),
-            filter((action) => !action.disabled),
             groupBy((a) => a.category)
         );
         console.log("grouped", grouped);
@@ -304,9 +303,12 @@ export function CommandBarInner({ children, movies }:
 
     control.register("movies", async (_input, _global) => {
         return movies.map((movie) => {
+            const directors = movie.moviesToDirectors.map((m) => m.director?.name).filter(Boolean);
             return NavigationAction({
                 title: movie.title,
+                render: () => <div className="flex items-center"><span>{`${movie.title} (${movie.year})`} </span><span className="text-zinc-500 text-xs truncate ml-2">{`${directors.join(", ")}`}</span></div>,
                 category: "Movies",
+                keywords: directors,
                 path: `/movie/${movie.id}`,
                 disabled: false,
                 router,
@@ -427,9 +429,13 @@ export function CommandBarInner({ children, movies }:
                                             <div className="grow-0 shrink-0 basis-auto w-4 h-4">
                                                 <action.icon />
                                             </div>
-                                            <span className="truncate text-zinc-50/80 leading-normal">
-                                                {action.title}
-                                            </span>
+                                            {action.render ? (
+                                                action.render()
+                                            ) : (
+                                                <span className="truncate text-zinc-50/80 leading-normal">
+                                                    {action.title}
+                                                </span>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -469,14 +475,18 @@ export function NavigationAction(input: {
     title: string;
     category: string;
     icon?: (props: any) => React.ReactNode;
+    render?: () => React.ReactNode;
+    keywords?: string[];
     disabled?: boolean;
     router: ReturnType<typeof useRouter>;
     pathname: string;
 }): Action {
     return {
         icon: input.icon || ArrowElbowDownRight,
+        render: input.render,
         title: input.title,
         category: input.category,
+        keywords: input.keywords,
         disabled:
             input.disabled ||
             (input.path.startsWith("/") &&
