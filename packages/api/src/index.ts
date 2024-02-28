@@ -5,8 +5,8 @@ import { z } from "zod";
 import { transformMovieIntoTextEmbedding } from "./utils";
 import { MovieEmbeddingSchema } from "./schemas";
 import { createDb } from "./db/client";
-import { asc, eq, inArray, desc } from "drizzle-orm";
-import { movies, rankings } from "./db/schema";
+import { asc, eq, inArray, like } from "drizzle-orm";
+import { directors, movies, rankings } from "./db/schema";
 import { cache } from "hono/cache";
 
 type Bindings = {
@@ -29,6 +29,7 @@ app.get(
 
 const routes = app
     .get("/movies/list", async (c) => {
+        // TODO: add cursor pagination
         const db = createDb(c.env.DB);
         return c.json(
             await db.query.movies.findMany({
@@ -62,6 +63,14 @@ const routes = app
         });
         console.log("movie", movie);
         return c.json(movie);
+    })
+    .get("/director/search", zValidator("query", z.object({ name: z.string() })), async (c) => {
+        const db = createDb(c.env.DB);
+        const { name } = c.req.valid("query");
+        // TODO: add search to drizzle-orm
+
+        const dirs = await db.select().from(directors).where(like(directors.name, `%${name}%`));
+        return c.json(dirs);
     })
     .get("/director/:id", async (c) => {
         const db = createDb(c.env.DB, { logger: true });
