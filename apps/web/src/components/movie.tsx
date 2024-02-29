@@ -1,11 +1,10 @@
-"use client";
-import { Directors } from "@/app/(movie)/movie/[id]/movie-header";
 import { Director, Movie } from "@/core/movie/movie.sql";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Instrument_Serif } from "next/font/google";
 import { Button } from "./ui/button";
+import { PeopleList, Person } from "./people-list";
 
 const instrument = Instrument_Serif({
     weight: "400",
@@ -39,7 +38,7 @@ export const MovieListItem = ({
                 </div>
                 {!!director && (
                     <div className="flex truncate flex-1">
-                        <Directors directors={director} />
+                        <PeopleList people={director.filter(d => d.name) as Person[]} />
                     </div>
                 )}
                 <div className="opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition">

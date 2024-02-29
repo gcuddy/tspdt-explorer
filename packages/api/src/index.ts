@@ -6,8 +6,8 @@ import { z } from "zod";
 import { transformMovieIntoTextEmbedding } from "./utils";
 import { MovieEmbeddingSchema } from "./schemas";
 import { createDb } from "./db/client";
-import { and, asc, desc, eq, inArray, like } from "drizzle-orm";
-import { directors, movies, rankings } from "./db/schema";
+import { and, asc, desc, eq, getTableColumns, inArray, like, sql } from "drizzle-orm";
+import { Movie, directors, movies, rankings } from "./db/schema";
 import { cache } from "hono/cache";
 
 type Bindings = {
@@ -160,6 +160,31 @@ const routes = app
         });
 
         return c.json(sorted);
+    })
+    .get("/movies/genre/:genre", zValidator("param", z.object({ genre: z.string() })), async (c) => {
+        const db = createDb(c.env.DB, { logger: true });
+        const genre = c.req.valid("param").genre;
+
+        const cols = getTableColumns(movies);
+        // lol this feels silly
+
+        let from: string[] = [];
+
+        const transformCamelToSnake = (str: string) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+        for (const col in cols) {
+            from.push(`m.${transformCamelToSnake(col)} as ${col}`);
+        }
+
+        const statement = sql`select ${sql.raw(from.join(", "))} from tspdt_movies m, json_each(m.genre) g where g.value = ${genre}`
+        const { results } = await db.run(statement);
+
+        console.log('results', results);
+
+        // const rw = await db.select().from<typeof movies>(sql`${movies} m, json_each(m.genre) g` as any).where(sql`g.value = ${genre}`);
+        // const rw = await db.select().from<typeof movies>(sql`${movies} m, json_each(m.genre) g` as any).innerJoin(moviesToDirectors, eq(movies.id, moviesToDirectors.movieId)).innerJoin(directors, eq(directors.id, moviesToDirectors.directorId)).where(sql`g.value = ${genre}`);
+
+        return c.json(results as Movie[]);
     })
     .post(
         "/movie",

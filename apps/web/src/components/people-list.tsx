@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-type Person = {
+export type Person = {
     id: string;
     name: string;
 };
