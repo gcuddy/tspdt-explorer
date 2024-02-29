@@ -19,7 +19,7 @@ export default async function Page({ params }: { params: { year: string } }) {
     console.dir(movies, { depth: null });
     return (
         <Stack className="gap-4">
-            <h2 className="text-5xl font-bold tracking-tighter">{year}</h2>
+            <h1 className="text-2xl leading-none text-white">Movies from {year}</h1>
             <ul className="flex flex-col gap-1">
                 {movies.map((movie) => (
                     <li key={movie.id} className="">

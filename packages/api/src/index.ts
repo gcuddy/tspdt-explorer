@@ -3,7 +3,7 @@ import { chunk } from "remeda";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { transformMovieIntoTextEmbedding } from "./utils";
+import { transformCamelToSnake, transformMovieIntoTextEmbedding } from "./utils";
 import { MovieEmbeddingSchema } from "./schemas";
 import { createDb } from "./db/client";
 import { and, asc, desc, eq, getTableColumns, inArray, like, sql } from "drizzle-orm";
@@ -170,8 +170,6 @@ const routes = app
 
         let from: string[] = [];
 
-        const transformCamelToSnake = (str: string) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
         for (const col in cols) {
             from.push(`m.${transformCamelToSnake(col)} as ${col}`);
         }
@@ -183,6 +181,22 @@ const routes = app
 
         // const rw = await db.select().from<typeof movies>(sql`${movies} m, json_each(m.genre) g` as any).where(sql`g.value = ${genre}`);
         // const rw = await db.select().from<typeof movies>(sql`${movies} m, json_each(m.genre) g` as any).innerJoin(moviesToDirectors, eq(movies.id, moviesToDirectors.movieId)).innerJoin(directors, eq(directors.id, moviesToDirectors.directorId)).where(sql`g.value = ${genre}`);
+
+        return c.json(results as Movie[]);
+    })
+    .get("/movies/country/:country", zValidator("param", z.object({ country: z.string() })), async (c) => {
+        const db = createDb(c.env.DB, { logger: true });
+        const country = c.req.valid("param").country;
+
+        const cols = getTableColumns(movies);
+        // lol this feels silly
+        let from: string[] = [];
+        for (const col in cols) {
+            from.push(`m.${transformCamelToSnake(col)} as ${col}`);
+        }
+
+        const statement = sql`select ${sql.raw(from.join(", "))} from tspdt_movies m, json_each(m.country) c where c.value = ${country}`
+        const { results } = await db.run(statement);
 
         return c.json(results as Movie[]);
     })

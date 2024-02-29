@@ -24,16 +24,17 @@ function Title({ title }: { title: string }) {
 function ProductionCountries({
     productionCountries,
 }: {
-    productionCountries: {
-        iso_3166_1: string;
-        name: string;
-    }[];
+    productionCountries: string[]
+    //  productionCountries: {
+    //      iso_3166_1: string;
+    //      name: string;
+    //  }[];
 }) {
     return productionCountries.map((c, i) => {
         return (
-            <span className="" key={c.iso_3166_1}>
-                <Link href={`/country/${c.iso_3166_1}`}>
-                    {c.name === "United States of America" ? "United States" : c.name}
+            <span className="" key={i}>
+                <Link href={`/country/${c}`}>
+                    {c}
                     {(productionCountries?.length ?? 0) > 1 &&
                         i !== (productionCountries?.length ?? 0) - 1
                         ? ", "
@@ -42,16 +43,6 @@ function ProductionCountries({
             </span>
         );
     });
-    // <div className="flex gap-2 items-center">
-    //   {productionCountries.map((c, i) => {
-    //     return (
-    //       <span className="text-sm text-zinc-400" key={c.id}>
-    //         <Link href={`/company/${c.id}`}>{c.name}</Link>
-    //         {i !== productionCountries.length - 1 && <Dot />}
-    //       </span>
-    //     );
-    //   })}
-    // </div>
 }
 
 function Genres({ genres }: { genres: string[] }) {
@@ -76,7 +67,7 @@ function MovieHeaderDetails({ movie }: { movie: Movie }) {
             <div className="flex gap-2 items-center flex-wrap justify-center">
                 <span>
                     <ProductionCountries
-                        productionCountries={movie.tmdb?.production_countries ?? []}
+                        productionCountries={movie.country ?? []}
                     />
                     <Link href={`/year/${movie.year}`}>{movie.year}</Link>
                 </span>

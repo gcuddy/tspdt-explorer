@@ -1,46 +1,49 @@
 import { MovieEmbedding } from "./schemas";
 
+
+export const transformCamelToSnake = (str: string) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
 export function transformMovieIntoTextEmbedding(movie: MovieEmbedding): string {
     let output = `Title:
 ${movie.title}`;
 
     if (movie.director) {
-      output += `Director:
+        output += `Director:
 ${movie.director}`;
     }
 
     if (movie.overview) {
-      output += `Overview:
+        output += `Overview:
 ${movie.overview}`;
     }
 
     if (movie.cast) {
-      output += `Cast:
+        output += `Cast:
 ${movie.cast}`;
     }
 
     if (movie.year) {
-      output += `Year:
+        output += `Year:
 ${movie.year}`;
     }
 
     if (movie.genre) {
-      output += `Genres:
+        output += `Genres:
 ${movie.genre}`;
     }
 
     if (movie.country) {
-      output += `Country:
+        output += `Country:
 ${movie.country}`;
     }
 
     if (movie.color) {
-      output += `Color:
+        output += `Color:
 ${movie.color}`;
     }
 
     if (movie.budget) {
-    output += `Budget:
+        output += `Budget:
 ${movie.budget}`;
     }
 
