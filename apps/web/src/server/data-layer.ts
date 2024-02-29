@@ -33,6 +33,17 @@ export async function searchDirector(query: string) {
     return data;
 }
 
+export async function getMoviesFromYear(year: number) {
+    const data = await client.movies.year[":year"].$get({
+        param: {
+            year: year.toString(),
+        },
+    })
+        .then((res) => res.json());
+
+    return data;
+}
+
 
 export async function getMovies() {
     const res = await client.movies.list.$get();

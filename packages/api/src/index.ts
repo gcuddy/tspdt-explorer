@@ -1,11 +1,12 @@
 import { Ai } from "@cloudflare/ai";
+import { chunk } from "remeda";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { transformMovieIntoTextEmbedding } from "./utils";
 import { MovieEmbeddingSchema } from "./schemas";
 import { createDb } from "./db/client";
-import { asc, eq, inArray, like } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, like } from "drizzle-orm";
 import { directors, movies, rankings } from "./db/schema";
 import { cache } from "hono/cache";
 
@@ -97,18 +98,68 @@ const routes = app
 
 
         const { ids } = c.req.valid("param");
+        console.log('id count', ids.split(",").length);
 
+        const chunks = chunk(ids.split(","), 100);
 
+        const chunked = await Promise.all(
+            chunks.map(async (chunk) => {
+                return await db.query.movies.findMany({
+                    where: inArray(
+                        movies.tmdbId,
+                        chunk.map((id) => parseInt(id))
+                    ),
+                });
 
-        const tmdbMovies = await db.query.movies.findMany({
-            where: inArray(
-                movies.tmdbId,
-                ids.split(",").map((id) => parseInt(id))
-            ),
-        });
+            })
+        );
 
+        const tmdbMovies = chunked.flat();
 
         return c.json(tmdbMovies);
+    })
+    .get("/movies/year/:year", zValidator("param", z.object({ year: z.string().regex(/\d{4}/) })), async (c) => {
+        const db = createDb(c.env.DB);
+        const year = parseInt(c.req.valid("param").year);
+        console.time("getMovies")
+        const moviesForYear = await db.query.movies.findMany({
+            where: and(eq(movies.year, year)),
+            with: {
+                moviesToDirectors: {
+                    with: { director: true },
+                },
+                rankings: {
+                    orderBy: desc(rankings.year),
+                    limit: 1,
+                },
+            },
+        });
+        console.timeEnd("getMovies");
+
+        const sorted = moviesForYear.sort((a, b) => {
+            const aRanking = a.rankings[0].ranking;
+            const bRanking = b.rankings[0].ranking;
+
+            if (!aRanking) {
+                return 1;
+            }
+
+            if (!bRanking) {
+                return -1;
+            }
+
+            if (aRanking < bRanking) {
+                return -1;
+            }
+
+            if (aRanking > bRanking) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        return c.json(sorted);
     })
     .post(
         "/movie",
