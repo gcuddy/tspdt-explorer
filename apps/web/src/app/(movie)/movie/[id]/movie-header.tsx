@@ -1,11 +1,10 @@
-import { Director } from "@/core/movie/movie.sql";
 import { getMovie } from "./page";
 
 import { Instrument_Serif } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import { Dot, Star } from "@phosphor-icons/react";
 import { Tag } from "@/components/ui/tag";
+import { PeopleList } from "@/components/people-list";
 type Movie = Awaited<ReturnType<typeof getMovie>>;
 
 type Props = {
@@ -83,10 +82,11 @@ function MovieHeaderDetails({ movie }: { movie: Movie }) {
                 </span>
                 <span>·</span>
                 <p className="text-zinc-400">
-                    <Directors
-                        directors={movie.moviesToDirectors
+                    <PeopleList
+                        people={movie.moviesToDirectors
                             .map(({ director }) => director)
                             .filter(Boolean)}
+                        prefix="Directed by"
                     />
                 </p>
             </div>
@@ -148,50 +148,3 @@ export function MovieHeader({ movie }: Props) {
     );
 }
 
-function DirectorLink({
-    director,
-}: {
-    director: Pick<Director, "id" | "name">;
-}) {
-    return (
-        <Link href={`/director/${director.id}`} className="text-zinc-300">
-            {director.name}
-        </Link>
-    );
-}
-
-export function Directors({
-    directors,
-}: {
-    directors: Array<Pick<Director, "id" | "name">>;
-}) {
-    if (directors.length === 1) {
-        return (
-            <span className="truncate">
-                Directed by <DirectorLink director={directors[0]} />
-            </span>
-        );
-    }
-
-    return (
-        <span className="truncate">
-            Directed by{" "}
-            {directors.map((director, index) => {
-                if (index === directors.length - 1) {
-                    return (
-                        <span key={director.id}>
-                            and <DirectorLink director={director} />
-                        </span>
-                    );
-                }
-
-                return (
-                    <>
-                        <DirectorLink key={director.id} director={director} />
-                        {", "}
-                    </>
-                );
-            })}
-        </span>
-    );
-}

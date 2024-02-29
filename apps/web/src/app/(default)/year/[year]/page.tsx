@@ -1,8 +1,8 @@
 "use server";
 
+import { PeopleList } from "@/components/people-list";
 import { Stack } from "@/components/ui/layout";
 import { Tag } from "@/components/ui/tag";
-import { PeopleList } from "@/components/utility";
 import { getMoviesFromYear } from "@/server/data-layer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -16,6 +16,7 @@ export default async function Page({ params }: { params: { year: string } }) {
 
     const movies = await getMoviesFromYear(year);
 
+    console.dir(movies, { depth: null });
     return (
         <Stack className="gap-4">
             <h2 className="text-5xl font-bold tracking-tighter">{year}</h2>
@@ -29,11 +30,8 @@ export default async function Page({ params }: { params: { year: string } }) {
                         <span className="italic">
                             (
                             <PeopleList
-                                items={movie.moviesToDirectors.map((md) => md.director).filter(Boolean)}
+                                people={movie.moviesToDirectors.map((md) => md.director).filter(Boolean)}
                                 prefix=""
-                                render={(director) => (
-                                    <Link href={`/director/${director.id}`}>{director.name}</Link>
-                                )}
                             />
                             )
                         </span>

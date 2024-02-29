@@ -8,6 +8,13 @@
       "when": 1708586837363,
       "tag": "0000_yielding_jubilee",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1709235380223,
+      "tag": "0001_plain_the_enforcers",
+      "breakpoints": true
     }
   ]
 }
