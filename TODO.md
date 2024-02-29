@@ -1,1 +1,5 @@
-- [ ] Transfer all endpoints over to new API
+- [x] Transfer all endpoints over to new API
+- [ ] Unify genre/year pages with views
+- [ ] List view and table views across all views
+- [ ] Person page should have unified actor/director or at least link to work as actor
+- [ ] Do the 21st century canon next https://theyshootpictures.com/21stcentury_startinglist_table.php
