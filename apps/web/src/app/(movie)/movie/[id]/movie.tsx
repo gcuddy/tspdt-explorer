@@ -44,12 +44,17 @@ export function Movie({
     const currentRanking = rawRankings.at(-1);
     const lowestRanking = Math.max(...rawRankings);
     const highestRanking = Math.min(...rawRankings);
+
     const previousYearDelta = useMemo(() => {
         const current = movie.rankings.at(-1)?.ranking;
         const previous = movie.rankings.at(-2)?.ranking;
         if (!current || !previous) return undefined;
         return current - previous;
     }, [movie.rankings]);
+
+    const trailer = useMemo(() => {
+        return movie.tmdb?.videos.results.find((v) => v.type === "Trailer");
+    }, [movie.tmdb?.videos.results]);
 
 
     bar.register("movie", async () => {
@@ -92,12 +97,9 @@ export function Movie({
     //
     return (
         <>
-            {/* after doing all this, i'm not sure i want to do this header thing... lol */}
-            {/* <Header /> */}
             <main className="mx-auto max-w-5xl">
                 <div className="flex sticky justify-end gap-3 top-0 bg-zinc-925 z-10 h-16 items-center">
-                    {/* TODO: think through this interface, there's to many buttons here */}
-                    {movie.tmdb?.videos.results?.length ? (
+                    {!!trailer ? (
                         <Dialog.Root>
                             <Dialog.Trigger asChild>
                                 <Button variant="ghost">
@@ -114,11 +116,11 @@ export function Movie({
                                         <iframe
                                             width="560"
                                             height="315"
-                                            src={`https://www.youtube.com/embed/${movie.tmdb?.videos.results[0].key}?autoplay=1&rel=0&controls=1&showinfo=0&modestbranding=1`}
+                                            src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&rel=0&controls=1&showinfo=0&modestbranding=1`}
                                             title="YouTube video player"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            style={{border: "0px"}}
-                                        />  
+                                            style={{ border: "0px" }}
+                                        />
                                     </div>
                                 </Dialog.Content>
                             </Dialog.Portal>

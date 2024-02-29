@@ -1,5 +1,4 @@
 import { List } from "@/app/list-items";
-import { tmdbGenres } from "@/data/tmdb-data";
 import { client } from "@/lib/hono";
 
 async function getMoviesForGenre(genre: string) {
@@ -15,12 +14,12 @@ export default async function Page({
 }: {
     params: { id: string };
 }) {
+
     const movies = await getMoviesForGenre(id);
     console.log("got movies", movies);
-    const genre = tmdbGenres[id as unknown as keyof typeof tmdbGenres];
     return (
-        <div>
-            <h1>{genre}</h1>
+        <div className="flex flex-col gap-4">
+            <h1 className="text-2xl leading-none text-white">{decodeURIComponent(id)} Movies</h1>
             <List movies={movies} />
         </div>
     );
