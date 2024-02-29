@@ -11,6 +11,7 @@ export default function ListItem({
     };
 }) {
     console.log("movie", movie);
+    // this is insanity, and a reason to not have drizzle transform to camel case
     return (
         <li className="flex items-center gap-1 relative">
             <span className="text-gray-500 text-sm absolute tabular-nums -left-2 -translate-x-full">

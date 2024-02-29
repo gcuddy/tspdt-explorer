@@ -72,8 +72,8 @@ function Genres({ genres }: { genres: string[] }) {
 // million-ignore
 function MovieHeaderDetails({ movie }: { movie: Movie }) {
     return (
-        <div className="flex gap-2 flex-col text-zinc-400 items-center">
-            <div className="flex gap-2 items-center">
+        <div className="flex gap-2 flex-col text-zinc-400 items-center ">
+            <div className="flex gap-2 items-center flex-wrap justify-center">
                 <span>
                     <ProductionCountries
                         productionCountries={movie.tmdb?.production_countries ?? []}
@@ -95,6 +95,10 @@ function MovieHeaderDetails({ movie }: { movie: Movie }) {
                 <span>·</span>
                 <div>
                     <Genres genres={movie.genre ?? []} />
+                </div>
+                <span>·</span>
+                <div>
+                    {movie.color === "col" ? "Color" : movie.color === "col-bw" ? "Color and Black & White" : "Black & White"}
                 </div>
             </div>
         </div>
