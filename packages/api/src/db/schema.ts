@@ -7,6 +7,7 @@ import {
     index,
 } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-zod";
+import { timestamps } from "./sql-utils";
 
 const sqliteTable = sqliteTableCreator((name) => `tspdt_${name}`);
 
@@ -111,3 +112,47 @@ export const rankingsRelations = relations(rankings, ({ one }) => ({
         references: [movies.id],
     }),
 }));
+
+
+export const users = sqliteTable("user", {
+    ...timestamps,
+    id: text("id").notNull().primaryKey(),
+    username: text("username"),
+    email: text("email").unique(),
+    discordId: text("discord_id").unique(),
+    emailVerified: integer("email_verified", {
+        mode: "boolean",
+    }),
+});
+
+export type User = InferSelectModel<typeof users>;
+
+export const sessions = sqliteTable("session", {
+    id: text("id").notNull().primaryKey(),
+    userId: text("user_id")
+        .notNull()
+        .references(() => users.id),
+    expiresAt: integer("expires_at").notNull()
+});
+
+
+export const userMovie = sqliteTable(
+    "user_movie",
+    {
+        ...timestamps,
+        userId: text("user_id").notNull().references(() => users.id),
+        movieId: text("movie_id").notNull().references(() => movies.id),
+        posterPath: text("poster_path"),
+        //   could get more complex with activity, but we'll keep it like this for now
+        timeSeen: integer("time_seen", { mode: "timestamp" }),
+        timeFavorited: integer("time_favorited", { mode: "timestamp" }),
+        //   to watchlist...
+        timeAdded: integer("time_added", { mode: "timestamp" }),
+    },
+    (table) => ({
+        primary: primaryKey({
+            columns: [table.userId, table.movieId],
+        }),
+    })
+);
+
