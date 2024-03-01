@@ -73,8 +73,8 @@ export default function Me({ user }: Pick<DeepNonNullable<Awaited<ReturnType<typ
                 You have watched {tspdtWatchedPercent}% percent of the TSPDT Top 1000
                 movies.
             </span>
-            <div className="flex flex-col gap-4 pt-8">
-                <Card className="items-start p-8 gap-5">
+            <div className="flex flex-col gap-8 pt-8">
+                <Card className="items-start p-8 gap-5 h-72 ">
                     <div className="flex justify-between w-full">
                         <div className="flex flex-col">
                             <span className="text-lg leading-tight text-white tracking-tight font-semibold">
@@ -91,8 +91,8 @@ export default function Me({ user }: Pick<DeepNonNullable<Awaited<ReturnType<typ
                             </Button>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        {lastTenMoviesSeen.map((userMovie) => (
+                    <div className="flex gap-2 grow w-full">
+                        {lastTenMoviesSeen.length ? lastTenMoviesSeen.map((userMovie) => (
                             <div key={userMovie.id} className="rounded ring-1 ring-white/5">
                                 <Image
                                     src={`https://image.tmdb.org/t/p/w342${userMovie.movie?.posterPath}`}
@@ -103,22 +103,45 @@ export default function Me({ user }: Pick<DeepNonNullable<Awaited<ReturnType<typ
                                 />
                                 {/* <div>{userMovie.movie?.title}</div> */}
                             </div>
-                        ))}
+                        )) : (
+                            <div className="grid place-content-center w-full h-full">
+                                <span className="text-sm text-zinc-500">
+                                    Movies you mark as seen will appear here
+                                </span></div>)}
                     </div>
                 </Card>
-                <span>
-                    You have {watchListMovies.length ?? 0} movies on your watch list
-                </span>
-                <Card>
-                    {lastTenMoviesAdded.map((userMovie) => (
-                        <Link
-                            href={`/movie/${userMovie.movie?.id}`}
-                            key={userMovie.movie?.id}
-                        >
-                            <div>{userMovie.movie?.title}</div>
-                        </Link>
-                    ))}
-                </Card>
+                <div className="flex flex-col gap-4">
+                    <Card className="h-72 p-8">
+                        <div className="flex justify-between w-full">
+                            <div className="flex flex-col">
+                                <span className="text-lg leading-tight text-white tracking-tight font-semibold">
+                                    Watchlist
+                                </span>
+                                <span className="text-sm font-normal leading-tight text-zinc-400">
+                                    You have {" "}
+                                    {watchListMovies.length ?? 0} movies on your watchlist
+                                </span>
+                            </div>
+                            <div>
+                                <Button squishy={true} variant="ghost">
+                                    View All <ArrowRight className="ml-1.5" />
+                                </Button>
+                            </div>
+                        </div>
+                        {lastTenMoviesAdded.length ? lastTenMoviesAdded.map((userMovie) => (
+                            <Link
+                                href={`/movie/${userMovie.movie?.id}`}
+                                key={userMovie.movie?.id}
+                            >
+                                <div>{userMovie.movie?.title}</div>
+                            </Link>
+                        )) : (
+                            <div className="grid place-content-center w-full h-full">
+                                <span className="text-sm text-zinc-500">
+                                    Movies you add to your watchlist will appear here
+                                </span></div>)}
+                    </Card>
+                </div>
             </div>
         </div>
     );
