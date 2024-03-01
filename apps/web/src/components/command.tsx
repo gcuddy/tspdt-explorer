@@ -306,14 +306,14 @@ export function CommandBarInner({ children, movies }:
             const directors = movie.moviesToDirectors.map((m) => m.director?.name).filter(Boolean);
             return NavigationAction({
                 title: movie.title,
-                render: () => <div className="flex items-center"><span>{`${movie.title} (${movie.year})`} </span><span className="text-zinc-500 text-xs truncate ml-2">{`${directors.join(", ")}`}</span></div>,
+                render: () => <div className="flex items-center"><span className="truncate">{`${movie.title}`}</span><span className="text-zinc-500 text-xs truncate ml-2">{`${directors.join(", ")}`} · {movie.year}</span></div>,
                 category: "Movies",
                 keywords: directors,
                 path: `/movie/${movie.id}`,
                 disabled: false,
                 router,
                 pathname,
-                icon: () => movie.tmdbPosterPath ? <Poster tWidth={92} width={48} poster_path={movie.tmdbPosterPath} /> : null,
+                icon: () => movie.tmdbPosterPath ? <Poster tWidth={92} width={40 / 1.5} poster_path={movie.tmdbPosterPath} /> : null,
             })
         })
     })
@@ -337,7 +337,7 @@ export function CommandBarInner({ children, movies }:
     const virtualizer = useVirtualizer({
         count: mappedActions.length,
         getScrollElement: () => scrollRef.current,
-        estimateSize: () => 40,
+        estimateSize: () => 48,
         overscan: 10,
     });
 
@@ -424,9 +424,9 @@ export function CommandBarInner({ children, movies }:
                                                     control.setActive(target, true);
                                                 }, 0);
                                             }}
-                                            className="flex gap-2 py-0 px-3 h-12 items-center rounded text-base data-[active=true]:bg-white/5"
+                                            className="flex gap-2 py-0 px-3 h-12 items-center rounded text-sm data-[active=true]:bg-white/5"
                                         >
-                                            <div className="grow-0 shrink-0 basis-auto w-4 h-4">
+                                            <div className="grow-0 shrink-0 basis-auto">
                                                 <action.icon />
                                             </div>
                                             {action.render ? (

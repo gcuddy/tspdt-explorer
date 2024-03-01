@@ -6,3 +6,5 @@
 - [ ] Global map type thing
 - [ ] A better filtering system that has everything url search params, instead of separate endpoints for genre, year, country, etc
 - [ ] CSRF
+- [ ] sessions shouldn't expire so quickly
+- [ ] handle error boundaries

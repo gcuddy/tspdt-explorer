@@ -15,7 +15,6 @@ import {
 import { hc } from "hono/client";
 import { AppType } from "tspdt-api/src/index";
 
-const client = hc<AppType>("http://localhost:8787");
 
 const alphabet =
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
