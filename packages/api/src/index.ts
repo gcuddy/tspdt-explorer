@@ -7,7 +7,7 @@ import { capitalizeFirstLetter, transformCamelToSnake, transformMovieIntoTextEmb
 import { MovieEmbeddingSchema } from "./schemas";
 import { createDb } from "./db/client";
 import { and, asc, desc, eq, getTableColumns, inArray, like, sql } from "drizzle-orm";
-import { Movie, directors, movies, oauthAccount, oauthAccountSchema, rankings, users } from "./db/schema";
+import { Movie, directors, movies, oauthAccount, oauthAccountSchema, rankings, userMovie, users } from "./db/schema";
 import { cache } from "hono/cache";
 import { initializeLucia } from "./lucia";
 import { setCookie, getCookie } from "hono/cookie";
@@ -97,6 +97,50 @@ const routes = app
                 },
             })
         );
+    })
+    .get("/movie/:id/interaction", async (c) => {
+        const user = c.get("user");
+        console.log('user', user);
+        if (!user) {
+            return c.json({ authorized: false });
+        }
+        const db = createDb(c.env.DB);
+        const interaction = await db.query.userMovie.findFirst({
+            where: and(
+                eq(userMovie.userId, user.id),
+                eq(userMovie.movieId, c.req.param("id"))
+            ),
+        });
+        console.log('interaction', interaction);
+        return c.json(interaction ?? null);
+    })
+    .post("/movie/:id/interaction", zValidator("form", z.object({
+        timeAdded: z.string().optional(),
+        timeFavorited: z.string().optional(),
+        timeSeen: z.string().optional(),
+    })), async (c) => {
+        const user = c.get("user");
+        if (!user) {
+            return c.text("Unauthorized", 401);
+        }
+        const db = createDb(c.env.DB);
+        const { timeAdded, timeFavorited, timeSeen } = c.req.valid("form");
+
+        await db.insert(userMovie).values({
+            userId: user.id,
+            movieId: c.req.param("id"),
+            timeAdded: timeAdded ? new Date(timeAdded) : null,
+            timeFavorited: timeFavorited ? new Date(timeFavorited) : null,
+            timeSeen: timeSeen ? new Date(timeSeen) : null,
+        }).onConflictDoUpdate({
+            target: [userMovie.userId, userMovie.movieId],
+            set: {
+                timeAdded: timeAdded ? new Date(timeAdded) : null,
+                timeFavorited: timeFavorited ? new Date(timeFavorited) : null,
+                timeSeen: timeSeen ? new Date(timeSeen) : null,
+            }
+        });
+
     })
     .get("/movie/:id", async (c) => {
         const db = createDb(c.env.DB);

@@ -6,7 +6,7 @@ import {
     primaryKey,
     index,
 } from "drizzle-orm/sqlite-core";
-import { createSelectSchema } from "drizzle-zod";
+import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 import { timestamps } from "./sql-utils";
 
 const sqliteTable = sqliteTableCreator((name) => `tspdt_${name}`);
@@ -154,6 +154,8 @@ export const userMovie = sqliteTable(
         }),
     })
 );
+
+export const userMovieInsertSchema = createInsertSchema(userMovie);
 
 
 export const oauthAccount = sqliteTable(

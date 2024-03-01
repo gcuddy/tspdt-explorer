@@ -8,26 +8,19 @@ import { MovieHeader } from "./movie-header";
 import { getMovie } from "./page";
 import { RankingChart } from "./ranking-chart";
 
-import { useReplicache } from "@/app/replicache";
 import { Button } from "@/components/ui/button";
 import * as Dialog from "@/components/ui/dialog";
-import { Movie as M } from "@/core/movie";
 import { cn } from "@/utils/tailwind";
 import { objectEntries } from "@antfu/utils";
 import {
     ArrowFatLineDown,
     ArrowFatLineUp,
-    CheckCircle,
-    FilmReel,
-    Heart,
-    ListPlus,
     Play,
     PlusCircle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { groupBy } from "remeda";
-import { useSubscribe } from "replicache-react";
 import { useQuery } from "@tanstack/react-query";
 import { getRecommendations } from "@/server/data-layer";
 import { Poster } from "@/components/poster";
@@ -35,8 +28,10 @@ import { Poster } from "@/components/poster";
 
 export function Movie({
     movie,
+    actionSlot
 }: {
     movie: Awaited<ReturnType<typeof getMovie>>;
+    actionSlot: React.ReactNode;
 }) {
     const bar = useCommandBar();
 
@@ -126,7 +121,7 @@ export function Movie({
                             </Dialog.Portal>
                         </Dialog.Root>
                     ) : null}
-                    <ActionBar movie={movie} />
+                    {actionSlot}
                 </div>
                 <Stack
                     style={
@@ -521,71 +516,5 @@ function MovieCreditsCard({
                 </Tabs.Root>
             </Dialog.Root>
         </Card>
-    );
-}
-
-
-function ActionBar({ movie }: { movie: { id: string } }) {
-    const replicache = useReplicache();
-
-    const userMovie = useSubscribe(replicache, async (tx) => {
-        return tx.get<M.InfoWithNumber>(`userMovie/${movie.id}`);
-    });
-
-    console.log({ replicache });
-
-    if (!replicache) return null;
-
-    return (
-        <>
-            <Button
-                className={userMovie?.timeSeen ? "opacity-50" : ""}
-                onClick={() => {
-                    console.log("click", userMovie?.timeSeen);
-                    userMovie?.timeSeen
-                        ? replicache.mutate.movie_unseen([movie.id])
-                        : replicache.mutate.movie_seen([movie.id]);
-                }}
-            >
-                {userMovie?.timeSeen ? (
-                    <CheckCircle className="mr-1.5" />
-                ) : (
-                    <FilmReel className="mr-1.5" />
-                )}
-                {userMovie?.timeSeen ? "Seen" : "Mark Seen"}
-            </Button>
-            <Button
-                onClick={() => {
-                    userMovie?.timeAdded
-                        ? replicache.mutate.movie_unmarktowatch([movie.id])
-                        : replicache.mutate.movie_marktowatch([movie.id]);
-                }}
-                className={userMovie?.timeAdded ? "opacity-50" : ""}
-            >
-                {userMovie?.timeAdded ? (
-                    <CheckCircle className="mr-1.5" />
-                ) : (
-                    <ListPlus className="mr-1.5" />
-                )}
-                {userMovie?.timeAdded ? "On Watchlist" : "Watchlist"}
-            </Button>
-            <Button
-                onClick={() => {
-                    userMovie?.timeFavorited
-                        ? replicache.mutate.movie_unfavorite([movie.id])
-                        : replicache.mutate.movie_favorite([movie.id]);
-                }}
-                className={cn(
-                    "hover:scale-105 transition active:scale-95",
-                    userMovie?.timeFavorited ? "bg-white/[.02] border-white/5" : ""
-                )}
-            >
-                <Heart
-                    weight={userMovie?.timeFavorited ? "fill" : "regular"}
-                    className={userMovie?.timeFavorited ? "text-red-500" : "text-white"}
-                />
-                <span className="sr-only">Favorite</span>
-            </Button>
-        </>
     );
 }

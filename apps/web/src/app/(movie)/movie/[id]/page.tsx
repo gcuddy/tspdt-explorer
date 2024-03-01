@@ -7,6 +7,7 @@ import { cache } from "react";
 import { Movie } from "./movie";
 import { client } from "@/lib/hono";
 import { Metadata } from "next";
+import { ActionBar } from "./action-bar";
 
 export const getMovie = cache(async (id: string) => {
     console.time("getMovie");
@@ -57,5 +58,7 @@ export default async function MoviePage({
     params: { id: string };
 }) {
     const movie = await getMovie(params.id);
-    return <Movie movie={movie} />;
+    return <Movie movie={movie} actionSlot={
+        <ActionBar movie={movie} />}
+    />;
 }
