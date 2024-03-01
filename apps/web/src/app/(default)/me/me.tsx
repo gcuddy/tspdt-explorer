@@ -150,6 +150,14 @@ async function CardWrapper() {
 function CardSkeleton() {
 
     return (
-        <div>loading...</div>
+
+        <div>
+            <Card className="h-72 animate-pulse">
+                <div />
+            </Card>
+            <Card className="h-72 animate-pulse">
+                <div />
+            </Card>
+        </div>
     );
 }
