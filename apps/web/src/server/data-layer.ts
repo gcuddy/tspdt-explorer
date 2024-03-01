@@ -76,3 +76,19 @@ export async function getMovies() {
     const movies = await res.json();
     return movies;
 }
+
+export const getUserMovie = async (id: string) => await client.movie[":id"].interaction.$get({ param: { id } }, { headers: await getAuthHeaders() }).then((res) => res.json())
+    .catch(e => {
+        console.error(e);
+        return { authorized: false };
+    })
+
+export async function getMovieInteractions() {
+    const res = await client.movie.interactions.$get({}, { headers: await getAuthHeaders() });
+    if (res.status === 401) {
+        return [];
+    }
+    const interactions = await res.json();
+    return interactions;
+}
+

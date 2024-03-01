@@ -12,6 +12,7 @@ import { cache } from "hono/cache";
 import { initializeLucia } from "./lucia";
 import { setCookie, getCookie } from "hono/cookie";
 import { Session, generateId, User as LuciaUser } from "lucia";
+import { HTTPException } from 'hono/http-exception'
 
 type Bindings = {
     AI: any;
@@ -97,6 +98,24 @@ const routes = app
                 },
             })
         );
+    })
+    .get("/movie/interactions", async (c) => {
+        // TODO: add cursor pagination
+        // TODO: break into watched, favorited, added endpoints
+
+        const user = c.get("user");
+        if (!user) {
+            throw new HTTPException(401, { message: "Unauthorized" });
+        }
+
+        const db = createDb(c.env.DB);
+        const interactions = await db.query.userMovie.findMany({
+            where: eq(userMovie.userId, user.id),
+            with: {
+                movie: true,
+            },
+        });
+        return c.json(interactions);
     })
     .get("/movie/:id/interaction", async (c) => {
         const user = c.get("user");

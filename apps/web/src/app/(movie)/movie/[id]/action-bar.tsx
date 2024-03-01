@@ -5,21 +5,28 @@ import { client } from "@/lib/hono";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, FilmReel, Heart, ListPlus } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/utils/tailwind";
-import { getAuthHeaders } from "@/server/data-layer";
+import { getAuthHeaders, getUserMovie } from "@/server/data-layer";
+import { markAsSeen } from "@/server/actions";
 
-async function markAsSeen() {
-    'use server';
-    console.log("hey");
-    return null;
-    //         await client.movie[":id"].interaction.$post({ param: { id: movie.id }, form: { timeSeen: String(new Date()) } }, { headers: await getAuthHeaders() });
+async function MarkAsSeen({ id, seen }: { id: string, seen: boolean }) {
+    const mark = markAsSeen.bind(null, id);
+    return <form action={mark}>
+        <Button
+            className={seen ? "opacity-50" : ""}
+        >
+            {seen ? (
+                <CheckCircle className="mr-1.5" />
+            ) : (
+                <FilmReel className="mr-1.5" />
+            )}
+            {seen ? "Seen" : "Mark Seen"}
+        </Button>
+    </form>
 }
+
 export async function ActionBar({ movie }: { movie: { id: string } }) {
-    "use server";
-    const userMovie = await client.movie[":id"].interaction.$get({ param: { id: movie.id } }, { headers: await getAuthHeaders() }).then((res) => res.json())
-        .catch(e => {
-            console.error(e);
-            return null;
-        })
+    const userMovieId = getUserMovie.bind(null, movie.id);
+    const userMovie = await userMovieId();
 
     async function addToWatchlist() {
         await client.movie[":id"].interaction.$post({ param: { id: movie.id }, form: { timeAdded: String(new Date()) } }, { headers: await getAuthHeaders() });
@@ -36,18 +43,7 @@ export async function ActionBar({ movie }: { movie: { id: string } }) {
 
     return (
         <>
-            <form action={markAsSeen}>
-                <Button
-                    className={userMovie?.timeSeen ? "opacity-50" : ""}
-                >
-                    {userMovie?.timeSeen ? (
-                        <CheckCircle className="mr-1.5" />
-                    ) : (
-                        <FilmReel className="mr-1.5" />
-                    )}
-                    {userMovie?.timeSeen ? "Seen" : "Mark Seen"}
-                </Button>
-            </form>
+            <MarkAsSeen id={movie.id} seen={!!userMovie?.timeSeen} />
             <Button
                 className={userMovie?.timeAdded ? "opacity-50" : ""}
             >

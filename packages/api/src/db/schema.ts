@@ -155,6 +155,14 @@ export const userMovie = sqliteTable(
     })
 );
 
+
+export const userMovieRelations = relations(userMovie, ({ one }) => ({
+    movie: one(movies, {
+        fields: [userMovie.movieId],
+        references: [movies.id],
+    }),
+}));
+
 export const userMovieInsertSchema = createInsertSchema(userMovie);
 
 
@@ -171,3 +179,5 @@ export const oauthAccount = sqliteTable(
     }))
 
 export const oauthAccountSchema = createSelectSchema(oauthAccount);
+
+// TODO: define relations
