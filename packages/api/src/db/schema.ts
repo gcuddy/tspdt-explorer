@@ -119,7 +119,6 @@ export const users = sqliteTable("user", {
     id: text("id").notNull().primaryKey(),
     username: text("username"),
     email: text("email").unique(),
-    discordId: text("discord_id").unique(),
     emailVerified: integer("email_verified", {
         mode: "boolean",
     }),
@@ -156,3 +155,17 @@ export const userMovie = sqliteTable(
     })
 );
 
+
+export const oauthAccount = sqliteTable(
+    "oauth_account",
+    {
+        providerId: text("provider_id").notNull(),
+        providerUserId: text("provider_user_id").notNull(),
+        userId: text("user_id").notNull().references(() => users.id),
+    }, (table) => ({
+        pk: primaryKey({
+            columns: [table.providerId, table.providerUserId]
+        })
+    }))
+
+export const oauthAccountSchema = createSelectSchema(oauthAccount);

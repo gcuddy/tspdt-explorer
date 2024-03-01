@@ -3,12 +3,15 @@ import { chunk } from "remeda";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { transformCamelToSnake, transformMovieIntoTextEmbedding } from "./utils";
+import { capitalizeFirstLetter, transformCamelToSnake, transformMovieIntoTextEmbedding } from "./utils";
 import { MovieEmbeddingSchema } from "./schemas";
 import { createDb } from "./db/client";
 import { and, asc, desc, eq, getTableColumns, inArray, like, sql } from "drizzle-orm";
-import { Movie, directors, movies, rankings } from "./db/schema";
+import { Movie, directors, movies, oauthAccount, oauthAccountSchema, rankings, users } from "./db/schema";
 import { cache } from "hono/cache";
+import { initializeLucia } from "./lucia";
+import { setCookie, getCookie } from "hono/cookie";
+import { Session, generateId, User as LuciaUser } from "lucia";
 
 type Bindings = {
     AI: any;
@@ -16,12 +19,61 @@ type Bindings = {
     DB: D1Database;
 };
 
-const app = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+    session: Session | null;
+    user: LuciaUser | null;
+}
+
+const app = new Hono<{ Bindings: Bindings, Variables: Variables }>();
+
+app.use("*", async (c, next) => {
+    const lucia = initializeLucia(c.env.DB);
+    const cok = c.req.header("Cookie") ?? "";
+    console.log('cok', cok);
+    const sessionId = getCookie(c, lucia.sessionCookieName) ?? null;
+    console.log('sessionId', sessionId);
+    if (!sessionId) {
+        c.set("user", null);
+        c.set("session", null);
+        return next();
+    }
+    const { session, user } = await lucia.validateSession(sessionId);
+    if (session && session.fresh) {
+        // use `header()` instead of `setCookie()` to avoid TS errors
+        c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), {
+            append: true
+        });
+    }
+    if (!session) {
+        c.header("Set-Cookie", lucia.createBlankSessionCookie().serialize(), {
+            append: true
+        });
+    }
+    c.set("user", user);
+    c.set("session", session);
+    return next();
+});
+
 
 // TODO: for ingesting, get keywords
+app.get(
+    "/director*",
+    cache({
+        cacheName: "movies",
+        cacheControl: "max-age=3600",
+    })
+);
 
 app.get(
-    "*",
+    "/movie*",
+    cache({
+        cacheName: "movies",
+        cacheControl: "max-age=3600",
+    })
+);
+
+app.get(
+    "/recommendations*",
     cache({
         cacheName: "movies",
         cacheControl: "max-age=3600",
@@ -308,7 +360,73 @@ const routes = app
                 }[],
             });
         }
-    );
+    )
+    .get("/auth/validate", async (c) => {
+        const session = c.get("session");
+        const user = c.get("user");
+        return c.json({ session, user });
+    })
+    .post("/auth/oauth", zValidator("json", oauthAccountSchema.omit({ userId: true }).extend({
+        email: z.string().email(),
+        username: z.string(),
+    })
+    ), async (c) => {
+        const db = createDb(c.env.DB);
+        // should we only create one of these?
+        const lucia = initializeLucia(c.env.DB);
+
+        const data = c.req.valid("json");
+
+        const existingUser = await db.query.users.findFirst({ where: eq(users.email, data.email) });
+
+        if (existingUser) {
+            // const existing = await db.query.oauthAccount.findFirst({
+            //     where: and(
+            //         eq(oauthAccount.providerId, data.providerId),
+            //         eq(oauthAccount.providerUserId, data.userId)
+            //     )
+            // })
+            await db.insert(oauthAccount).values({
+                providerId: data.providerId,
+                providerUserId: data.providerUserId,
+                userId: existingUser.id
+            }).onConflictDoNothing();
+            const session = await lucia.createSession(existingUser.id, {})
+            const sessionCookie = lucia.createSessionCookie(session.id);
+            setCookie(c, sessionCookie.name, sessionCookie.value, {
+                ...sessionCookie.attributes,
+                sameSite: sessionCookie.attributes.sameSite ? capitalizeFirstLetter(sessionCookie.attributes.sameSite) : undefined
+            });
+            return c.json({ userId: existingUser.id });
+        }
+
+        const userId = generateId(15);
+
+
+        // TODO: transactions not supported yet by d1
+        // await db.transaction(async () => {
+        // })
+        await db.insert(users).values({
+            id: userId,
+            email: data.email,
+            username: data.username
+        })
+
+        await db.insert(oauthAccount).values({
+            providerId: data.providerId,
+            providerUserId: data.providerUserId,
+            userId: userId
+        })
+
+        const session = await lucia.createSession(userId, {})
+        const sessionCookie = lucia.createSessionCookie(session.id);
+        console.log('sessionCookie', sessionCookie);
+        setCookie(c, sessionCookie.name, sessionCookie.value, {
+            ...sessionCookie.attributes,
+            sameSite: sessionCookie.attributes.sameSite ? capitalizeFirstLetter(sessionCookie.attributes.sameSite) : undefined
+        });
+        return c.json({ userId });
+    })
 
 app.onError((err, c) => {
     console.error(err);

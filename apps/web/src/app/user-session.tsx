@@ -1,26 +1,25 @@
 "use client";
 
-import { Session } from "lucia";
+import { Session, User } from "lucia";
 import React from "react";
 
-export const UserContext = React.createContext<Session | null>(null);
+export const UserContext = React.createContext<{ session: Session | null; user: User | null } | null>(null);
 
 export function UserProvider({
-  children,
-  session,
+    children,
+    session,
+    user
 }: {
-  children: React.ReactNode;
-  session: Session | null;
+    children: React.ReactNode;
+    session: Session | null;
+    user: User | null;
 }) {
-  return (
-    <UserContext.Provider value={session}>{children}</UserContext.Provider>
-  );
+    return (
+        <UserContext.Provider value={{ session, user }}>{children}</UserContext.Provider>
+    );
 }
 
 export function useUser() {
-  const user = React.useContext(UserContext);
-  if (user === undefined) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return user;
+    const user = React.useContext(UserContext);
+    return user;
 }

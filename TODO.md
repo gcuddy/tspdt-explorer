@@ -5,3 +5,4 @@
 - [ ] Do the 21st century canon next https://theyshootpictures.com/21stcentury_startinglist_table.php
 - [ ] Global map type thing
 - [ ] A better filtering system that has everything url search params, instead of separate endpoints for genre, year, country, etc
+- [ ] CSRF

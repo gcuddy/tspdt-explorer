@@ -3,6 +3,11 @@ import { MovieEmbedding } from "./schemas";
 
 export const transformCamelToSnake = (str: string) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
+
+export function capitalizeFirstLetter<T extends string>(string: T) {
+    return string.charAt(0).toUpperCase() + string.slice(1) as Capitalize<T>;
+}
+
 export function transformMovieIntoTextEmbedding(movie: MovieEmbedding): string {
     let output = `Title:
 ${movie.title}`;

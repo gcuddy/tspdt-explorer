@@ -5,6 +5,8 @@ import { GlobalCommands } from "./global-commands";
 import { BodyProvider } from "./body-provider";
 import { FilterProvider } from "./filter-provider";
 import Providers from "./providers";
+import { getPageSession } from "@/server/data-layer";
+import { UserProvider } from "./user-session";
 
 // export const runtime = "edge";
 
@@ -20,24 +22,26 @@ export default async function RootLayout({
     actions: React.ReactNode;
 }) {
     //   const session = await getPageSession();
+    const { session, user } = await getPageSession();
+    console.log({ session, user });
 
     return (
         <html lang="en">
-            {/* <UserProvider session={session}> */}
-            {/* <R> */}
-            <Providers>
-                <CommandBar>
-                    <BodyProvider>
-                        {/* <ActionProvider> */}
-                        <FilterProvider>
-                            <GlobalCommands>{children}</GlobalCommands>
-                        </FilterProvider>
-                        {/* </ActionProvider> */}
-                    </BodyProvider>
-                </CommandBar>
-            </Providers>
-            {/* </R> */}
-            {/* </UserProvider> */}
+            <UserProvider session={session ? { ...session, expiresAt: new Date(session.expiresAt) } : null} user={user}>
+                {/* <R> */}
+                <Providers>
+                    <CommandBar>
+                        <BodyProvider>
+                            {/* <ActionProvider> */}
+                            <FilterProvider>
+                                <GlobalCommands>{children}</GlobalCommands>
+                            </FilterProvider>
+                            {/* </ActionProvider> */}
+                        </BodyProvider>
+                    </CommandBar>
+                </Providers>
+                {/* </R> */}
+            </UserProvider>
         </html>
     );
 }

@@ -2,12 +2,11 @@
 // lucia.ts
 import { Lucia } from "lucia";
 import { D1Adapter } from "@lucia-auth/adapter-sqlite";
-import { Discord } from "arctic";
 
 export function initializeLucia(D1: D1Database) {
     const adapter = new D1Adapter(D1, {
-        user: "user",
-        session: "session"
+        user: "tspdt_user",
+        session: "tspdt_session"
     });
     return new Lucia(adapter, {
         sessionCookie: {
@@ -19,7 +18,7 @@ export function initializeLucia(D1: D1Database) {
         getUserAttributes: (attributes) => {
             return {
                 // attributes has the type of DatabaseUserAttributes
-                discordId: attributes.discord_id,
+                // discordId: attributes.discord_id,
                 username: attributes.username,
                 email: attributes.email
             };
@@ -28,7 +27,7 @@ export function initializeLucia(D1: D1Database) {
 }
 
 interface DatabaseUserAttributes {
-    discord_id: number;
+    // discord_id: number;
     email: string;
     username: string;
 }
@@ -40,5 +39,4 @@ declare module "lucia" {
     }
 }
 
-export const discord = new Discord(process.env.DISCORD_ID as string, process.env.DISCORD_SECRET as string, "http://localhost:3000/login/discord/callback");
 

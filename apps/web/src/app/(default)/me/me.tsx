@@ -1,45 +1,18 @@
 "use client";
 
-import { useReplicache } from "@/app/replicache";
 import { Card } from "@/components/ui/card";
-import { Movie } from "@/core/movie";
-import { SimplifiedMovie } from "@/core/movie/movie.sql";
-import { Ranking } from "@/db/schema";
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo } from "react";
-import { useSubscribe } from "replicache-react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, SignOut } from "@phosphor-icons/react";
-import { useUser } from "@/app/user-session";
 import Form from "@/components/form";
-import { useRouter } from "next/navigation";
-import { Session } from "lucia";
+import { getPageSession } from "@/server/data-layer";
+import { DeepNonNullable } from "ts-essentials";
 
-export default function Me({ session }: { session?: Session | null }) {
-    const router = useRouter();
-    const rep = useReplicache();
+export default function Me({ user }: Pick<DeepNonNullable<Awaited<ReturnType<typeof getPageSession>>>, "user">) {
 
-    if (!session) {
-        router.replace("/login");
-        return null;
-    }
-
-    const userMovies = useSubscribe(rep, async (tx) => {
-        const userMovies = await tx
-            .scan({ prefix: "userMovie/" })
-            .entries()
-            .toArray();
-
-        return await Promise.all(
-            userMovies.map(async ([key, userMovie]) => {
-                const [, id] = key.split("/");
-                const movie = await tx.get<SimplifiedMovie>(`movie/${id}`);
-                const ranking = await tx.get<Ranking>(`movie/${id}/ranking`);
-                return { ...(userMovie as Movie.InfoWithNumber), movie, ranking };
-            })
-        );
-    });
+    const userMovies: UserMovie[] = []
 
     const moviesSeen = useMemo(() => {
         return userMovies?.filter((m) => m.timeSeen) ?? [];
@@ -79,14 +52,13 @@ export default function Me({ session }: { session?: Session | null }) {
 
     console.log({ userMovies });
 
-    const user = useUser();
 
     return (
         <div className="flex flex-col min-h-screen py-2">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                     <h1 className="text-4xl font-bold">Me</h1>
-                    <span className="text-xl text-white/50">{user?.user.email}</span>
+                    <span className="text-xl text-white/50">{user?.email}</span>
                 </div>
                 <div>
                     <Form action="/api/logout">

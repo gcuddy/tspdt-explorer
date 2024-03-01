@@ -1,8 +1,12 @@
-import { getPageSession } from "@/core/auth/validate";
+import { getPageSession } from "@/server/data-layer";
+import { redirect } from "next/navigation";
 import Me from "./me";
 
 export default async function Page() {
-  const session = await getPageSession();
-
-  return <Me session={session} />;
+    const { user, session } = await getPageSession();
+    console.log({ user, session })
+    if (!user) {
+        return redirect("/login");
+    }
+    return <Me user={user} />;
 }

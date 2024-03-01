@@ -1,71 +1,88 @@
-import { auth, discordAuth } from "@/core/auth/lucia";
-import { OAuthRequestError } from "@lucia-auth/oauth";
-import { cookies, headers } from "next/headers";
+import { discord } from "@/core/auth/oauth";
+import { client } from "@/lib/hono";
+import { cookies } from "next/headers";
+import { parseCookies } from "oslo/cookie";
 import { NextRequest } from "next/server";
 
 export const GET = async (request: NextRequest) => {
-  const storedState = cookies().get("discord_oauth_state")?.value;
-  const url = new URL(request.url);
-  const state = url.searchParams.get("state");
-  const code = url.searchParams.get("code");
-  // validate state
-  if (!storedState || !state || storedState !== state || !code) {
-    return new Response(null, {
-      status: 400,
-    });
-  }
-  //   console.log({
-  //     state,
-  //     code,
-  //   });
+    const url = new URL(request.url);
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+    const storedState = cookies().get("discord_oauth_state")?.value ?? null;
 
-  try {
-    const { getExistingUser, discordUser, createUser } =
-      await discordAuth.validateCallback(code);
-
-    // console.log("GET", request, getExistingUser, discordUser, createUser);
-
-    console.dir(discordUser, { depth: null });
-
-    const getUser = async () => {
-      const existingUser = await getExistingUser();
-      if (existingUser) return existingUser;
-      const user = await createUser({
-        attributes: {
-          username: discordUser.username,
-          email: discordUser.email,
-        },
-      });
-      return user;
-    };
-
-    const user = await getUser();
-
-    const session = await auth.createSession({
-      userId: user.userId,
-      attributes: {},
-    });
-    const authRequest = auth.handleRequest(request.method, {
-      headers,
-      cookies,
-    });
-    authRequest.setSession(session);
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: "/", // redirect to profile page
-      },
-    });
-  } catch (e) {
-    console.error(e);
-    if (e instanceof OAuthRequestError) {
-      // invalid code
-      return new Response(null, {
-        status: 400,
-      });
+    if (!storedState || !state || storedState !== state || !code) {
+        return new Response(null, {
+            status: 400,
+        });
     }
-    return new Response(null, {
-      status: 500,
-    });
-  }
+
+    try {
+        const tokens = await discord.validateAuthorizationCode(code);
+
+        const discordUserResponse = await fetch("https://discord.com/api/users/@me", {
+            headers: {
+                Authorization: `Bearer ${tokens.accessToken}`,
+            },
+        });
+
+        const discordUser = await discordUserResponse.json<DiscordUser>();
+
+        const res = await client.auth.oauth.$post({
+            json: {
+                providerId: "discord",
+                providerUserId: discordUser.id,
+                email: discordUser.email,
+                username: discordUser.username
+            }
+        });
+
+        // do i need to do something here? idk...
+        // set cookies?
+
+        const authCookie = res.headers.get("set-cookie");
+        if (!authCookie) {
+            return new Response(null, {
+                status: 500,
+            });
+        }
+        const parsed = parseCookies(authCookie);
+        console.log({ parsed });
+
+        for (const [name, value] of parsed) {
+            cookies().set(name, value, {
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                httpOnly: true,
+                maxAge: 60 * 10
+            });
+        }
+
+        return new Response(null, {
+            status: 302,
+            headers: {
+                Location: "/"
+            }
+        });
+
+
+    } catch (e) {
+        console.log('error!');
+        console.error(e);
+        // if (e instanceof OAuthRequestError) {
+        //     // invalid code
+        //     return new Response(null, {
+        //         status: 400,
+        //     });
+        // }
+        return new Response(null, {
+            status: 500,
+        });
+    }
+};
+
+type DiscordUser = {
+    id: string;
+    username: string;
+    email: string;
 };

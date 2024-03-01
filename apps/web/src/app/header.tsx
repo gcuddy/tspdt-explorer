@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { SearchButton } from "./search-button";
-import { usePathname } from "next/navigation";
 import { cn } from "@/utils/tailwind";
 import { useEffect, useState } from "react";
 import { useFilter } from "./filter-provider";
@@ -19,7 +18,8 @@ export default function Header({
 }) {
     const [showFilter, setShowFilter] = useState(false);
     const { filter, setFilter } = useFilter();
-    const user = useUser();
+    const auth = useUser();
+
 
     useEffect(() => {
         if (!enableFilter) return;
@@ -68,7 +68,7 @@ export default function Header({
                                     TSPDT
                                 </span>
                             </Link>
-                            {user ? (
+                            {auth?.user ? (
                                 <Link href="/me">Me</Link>
                             ) : (
                                 <Link href="/login">Login</Link>
