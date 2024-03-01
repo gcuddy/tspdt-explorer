@@ -8,3 +8,6 @@
 - [ ] CSRF
 - [ ] sessions shouldn't expire so quickly
 - [ ] handle error boundaries
+- [ ] allow all tmdb people to have urls
+- [ ] opengraph images
+- [ ] fix images sometimes not working in reccommendations (should have skeleton fallback, as well as considering using r2/cloudflare images)

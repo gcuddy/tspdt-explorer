@@ -390,7 +390,7 @@ function MovieCreditsCard({
                             {(movie.tmdb?.credits.cast?.length ?? 0) > 10 && (
                                 <>
                                     <Dialog.Trigger className="text-sm rounded-md  text-zinc-200 font-medium hover:text-zinc-50 transition">
-                                        Show More
+                                        Show more
                                         {/* {expandedTabsState.cast ? "Show Less" : "Show More"} */}
                                     </Dialog.Trigger>
                                     <Dialog.Portal>
@@ -420,7 +420,7 @@ function MovieCreditsCard({
                         </div>
                     </Tabs.Content>
                     <Tabs.Content
-                        className="min-w-0 w-full flex flex-col grow"
+                        className="min-w-0 w-full flex flex-col grow gap-y-1"
                         value="crew"
                     >
                         {groupedCrew
@@ -434,7 +434,7 @@ function MovieCreditsCard({
                             })
                             .map(([job, crew]) => (
                                 <div
-                                    className="flex w-full justify-between min-w-0"
+                                    className="flex w-full justify-between min-w-0 gap-1 truncate"
                                     key={job as string}
                                 >
                                     <span className="text-sm font-semibold text-zinc-400">
@@ -443,16 +443,16 @@ function MovieCreditsCard({
                                     <div className="flex flex-wrap shrink-0 grow-0 basis-auto min-w-0 text-sm gap-1 truncate">
                                         {crew.map((c) => (
                                             <div
-                                                className="min-w-0 truncate no-wrap shrink-0"
+                                                className="min-w-0 truncate no-wrap shrink-0 text-zinc-400"
                                                 key={c.id}
                                             >
-                                                {c.name}
+                                                {c.name}{crew.indexOf(c) !== crew.length - 1 ? ", " : ""}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             ))}
-                        <Dialog.Trigger>Show all</Dialog.Trigger>
+                        <Dialog.Trigger className="text-sm rounded-md  text-zinc-200 font-medium hover:text-zinc-50 transition ml-auto">Show more</Dialog.Trigger>
                         <Dialog.Portal>
                             <Dialog.Overlay />
                             <Dialog.Content>
@@ -463,10 +463,10 @@ function MovieCreditsCard({
                                             key={job as string}
                                             className="flex w-full justify-between min-w-0"
                                         >
-                                            <span className="text-sm font-semibold text-zinc-400">
+                                            <span className="font-semibold text-zinc-400">
                                                 {job as string}
                                             </span>
-                                            <div className="flex shrink-0 grow-0 basis-auto min-w-0 text-sm gap-1 truncate">
+                                            <div className="flex shrink-0 grow-0 basis-auto min-w-0 gap-1 truncate">
                                                 {crew.map((c) => (
                                                     <div
                                                         className="min-w-0 truncate no-wrap shrink-0"
