@@ -1,26 +1,16 @@
 // app/api/logout/route.ts
-import { auth } from "@/core/auth/lucia";
-import * as context from "next/headers";
+import { client } from "@/lib/hono";
+import { getAuthHeaders } from "@/server/data-layer";
 
-import type { NextRequest } from "next/server";
 
-export const POST = async (request: NextRequest) => {
-  const authRequest = auth.handleRequest(request.method, context);
-  // check if user is authenticated
-  const session = await authRequest.validate();
-  if (!session) {
-    return new Response(null, {
-      status: 401,
-    });
-  }
-  // make sure to invalidate the current session!
-  await auth.invalidateSession(session.sessionId);
-  // delete session cookie
-  authRequest.setSession(null);
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: "/", // redirect to login page
-    },
-  });
+export const POST = async () => {
+    const res = await client.auth.logout.$post({}, { headers: await getAuthHeaders() });
+    if (res.ok) {
+        return new Response(null, {
+            status: 302,
+            headers: {
+                Location: "/", // redirect to login page
+            },
+        });
+    }
 };

@@ -442,6 +442,18 @@ const routes = app
         const user = c.get("user");
         return c.json({ session, user });
     })
+    .post("/auth/logout", async (c) => {
+        const lucia = initializeLucia(c.env.DB);
+        const session = c.get("session");
+        if (!session) {
+            throw new HTTPException(401, { message: "Unauthorized" });
+        }
+        await lucia.invalidateSession(session.id);
+        c.header("Set-Cookie", lucia.createBlankSessionCookie().serialize(), {
+            append: true,
+        });
+        return c.json({ success: true });
+    })
     .post("/auth/oauth", zValidator("json", oauthAccountSchema.omit({ userId: true }).extend({
         email: z.string().email(),
         username: z.string(),

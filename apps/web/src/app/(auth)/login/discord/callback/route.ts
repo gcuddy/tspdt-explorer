@@ -1,4 +1,4 @@
-import { discord } from "@/core/auth/oauth";
+import { discord } from "../oauth";
 import { client } from "@/lib/hono";
 import { cookies } from "next/headers";
 import { parseCookies } from "oslo/cookie";
