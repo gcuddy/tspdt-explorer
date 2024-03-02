@@ -11,3 +11,7 @@
 - [ ] allow all tmdb people to have urls
 - [ ] opengraph images
 - [ ] fix images sometimes not working in reccommendations (should have skeleton fallback, as well as considering using r2/cloudflare images)
+- [ ] legend and toggle films for multiple films on chart (ie with director or compare page, see below)
+- [ ] compare page
+- [ ] import from letterboxd via csv
+- [ ] world maps

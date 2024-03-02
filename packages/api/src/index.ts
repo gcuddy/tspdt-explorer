@@ -133,32 +133,41 @@ const routes = app
         console.log('interaction', interaction);
         return c.json(interaction ?? null);
     })
-    .post("/movie/:id/interaction", zValidator("form", z.object({
-        timeAdded: z.string().optional(),
-        timeFavorited: z.string().optional(),
-        timeSeen: z.string().optional(),
-    })), async (c) => {
+    .post("/movie/:id/interaction", zValidator("json", z.object({
+        timeAdded: z.coerce.date().or(z.null()).optional(),
+        timeFavorited: z.coerce.date().or(z.null()).optional(),
+        timeSeen: z.date().or(z.null()).optional(),
+    }), (result, c) => {
+        if (!result.success) {
+            console.log('result.error', result.error);
+            return c.json({ error: result.error });
+        }
+
+    }), async (c, next) => {
+        console.log('posting interaction');
         const user = c.get("user");
         if (!user) {
             return c.text("Unauthorized", 401);
         }
         const db = createDb(c.env.DB);
-        const { timeAdded, timeFavorited, timeSeen } = c.req.valid("form");
+        const data = c.req.valid("json");
+        console.log('got data', data);
+
+        console.log({ data })
 
         await db.insert(userMovie).values({
             userId: user.id,
             movieId: c.req.param("id"),
-            timeAdded: timeAdded ? new Date(timeAdded) : null,
-            timeFavorited: timeFavorited ? new Date(timeFavorited) : null,
-            timeSeen: timeSeen ? new Date(timeSeen) : null,
+            ...data
         }).onConflictDoUpdate({
             target: [userMovie.userId, userMovie.movieId],
             set: {
-                timeAdded: timeAdded ? new Date(timeAdded) : null,
-                timeFavorited: timeFavorited ? new Date(timeFavorited) : null,
-                timeSeen: timeSeen ? new Date(timeSeen) : null,
+                ...data
             }
         });
+
+
+        return next();
 
     })
     .get("/movie/:id", async (c) => {

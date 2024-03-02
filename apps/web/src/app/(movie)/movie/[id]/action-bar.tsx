@@ -1,5 +1,3 @@
-"use server";
-
 import React from "react";
 import { client } from "@/lib/hono";
 import { Button } from "@/components/ui/button";
@@ -9,7 +7,7 @@ import { getAuthHeaders, getUserMovie } from "@/server/data-layer";
 import { markAsSeen } from "@/server/actions";
 
 async function MarkAsSeen({ id, seen }: { id: string, seen: boolean }) {
-    const mark = markAsSeen.bind(null, id);
+    const mark = markAsSeen.bind(null, id, !seen);
     return <form action={mark}>
         <Button
             className={seen ? "opacity-50" : ""}
