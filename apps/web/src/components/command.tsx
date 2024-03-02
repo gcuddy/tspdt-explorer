@@ -128,7 +128,7 @@ function useControl() {
         }
 
         runEffect();
-    }, [visible]);
+    }, [visible, input, activeProviders, providers]);
 
     useEffect(() => {
         const el = root?.querySelector(`[data-element="results"]`)!;

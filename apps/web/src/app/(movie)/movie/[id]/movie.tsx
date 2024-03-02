@@ -159,7 +159,7 @@ export function Movie({
                                                 <Dialog.Title>Change Poster</Dialog.Title>
                                                 <div className="flex flex-wrap max-h-96 overflow-y-auto">
                                                     {movie.tmdb?.images.posters.map((p) => (
-                                                        <div className="w-1/4 p-2">
+                                                        <div key={p.file_path} className="w-1/4 p-2">
                                                             {/* {JSON.stringify(p)} */}
                                                             <button
                                                                 onClick={() => {
