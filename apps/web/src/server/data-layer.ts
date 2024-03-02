@@ -83,11 +83,11 @@ export const getUserMovie = async (id: string) => await client.movie[":id"].inte
         return { authorized: false };
     })
 
-export const getMovieInteractions = cache(async () => {
+export const getMovieInteractions = async () => {
     const res = await client.movie.interactions.$get({}, { headers: await getAuthHeaders() });
     if (res.status === 401) {
         return [];
     }
     const interactions = await res.json();
     return interactions;
-});
+}

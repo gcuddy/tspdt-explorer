@@ -7,6 +7,7 @@ import { ArrowRight, SignOut } from "@phosphor-icons/react/dist/ssr";
 import Form from "@/components/form";
 import { getMovieInteractions, getPageSession } from "@/server/data-layer";
 import { DeepNonNullable } from "ts-essentials";
+import { FilmReel, Bookmarks } from "@phosphor-icons/react/dist/ssr";
 
 export default function Me({ user }: Pick<DeepNonNullable<Awaited<ReturnType<typeof getPageSession>>>, "user">) {
 
@@ -74,12 +75,15 @@ async function CardWrapper() {
             <Card className="items-start p-8 gap-5 h-72 ">
                 <div className="flex justify-between w-full">
                     <div className="flex flex-col">
-                        <span className="text-lg leading-tight text-white tracking-tight font-semibold">
-                            Seen
-                        </span>
+                        <div className="flex gap-1.5 text-lg font-semibold items-center">
+                            <FilmReel className="inline-flex text-zinc-200" weight="light" />
+                            <span className="text-lg leading-tight text-white tracking-tight font-semibold">
+                                Seen
+                            </span>
+                        </div>
                         <span className="text-sm font-normal leading-tight text-zinc-400">
                             You have watched{" "}
-                            {userMovies?.filter((m) => m.timeSeen).length ?? 0} movies
+                            {moviesSeen.length} movie{moviesSeen.length > 1 ? 's' : ''}.
                         </span>
                     </div>
                     <div>
@@ -108,15 +112,18 @@ async function CardWrapper() {
                 </div>
             </Card>
             <div className="flex flex-col gap-4">
-                <Card className="h-72 p-8">
+                <Card className="items-start p-8 gap-5 h-72 ">
                     <div className="flex justify-between w-full">
                         <div className="flex flex-col">
-                            <span className="text-lg leading-tight text-white tracking-tight font-semibold">
-                                Watchlist
-                            </span>
+                            <div className="flex gap-1.5 text-lg font-semibold items-center">
+                                <Bookmarks className="inline-flex text-zinc-200" weight="light" />
+                                <span className="text-lg leading-tight text-white tracking-tight font-semibold">
+                                    Watchlist
+                                </span>
+                            </div>
                             <span className="text-sm font-normal leading-tight text-zinc-400">
                                 You have {" "}
-                                {watchListMovies.length ?? 0} movies on your watchlist
+                                {watchListMovies.length ?? 0} movie{watchListMovies.length > 1 ? 's' : ''} on your watchlist.
                             </span>
                         </div>
                         <div>
@@ -125,18 +132,24 @@ async function CardWrapper() {
                             </Button>
                         </div>
                     </div>
-                    {lastTenMoviesAdded.length ? lastTenMoviesAdded.map((userMovie) => (
-                        <Link
-                            href={`/movie/${userMovie.movie?.id}`}
-                            key={userMovie.movie?.id}
-                        >
-                            <div>{userMovie.movie?.title}</div>
-                        </Link>
-                    )) : (
-                        <div className="grid place-content-center w-full h-full">
-                            <span className="text-sm text-zinc-500">
-                                Movies you add to your watchlist will appear here
-                            </span></div>)}
+                    <div className="flex gap-2 grow w-full">
+                        {lastTenMoviesAdded.length ? lastTenMoviesAdded.map((userMovie) => (
+                            <Link href={`/movie/${userMovie.movieId}`} key={userMovie.movieId} className="rounded ring-1 ring-white/5">
+                                <Image
+                                    src={`https://image.tmdb.org/t/p/w342${userMovie.movie?.tmdbPosterPath}`}
+                                    alt=""
+                                    className="rounded-[inherit]"
+                                    width={109.333}
+                                    height={164}
+                                />
+                                {/* <div>{userMovie.movie?.title}</div> */}
+                            </Link>
+                        )) : (
+                            <div className="grid place-content-center w-full h-full">
+                                <span className="text-sm text-zinc-500">
+                                    Movies you add to your watchlist will appear here
+                                </span></div>)}
+                    </div>
                 </Card>
             </div>
         </div>
