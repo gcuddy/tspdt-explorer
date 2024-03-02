@@ -1,7 +1,6 @@
-import { discord } from "@/core/auth/oauth";
+import { discord } from "./oauth";
 import { generateState } from "arctic";
 import * as context from "next/headers";
-
 
 export const GET = async () => {
     const state = generateState();
