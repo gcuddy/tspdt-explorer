@@ -90,7 +90,7 @@ async function CardWrapper() {
                 </div>
                 <div className="flex gap-2 grow w-full">
                     {lastTenMoviesSeen.length ? lastTenMoviesSeen.map((userMovie) => (
-                        <div key={userMovie.movieId} className="rounded ring-1 ring-white/5">
+                        <Link href={`/movie/${userMovie.movieId}`} key={userMovie.movieId} className="rounded ring-1 ring-white/5">
                             <Image
                                 src={`https://image.tmdb.org/t/p/w342${userMovie.movie?.tmdbPosterPath}`}
                                 alt=""
@@ -99,7 +99,7 @@ async function CardWrapper() {
                                 height={164}
                             />
                             {/* <div>{userMovie.movie?.title}</div> */}
-                        </div>
+                        </Link>
                     )) : (
                         <div className="grid place-content-center w-full h-full">
                             <span className="text-sm text-zinc-500">

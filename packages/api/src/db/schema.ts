@@ -143,7 +143,7 @@ export const userMovie = sqliteTable(
         movieId: text("movie_id").notNull().references(() => movies.id),
         posterPath: text("poster_path"),
         //   could get more complex with activity, but we'll keep it like this for now
-        timeSeen: integer("time_seen", { mode: "timestamp" }),
+        timeSeen: integer("time_seen", { mode: "timestamp_ms" }),
         timeFavorited: integer("time_favorited", { mode: "timestamp" }),
         //   to watchlist...
         timeAdded: integer("time_added", { mode: "timestamp" }),

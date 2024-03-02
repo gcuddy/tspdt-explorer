@@ -3,18 +3,41 @@ import { client } from '@/lib/hono';
 import { getAuthHeaders } from './data-layer';
 import { revalidatePath } from 'next/cache';
 
-export async function markAsSeen(id: string, unmark = false) {
-    console.log({ id, unmark });
-    console.log("date", new Date());
+export async function markAsSeen(id: string, unmark = false, alwaysRevalidate = false) {
     try {
-        const res = await client.movie[":id"].interaction.$post({
+        await client.movie[":id"].interaction.$post({
             param: { id },
             json: { timeSeen: unmark ? null : new Date() }
         },
             { headers: await getAuthHeaders() });
-        console.log({ res });
     } catch (e) {
         console.error(e);
+        revalidatePath(`/movie/${id}`);
     }
-    revalidatePath(`/movie/${id}`);
+}
+
+export async function toggleWatchlist(id: string, remove = false, alwaysRevalidate = false) {
+    try {
+        await client.movie[":id"].interaction.$post({
+            param: { id },
+            json: { timeAdded: remove ? null : new Date() }
+        },
+            { headers: await getAuthHeaders() });
+    } catch (e) {
+        console.error(e);
+        revalidatePath(`/movie/${id}`);
+    }
+}
+
+export async function toggleFavorite(id: string, remove = false, alwaysRevalidate = false) {
+    try {
+        await client.movie[":id"].interaction.$post({
+            param: { id },
+            json: { timeFavorited: remove ? null : new Date() }
+        },
+            { headers: await getAuthHeaders() });
+    } catch (e) {
+        console.error(e);
+        revalidatePath(`/movie/${id}`);
+    }
 }

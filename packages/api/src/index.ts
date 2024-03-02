@@ -134,16 +134,19 @@ const routes = app
         return c.json(interaction ?? null);
     })
     .post("/movie/:id/interaction", zValidator("json", z.object({
-        timeAdded: z.coerce.date().or(z.null()).optional(),
-        timeFavorited: z.coerce.date().or(z.null()).optional(),
-        timeSeen: z.date().or(z.null()).optional(),
+        timeAdded: z.date().or(z.string().transform(d => new Date(d))).or(z.null()).optional(),
+        timeFavorited: z.date().or(z.string().transform(d => new Date(d))).or(z.null()).optional(),
+        timeSeen: z.date().or(z.string().transform(d => new Date(d))).or(z.null()).optional(),
     }), (result, c) => {
+        console.log("posting interaction", result, c);
         if (!result.success) {
             console.log('result.error', result.error);
             return c.json({ error: result.error });
+        } else {
+            console.log("result.timeSeen", result.data.timeSeen);
         }
 
-    }), async (c, next) => {
+    }), async (c) => {
         console.log('posting interaction');
         const user = c.get("user");
         if (!user) {
@@ -155,19 +158,20 @@ const routes = app
 
         console.log({ data })
 
-        await db.insert(userMovie).values({
+        const updated = await db.insert(userMovie).values({
             userId: user.id,
             movieId: c.req.param("id"),
             ...data
         }).onConflictDoUpdate({
             target: [userMovie.userId, userMovie.movieId],
             set: {
-                ...data
+                ...data,
+                // If we are are marking a movie as seen, we should then remove it from the watchlist
+                timeAdded: data.timeAdded ? data.timeAdded : data.timeSeen ? null : undefined
             }
-        });
+        }).returning();
 
-
-        return next();
+        return c.json(updated);
 
     })
     .get("/movie/:id", async (c) => {
