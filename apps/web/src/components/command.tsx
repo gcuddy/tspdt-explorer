@@ -108,9 +108,11 @@ function useControl() {
         };
     }, [root]);
 
+
     useEffect(() => {
         if (!visible) return;
 
+        // todo rewrite as memo
         async function runEffect() {
             console.log("running effect");
             const p = activeProviders.length
@@ -128,7 +130,8 @@ function useControl() {
         }
 
         runEffect();
-    }, [visible, input, activeProviders, providers]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [visible]);
 
     useEffect(() => {
         const el = root?.querySelector(`[data-element="results"]`)!;
@@ -150,6 +153,14 @@ function useControl() {
         return () => observer.disconnect();
     }, [root, control]);
 
+    const show = useCallback(() => {
+        setVisible(true);
+        setInput("");
+    }, []);
+
+    const hide = useCallback(() => {
+        setVisible(false);
+    }, []);
     useEffect(() => {
         function onKeydown(e: KeyboardEvent) {
             if (e.key === "k" && (e.ctrlKey || e.metaKey)) {
@@ -173,7 +184,7 @@ function useControl() {
         return () => {
             document.removeEventListener("keydown", onKeydown);
         };
-    }, [control, visible]);
+    }, [control, visible, show]);
 
     useEffect(() => {
         function onKeydown(e: KeyboardEvent) {
@@ -213,14 +224,6 @@ function useControl() {
         return grouped;
     }, [input, actions]);
 
-    const show = useCallback(() => {
-        setVisible(true);
-        setInput("");
-    }, []);
-
-    const hide = useCallback(() => {
-        setVisible(false);
-    }, []);
 
     return {
         bind: setRoot,
@@ -415,6 +418,7 @@ export function CommandBarInner({ children, movies }:
                                         // biome-ignore lint/a11y/useKeyWithClickEvents: this is fine
                                         // biome-ignore lint/a11y/useKeyWithMouseEvents: this is also fine
                                         <div
+                                            key={item.key}
                                             style={style}
                                             data-element="action"
                                             onClick={() => {

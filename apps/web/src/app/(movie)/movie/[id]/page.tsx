@@ -9,7 +9,7 @@ import { client } from "@/lib/hono";
 import { Metadata } from "next";
 import { ActionBar } from "./action-bar";
 
-export const getMovie = cache(async (id: string) => {
+const getMovie = cache(async (id: string) => {
     console.time("getMovie");
     console.time("getMovie:db");
     const res = await client.movie[":id"].$get({ param: { id } });
