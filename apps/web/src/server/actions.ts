@@ -14,6 +14,7 @@ export async function markAsSeen(id: string, unmark = false, alwaysRevalidate = 
         console.error(e);
         revalidatePath(`/movie/${id}`);
     }
+    revalidatePath(`/me`);
 }
 
 export async function toggleWatchlist(id: string, remove = false, alwaysRevalidate = false) {
@@ -27,6 +28,7 @@ export async function toggleWatchlist(id: string, remove = false, alwaysRevalida
         console.error(e);
         revalidatePath(`/movie/${id}`);
     }
+    revalidatePath(`/me`);
 }
 
 export async function toggleFavorite(id: string, remove = false, alwaysRevalidate = false) {
@@ -40,4 +42,5 @@ export async function toggleFavorite(id: string, remove = false, alwaysRevalidat
         console.error(e);
         revalidatePath(`/movie/${id}`);
     }
+    revalidatePath(`/me`);
 }

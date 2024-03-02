@@ -306,7 +306,12 @@ export function CommandBarInner({ children, movies }:
             const directors = movie.moviesToDirectors.map((m) => m.director?.name).filter(Boolean);
             return NavigationAction({
                 title: movie.title,
-                render: () => <div className="flex items-center"><span className="truncate">{`${movie.title}`}</span><span className="text-zinc-500 text-xs truncate ml-2">{`${directors.join(", ")}`} · {movie.year}</span></div>,
+                render: () => {
+                    return (<div className="flex items-center">
+                        <span className="truncate">{`${movie.title}`}</span>
+                        <span className="text-zinc-500 text-xs truncate ml-2"><span className="tabular-nums">{movie.currentRanking}</span> · {`${directors.join(", ")}`} · {movie.year}</span>
+                    </div>)
+                },
                 category: "Movies",
                 keywords: directors,
                 path: `/movie/${movie.id}`,

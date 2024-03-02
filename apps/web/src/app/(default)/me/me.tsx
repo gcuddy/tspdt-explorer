@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, SignOut } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Heart, SignOut } from "@phosphor-icons/react/dist/ssr";
 import Form from "@/components/form";
 import { getMovieInteractions, getPageSession } from "@/server/data-layer";
 import { DeepNonNullable } from "ts-essentials";
@@ -94,16 +94,7 @@ async function CardWrapper() {
                 </div>
                 <div className="flex gap-2 grow w-full">
                     {lastTenMoviesSeen.length ? lastTenMoviesSeen.map((userMovie) => (
-                        <Link href={`/movie/${userMovie.movieId}`} key={userMovie.movieId} className="rounded ring-1 ring-white/5">
-                            <Image
-                                src={`https://image.tmdb.org/t/p/w342${userMovie.movie?.tmdbPosterPath}`}
-                                alt=""
-                                className="rounded-[inherit]"
-                                width={109.333}
-                                height={164}
-                            />
-                            {/* <div>{userMovie.movie?.title}</div> */}
-                        </Link>
+                        <Poster id={userMovie.movieId} posterPath={userMovie.movie?.tmdbPosterPath ?? ''} favorited={!!userMovie.timeFavorited} key={userMovie.movieId} />
                     )) : (
                         <div className="grid place-content-center w-full h-full">
                             <span className="text-sm text-zinc-500">
@@ -134,16 +125,7 @@ async function CardWrapper() {
                     </div>
                     <div className="flex gap-2 grow w-full">
                         {lastTenMoviesAdded.length ? lastTenMoviesAdded.map((userMovie) => (
-                            <Link href={`/movie/${userMovie.movieId}`} key={userMovie.movieId} className="rounded ring-1 ring-white/5">
-                                <Image
-                                    src={`https://image.tmdb.org/t/p/w342${userMovie.movie?.tmdbPosterPath}`}
-                                    alt=""
-                                    className="rounded-[inherit]"
-                                    width={109.333}
-                                    height={164}
-                                />
-                                {/* <div>{userMovie.movie?.title}</div> */}
-                            </Link>
+                            <Poster id={userMovie.movieId} posterPath={userMovie.movie?.tmdbPosterPath ?? ''} favorited={!!userMovie.timeFavorited} key={userMovie.movieId} />
                         )) : (
                             <div className="grid place-content-center w-full h-full">
                                 <span className="text-sm text-zinc-500">
@@ -173,4 +155,24 @@ function CardSkeleton() {
             </Card>
         </div>
     );
+}
+
+function Poster({ id, posterPath, favorited }: { id: string, posterPath: string, favorited: boolean }) {
+
+    return <Link href={`/movie/${id}`} className="rounded ring-1 ring-white/5 relative">
+        <Image
+            src={`https://image.tmdb.org/t/p/w342${posterPath}`}
+            alt=""
+            className="rounded-[inherit]"
+            width={109.333}
+            height={164}
+        />
+        {favorited && <div className="absolute -bottom-2 -right-1">
+            <Heart
+                weight="fill"
+                className="text-red-500"
+            />
+        </div>}
+
+    </Link>
 }
