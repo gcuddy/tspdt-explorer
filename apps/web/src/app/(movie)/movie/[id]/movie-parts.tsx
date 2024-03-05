@@ -1,53 +1,27 @@
-import { useMemo } from "react";
-import * as Dialog from "@/components/ui/dialog";
+import { groupBy } from "remeda";
 import * as tmdb from "@/app/api/tmdb";
-import { Button } from "@/components/ui/button";
-import { Play } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Poster } from "@/components/poster";
+import { objectEntries } from "@antfu/utils";
+import { cn } from "@/utils/tailwind";
+import { Credits, PosterSelector, Trailer } from "./movie-client-parts";
 
 async function getMovieData({ tmdbId }: { tmdbId: number }) {
 	const tmovie = await tmdb.getMovie({ tmdbId });
 	return tmovie;
 }
 
-export async function Trailer({ tmdbId }: { tmdbId: number }) {
+export async function TrailerWrapper({ tmdbId }: { tmdbId: number }) {
 
 	const movie = await getMovieData({ tmdbId });
 
 
-	const trailer = useMemo(() => {
-		return movie?.videos.results.find((v) => v.type === "Trailer");
-	}, [movie?.videos.results]);
+	const trailer = movie?.videos.results.find((v) => v.type === "Trailer");
 
 	if (!trailer) return null;
 
 	return (<div>{!!trailer ? (
-		<Dialog.Root>
-			<Dialog.Trigger asChild>
-				<Button variant="ghost">
-					<Play className="mr-1.5" size={12} weight="fill" />
-					Trailer
-				</Button>
-			</Dialog.Trigger>
-			<Dialog.Portal>
-				<Dialog.Overlay />
-				<Dialog.Content>
-					<Dialog.Title>Trailer</Dialog.Title>
-					<div className="flex justify-center">
-						{/* TODO: make this bigger */}
-						<iframe
-							width="560"
-							height="315"
-							src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&rel=0&controls=1&showinfo=0&modestbranding=1`}
-							title="YouTube video player"
-							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-							style={{ border: "0px" }}
-						/>
-					</div>
-				</Dialog.Content>
-			</Dialog.Portal>
-		</Dialog.Root>
+		<Trailer trailerKey={trailer.key} />
 	) : null} </div>);
 }
 
@@ -66,43 +40,7 @@ export async function MovieOverview({ tmdbId }: { tmdbId: number }) {
 		</div>
 		<div className="pr-6 shrink-0">
 			{(movie.images.posters?.length ?? 0) > 1 ? (
-				<Dialog.Root>
-					<Dialog.Trigger className="contents">
-						{/* this makes distance 32, outer radius is 8 so 8 - 32 is negative - no radius needed */}
-						<Poster
-							poster_path={
-								movie.poster_path ?? ""
-								//   userMovie?.posterPath ?? movie.poster_path ?? ""
-							}
-						/>
-					</Dialog.Trigger>
-					<Dialog.Portal>
-						<Dialog.Overlay />
-						<Dialog.Content>
-							<Dialog.Title>Change Poster</Dialog.Title>
-							<div className="flex flex-wrap max-h-96 overflow-y-auto">
-								{movie.images.posters.map((p) => (
-									<div key={p.file_path} className="w-1/4 p-2">
-										{/* {JSON.stringify(p)} */}
-										<button
-											onClick={() => {
-												//   replicache.mutate.movie_poster_path({
-												//     id: movie.id,
-												//     posterPath: p.file_path,
-												//   });
-											}}
-										>
-											<Poster
-												width={p.width}
-												poster_path={p.file_path}
-											/>
-										</button>
-									</div>
-								))}
-							</div>
-						</Dialog.Content>
-					</Dialog.Portal>
-				</Dialog.Root>
+				<PosterSelector movie={movie} />
 			) : (
 				<Poster poster_path={movie.poster_path ?? ""} />
 			)}
@@ -126,4 +64,61 @@ export function MovieOverviewSkeleton() {
 			</div>
 		</Card>
 	)
+}
+
+const JOBS_TO_SHOW = [
+	"Screenplay",
+	"Producer",
+	"Cinematography",
+	"Director of Photography",
+	"Editor",
+	"Original Music Composer",
+	"Music",
+];
+
+
+export async function MovieCreditsCard({
+	tmdbId,
+	className,
+}: {
+	tmdbId: number;
+	className?: string;
+}) {
+
+	const movie = await getMovieData({ tmdbId });
+	if (!movie) return null;
+	const groupedCrew = objectEntries(groupBy(movie.credits.crew ?? [], (c) => c.job))
+		.filter(([job, _crew]) => JOBS_TO_SHOW.includes(job as string))
+		//   display in same order
+		.sort(([jobA, _crewA], [jobB, _crewB]) => {
+			return (
+				JOBS_TO_SHOW.indexOf(jobA as string) -
+				JOBS_TO_SHOW.indexOf(jobB as string)
+			);
+		})
+
+	return (
+		<Card className={cn("col-span-8 p-6", className)}>
+			<Credits movie={movie} groupedCrew={groupedCrew as any} />
+		</Card>
+	);
+}
+
+export function MovieCreditsCardSkeleton() {
+	return (
+		<Card className="col-span-8 p-6">
+			<div className="flex flex-wrap text-balance gap-x-3 gap-y-1">
+				{Array.from({ length: 10 }).map((_, i) => (
+					<div
+						className="w-[150px] h-6 bg-zinc-400 animate-pulse"
+						key={i}
+					>
+					</div>
+				))}
+				<div className="text-sm rounded-md  text-zinc-200 font-medium hover:text-zinc-50 transition">
+					Show more
+				</div>
+			</div>
+		</Card>
+	);
 }

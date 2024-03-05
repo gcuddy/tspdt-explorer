@@ -1,3 +1,4 @@
+"use server";
 import { uncached_getMovie } from "@/utils/tmdb";
 import { cache } from "react";
 import "server-only";
