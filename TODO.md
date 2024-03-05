@@ -1,0 +1,17 @@
+- [x] Transfer all endpoints over to new API
+- [ ] Unify genre/year pages with views
+- [ ] List view and table views across all views
+- [ ] Person page should have unified actor/director or at least link to work as actor
+- [ ] Do the 21st century canon next https://theyshootpictures.com/21stcentury_startinglist_table.php
+- [ ] Global map type thing
+- [ ] A better filtering system that has everything url search params, instead of separate endpoints for genre, year, country, etc
+- [ ] CSRF
+- [ ] sessions shouldn't expire so quickly
+- [ ] handle error boundaries
+- [ ] allow all tmdb people to have urls
+- [ ] opengraph images
+- [ ] fix images sometimes not working in reccommendations (should have skeleton fallback, as well as considering using r2/cloudflare images)
+- [ ] legend and toggle films for multiple films on chart (ie with director or compare page, see below)
+- [ ] compare page
+- [ ] import from letterboxd via csv
+- [ ] world maps

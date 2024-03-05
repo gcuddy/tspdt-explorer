@@ -1,0 +1,26 @@
+name = "tspdt-api"
+compatibility_date = "2023-12-01"
+
+
+[ai]
+binding = "AI"
+
+[[vectorize]]
+binding = "VECTORIZE_INDEX" # available within your Worker on env.VECTORIZE_INDEX
+index_name = "tspdt-index"
+
+# [vars]
+# MY_VARIABLE = "production_value"
+
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
+
+[[d1_databases]]
+binding = "DB"                                       # i.e. available in your Worker on env.DB
+database_name = "tspdt"
+database_id = "cbf154c4-2b39-430d-aebf-e5bd8426775e"
