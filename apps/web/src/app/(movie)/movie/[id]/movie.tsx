@@ -1,15 +1,19 @@
 "use client";
 
+
+// TODO: this should be converted to a server component
+
 import { useCommandBar } from "@/components/command";
 import { Card } from "@/components/ui/card";
 import { Stack } from "@/components/ui/layout";
 import * as Tabs from "@radix-ui/react-tabs";
 import { MovieHeader } from "./movie-header";
-import { getMovie } from "./page";
 import { RankingChart } from "./ranking-chart";
 
+import { Poster } from "@/components/poster";
 import { Button } from "@/components/ui/button";
 import * as Dialog from "@/components/ui/dialog";
+import { getRecommendations } from "@/server/data-layer";
 import { cn } from "@/utils/tailwind";
 import { objectEntries } from "@antfu/utils";
 import {
@@ -18,19 +22,22 @@ import {
     Play,
     PlusCircle,
 } from "@phosphor-icons/react";
-import Link from "next/link";
-import { useMemo } from "react";
-import { groupBy } from "remeda";
 import { useQuery } from "@tanstack/react-query";
-import { getRecommendations } from "@/server/data-layer";
-import { Poster } from "@/components/poster";
+import Link from "next/link";
+import { Suspense, useMemo } from "react";
+import { groupBy } from "remeda";
+import { MovieOverview, MovieOverviewSkeleton, Trailer } from "./movie-parts";
 // import * as Dialog from "@radix-ui/react-dialog";
+import { client } from "@/lib/hono";
+import type { InferResponseType } from 'hono/client';
+
+const $get = client.movie[":id"].$get;
 
 export function Movie({
     movie,
     actionSlot
 }: {
-    movie: Awaited<ReturnType<typeof getMovie>>;
+    movie: NonNullable<InferResponseType<typeof $get>>
     actionSlot: React.ReactNode;
 }) {
     const bar = useCommandBar();
@@ -46,10 +53,6 @@ export function Movie({
         if (!current || !previous) return undefined;
         return current - previous;
     }, [movie.rankings]);
-
-    const trailer = useMemo(() => {
-        return movie.tmdb?.videos.results.find((v) => v.type === "Trailer");
-    }, [movie.tmdb?.videos.results]);
 
 
     bar.register("movie", async () => {
@@ -94,33 +97,9 @@ export function Movie({
         <>
             <main className="mx-auto max-w-5xl">
                 <div className="flex sticky justify-end gap-3 top-0 bg-zinc-925 z-10 h-16 items-center">
-                    {!!trailer ? (
-                        <Dialog.Root>
-                            <Dialog.Trigger asChild>
-                                <Button variant="ghost">
-                                    <Play className="mr-1.5" size={12} weight="fill" />
-                                    Trailer
-                                </Button>
-                            </Dialog.Trigger>
-                            <Dialog.Portal>
-                                <Dialog.Overlay />
-                                <Dialog.Content>
-                                    <Dialog.Title>Trailer</Dialog.Title>
-                                    <div className="flex justify-center">
-                                        {/* TODO: make this bigger */}
-                                        <iframe
-                                            width="560"
-                                            height="315"
-                                            src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&rel=0&controls=1&showinfo=0&modestbranding=1`}
-                                            title="YouTube video player"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            style={{ border: "0px" }}
-                                        />
-                                    </div>
-                                </Dialog.Content>
-                            </Dialog.Portal>
-                        </Dialog.Root>
-                    ) : null}
+                    <Suspense fallback={<Button> <div className="h-2 w-4 bg-zinc-400 animate-pulse"></div></Button>}>
+                        {!!movie.tmdbId && <Trailer tmdbId={movie.tmdbId} />}
+                    </Suspense>
                     {actionSlot}
                 </div>
                 <Stack
@@ -134,57 +113,9 @@ export function Movie({
                 >
                     <MovieHeader movie={movie} />
                     <div className="w-full max-w-3xl mx-auto space-y-14">
-                        <Card className="h-72 flex flex-row gap-16">
-                            <div className="pl-6 py-6 gap-4 h-full flex flex-col justify-center">
-                                <span className=" text-xl leading-tight drop-shadow  tracking-tight text-balance text-zinc-50 font-semibold">
-                                    {movie.tmdb?.tagline}
-                                </span>
-                                <p className="text-sm text-zinc-400">{movie.tmdb?.overview}</p>
-                            </div>
-                            <div className="pr-6 shrink-0">
-                                {(movie.tmdb?.images.posters?.length ?? 0) > 1 ? (
-                                    <Dialog.Root>
-                                        <Dialog.Trigger className="contents">
-                                            {/* this makes distance 32, outer radius is 8 so 8 - 32 is negative - no radius needed */}
-                                            <Poster
-                                                poster_path={
-                                                    movie.tmdb?.poster_path ?? ""
-                                                    //   userMovie?.posterPath ?? movie.tmdb?.poster_path ?? ""
-                                                }
-                                            />
-                                        </Dialog.Trigger>
-                                        <Dialog.Portal>
-                                            <Dialog.Overlay />
-                                            <Dialog.Content>
-                                                <Dialog.Title>Change Poster</Dialog.Title>
-                                                <div className="flex flex-wrap max-h-96 overflow-y-auto">
-                                                    {movie.tmdb?.images.posters.map((p) => (
-                                                        <div key={p.file_path} className="w-1/4 p-2">
-                                                            {/* {JSON.stringify(p)} */}
-                                                            <button
-                                                                onClick={() => {
-                                                                    //   replicache.mutate.movie_poster_path({
-                                                                    //     id: movie.id,
-                                                                    //     posterPath: p.file_path,
-                                                                    //   });
-                                                                }}
-                                                            >
-                                                                <Poster
-                                                                    width={p.width}
-                                                                    poster_path={p.file_path}
-                                                                />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </Dialog.Content>
-                                        </Dialog.Portal>
-                                    </Dialog.Root>
-                                ) : (
-                                    <Poster poster_path={movie.tmdb?.poster_path ?? ""} />
-                                )}
-                            </div>
-                        </Card>
+                        <Suspense fallback={<MovieOverviewSkeleton />}>
+                            {!!movie.tmdbId && <MovieOverview tmdbId={movie.tmdbId} />}
+                        </Suspense>
                         <div className="grid grid-cols-12 gap-6">
                             <Card className="col-span-4 p-6">
                                 <div className="flex flex-col gap-2 w-full">

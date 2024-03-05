@@ -10,10 +10,6 @@ import { DeepNonNullable } from "ts-essentials";
 import { FilmReel, Bookmarks } from "@phosphor-icons/react/dist/ssr";
 
 export default function Me({ user }: Pick<DeepNonNullable<Awaited<ReturnType<typeof getPageSession>>>, "user">) {
-
-
-
-
     return (
         <div className="flex flex-col min-h-screen py-2">
             <div className="flex items-center justify-between">
