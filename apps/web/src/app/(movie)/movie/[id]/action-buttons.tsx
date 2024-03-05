@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { markAsSeen, toggleFavorite, toggleWatchlist } from "@/server/actions";
 import { cn } from "@/utils/tailwind";
 import { CheckCircle, FilmReel, Heart, ListPlus } from "@phosphor-icons/react";
-import { useOptimistic, useState } from 'react'
+import { useState } from 'react'
 
 
 export function MarkAsSeen({ id, seen }: { id: string, seen: boolean }) {

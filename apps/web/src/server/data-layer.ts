@@ -17,6 +17,7 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
 
 export const getPageSession = cache(async () => {
     const auth_session = cookies().get("auth_session");
+    console.log({ auth_session });
     auth_session?.value
     // lol, there's gotta be a better way...
     const session = await client.auth.validate.$get({}, {

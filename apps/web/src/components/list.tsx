@@ -1,16 +1,13 @@
 "use client";
-import { useRef } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { For } from "million/react";
-import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
 
 export function WindowList<T>({
   items,
-  render,
 }: {
   items: T[];
   render: (item: T) => React.ReactNode;
 }) {
-  const parentRef = useRef<HTMLElement>(null);
 
   const rowVirtualizer = useWindowVirtualizer({
     count: 10000,

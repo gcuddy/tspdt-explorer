@@ -19,7 +19,7 @@ if (!tspdt || !tmdb) {
 const movie = (await fetch(
   `https://api.themoviedb.org/3/movie/${tmdb}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits`
 ).then((res) => res.json())) as MovieDetails & { credits: Credits };
-const rows = db
+db
   .query(
     "update movies set tmdb_data = ?, tmdb_id = ?, poster_path = ? where tspdt_id = ?"
   )

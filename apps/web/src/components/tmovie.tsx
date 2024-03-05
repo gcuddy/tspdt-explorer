@@ -1,6 +1,6 @@
 import { getMovie } from "@/app/api/tmdb";
-import { Director, Movie } from "@/core/movie/movie.sql";
 import { MovieListItem } from "./movie";
+import { Director, Movie } from "tspdt-api/src/db/schema";
 
 export async function FancyMovieListItem({
   movie,

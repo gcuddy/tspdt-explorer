@@ -25,7 +25,6 @@ export function RankingChart({
   enablePoints?: boolean;
   colors?: string[];
 }) {
-  const currentYear = new Date().getFullYear();
 
   const router = useRouter();
 
@@ -252,44 +251,44 @@ export function RankingChart({
       pointSymbol={
         enablePoints
           ? (props) => {
-              props.color;
-              return (
-                <circle
-                  r={props.size / 2}
-                  strokeWidth={props.borderWidth}
-                  stroke={props.borderColor}
-                  fill={
-                    Number(props.datum.y) <= 1000 ? "hsl(17, 63%, 80%)" : "#fff"
-                  }
-                />
-              );
-            }
+            props.color;
+            return (
+              <circle
+                r={props.size / 2}
+                strokeWidth={props.borderWidth}
+                stroke={props.borderColor}
+                fill={
+                  Number(props.datum.y) <= 1000 ? "hsl(17, 63%, 80%)" : "#fff"
+                }
+              />
+            );
+          }
           : undefined
       }
       legends={
         data.length === 1
           ? undefined
           : [
-              // TODO: this is not great, probably shuold implement own
-              //   {
-              //     anchor: "top",
-              //     direction: "row",
-              //     itemWidth: 50,
-              //     // itemWidth: ,
-              //     toggleSerie: true,
-              //     itemHeight: 25,
-              //     translateY: -25,
-              //     // translateX: 100,
-              //     symbolSize: 6,
-              //     symbolShape: "circle",
-              //     itemTextColor: "#fff",
-              //     data: data.map((movie, index) => ({
-              //       id: movie.id,
-              //       label: movie.title,
-              //       fill: getItemAtIndex(COLORS, index),
-              //     })),
-              //   },
-            ]
+            // TODO: this is not great, probably shuold implement own
+            //   {
+            //     anchor: "top",
+            //     direction: "row",
+            //     itemWidth: 50,
+            //     // itemWidth: ,
+            //     toggleSerie: true,
+            //     itemHeight: 25,
+            //     translateY: -25,
+            //     // translateX: 100,
+            //     symbolSize: 6,
+            //     symbolShape: "circle",
+            //     itemTextColor: "#fff",
+            //     data: data.map((movie, index) => ({
+            //       id: movie.id,
+            //       label: movie.title,
+            //       fill: getItemAtIndex(COLORS, index),
+            //     })),
+            //   },
+          ]
       }
       lineWidth={data.length > 30 ? 0.5 : 1}
       //   pointColor={(point: Point) => {

@@ -46,13 +46,13 @@ async function CardWrapper() {
 
     const lastTenMoviesSeen = moviesSeen
         .filter((m) => m.timeSeen)
-        .sort((a, b) => (a.timeSeen ?? 0) - (b.timeSeen ?? 0))
+        .sort((a, b) => (Number(a.timeSeen) ?? 0) - (Number(b.timeSeen) ?? 0))
         .reverse()
         .slice(0, 10);
 
     const lastTenMoviesAdded = watchListMovies
         .filter((m) => m.timeAdded)
-        .sort((a, b) => (a.timeAdded ?? 0) - (b.timeAdded ?? 0))
+        .sort((a, b) => (Number(a.timeAdded) ?? 0) - (Number(b.timeAdded) ?? 0))
         .reverse()
         .slice(0, 10);
 

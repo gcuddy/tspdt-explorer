@@ -22,13 +22,16 @@ type Bindings = {
 
 type Variables = {
     session: Session | null;
-    user: LuciaUser | null;
+    user: LuciaUser & {
+        email: string;
+    } | null;
 }
 
 const app = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 
 app.use("*", async (c, next) => {
     const lucia = initializeLucia(c.env.DB);
+    console.log(lucia)
     const cok = c.req.header("Cookie") ?? "";
     console.log('cok', cok);
     const sessionId = getCookie(c, lucia.sessionCookieName) ?? null;
@@ -50,6 +53,7 @@ app.use("*", async (c, next) => {
             append: true
         });
     }
+    // @ts-expect-error - types all screwy
     c.set("user", user);
     c.set("session", session);
     return next();

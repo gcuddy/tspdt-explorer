@@ -1,9 +1,6 @@
 import { DefaultTableView } from "@/components/table";
-import { SimplifiedMovie } from "@/core/movie/movie.sql";
-import { movies } from "@/db/schema";
 import { tmdb } from "@/lib/tmdb";
 import { client } from "@/lib/hono";
-import type { Movie } from "tspdt-api/src/db/schema"
 import { Person } from "@/components/person";
 
 async function getData(id: number) {

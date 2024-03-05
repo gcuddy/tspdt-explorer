@@ -1,7 +1,3 @@
-import * as tmdb from "@/app/api/tmdb";
-// import { movies, rankings } from "@/core/movie/movie.sql";
-// import { db } from "@/db/client";
-// import { asc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Movie } from "./movie";
@@ -27,23 +23,25 @@ const getMovie = cache(async (id: string) => {
 
     console.time("getMovie:tmdb");
 
-    const tmovie = await tmdb.getMovie(movie);
-
-    //   save tmdbId
-    if (tmovie?.id && movie.tmdbId !== tmovie.id) {
-        // await db.update(movies).set({
-        //   tmdbId: tmovie.id,
-        // });
-    }
+    // const tmovie = await tmdb.getMovie(movie);
+    //
+    // //   save tmdbId
+    // if (tmovie?.id && movie.tmdbId !== tmovie.id) {
+    //     // await db.update(movies).set({
+    //     //   tmdbId: tmovie.id,
+    //     // });
+    // }
 
     console.timeEnd("getMovie:tmdb");
 
     console.timeEnd("getMovie");
 
-    return {
-        ...movie,
-        tmdb: tmovie,
-    };
+    return movie;
+
+    // return {
+    //     ...movie,
+    //     tmdb: tmovie,
+    // };
 });
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
     const movie = await getMovie(params.id);

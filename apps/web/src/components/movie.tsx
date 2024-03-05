@@ -1,10 +1,10 @@
-import { Director, Movie } from "@/core/movie/movie.sql";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Instrument_Serif } from "next/font/google";
 import { Button } from "./ui/button";
 import { PeopleList, Person } from "./people-list";
+import { Director, Movie } from "tspdt-api/src/db/schema";
 
 const instrument = Instrument_Serif({
     weight: "400",

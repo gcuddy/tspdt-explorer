@@ -1,5 +1,5 @@
-import { Movie, Ranking } from "@/core/movie/movie.sql";
 import Link from "next/link";
+import { Movie, Ranking } from "tspdt-api/src/db/schema";
 
 export function MovieList({
   list,
@@ -15,8 +15,8 @@ export function MovieList({
           {(movie.rankings.at(-1)?.ranking ?? 99999) <= 1000
             ? "★ "
             : (movie.rankings.at(-1)?.ranking ?? 99999) <= 2500
-            ? "● "
-            : ""}
+              ? "● "
+              : ""}
           <Link href={`/movie/${movie.id}`}>{movie.title}</Link> (
           {movie.rankings.at(-1)?.ranking})
         </li>

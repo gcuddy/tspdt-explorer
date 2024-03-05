@@ -1,15 +1,24 @@
-import { getMovie } from "./page";
-
-import { Instrument_Serif } from "next/font/google";
-import Link from "next/link";
-import Image from "next/image";
-import { Tag } from "@/components/ui/tag";
+import * as tmdb from "@/app/api/tmdb";
 import { PeopleList } from "@/components/people-list";
-type Movie = Awaited<ReturnType<typeof getMovie>>;
+import { Tag } from "@/components/ui/tag";
+import { client } from "@/lib/hono";
+import type { InferResponseType } from 'hono/client';
+import { Instrument_Serif } from "next/font/google";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense } from "react";
+
+const $get = client.movie[":id"].$get;
+type Movie = InferResponseType<typeof $get>
 
 type Props = {
     movie: Movie;
 };
+
+async function getMovieData({ tmdbId }: { tmdbId: number }) {
+    const tmovie = await tmdb.getMovie({ tmdbId });
+    return tmovie;
+}
 
 const serif = Instrument_Serif({ weight: "400", subsets: ["latin"] });
 
@@ -62,6 +71,8 @@ function Genres({ genres }: { genres: string[] }) {
 
 // million-ignore
 function MovieHeaderDetails({ movie }: { movie: Movie }) {
+    if (!movie) return null;
+
     return (
         <div className="flex gap-2 flex-col text-zinc-400 items-center ">
             <div className="flex gap-2 items-center flex-wrap justify-center">
@@ -82,7 +93,7 @@ function MovieHeaderDetails({ movie }: { movie: Movie }) {
                 </p>
             </div>
             <div className="flex gap-2 items-center">
-                <span className="text-zinc-400">{movie.tmdb?.runtime} min</span>
+                <span className="text-zinc-400">{movie.runtime} min</span>
                 <span>·</span>
                 <div>
                     <Genres genres={movie.genre ?? []} />
@@ -97,31 +108,28 @@ function MovieHeaderDetails({ movie }: { movie: Movie }) {
 }
 
 export function MovieHeader({ movie }: Props) {
-    const ranking = movie.rankings.at(-1)?.ranking;
+    if (!movie) return null;
 
-    console.log({ movie });
+    const { currentRanking: ranking } = movie;
+
     return (
         <div className="grid grid-cols-12 w-full gap-4">
-            {!!movie.tmdb && (
-                <div className="col-span-12 flex justify-center">
-                    <Image
-                        width={1024}
-                        height={1024 * (9 / 16)}
-                        className="aspect-video"
-                        alt=""
-                        // or w1280 or original
-                        src={`https://image.tmdb.org/t/p/original${movie.tmdb?.backdrop_path}`}
-                    />
-                </div>
-            )}
+            <div className="col-span-12 flex justify-center">
+                <Image
+                    width={1024}
+                    height={1024 * (9 / 16)}
+                    className="aspect-video"
+                    alt=""
+                    // or w1280 or original
+                    src={`https://image.tmdb.org/t/p/original${movie.tmdbBackdropPath}`}
+                />
+            </div>
             <div className="col-span-12 grid grid-cols-12 gap-2">
                 <Title title={movie.title} />
                 <div className="col-span-6 col-start-4 gap-2 relative text-sm text-center flex flex-col items-center justify-center">
-                    {movie.tmdb?.original_title !== movie.title && (
-                        <h2 className="text-xl text-balance">
-                            {movie.tmdb?.original_title}
-                        </h2>
-                    )}
+                    <Suspense>
+                        {movie.tmdbId && <OriginalTitle title={movie.title} tmdbId={movie.tmdbId} />}
+                    </Suspense>
                     <MovieHeaderDetails movie={movie} />
                     <span className="flex gap-2">
                         {ranking && ranking <= 2500 && (
@@ -143,3 +151,16 @@ export function MovieHeader({ movie }: Props) {
     );
 }
 
+async function OriginalTitle({ title, tmdbId }: { title: string, tmdbId: number }) {
+
+    const movie = await getMovieData({ tmdbId });
+
+    return (
+        movie?.original_title !== title && (
+            <h2 className="text-xl text-balance">
+                {movie?.original_title}
+            </h2>
+        )
+    )
+
+}

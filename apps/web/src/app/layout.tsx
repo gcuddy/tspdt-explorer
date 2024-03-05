@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CommandBar } from "@/components/command";
-import { GlobalCommands } from "./global-commands";
 import { BodyProvider } from "./body-provider";
 import { FilterProvider } from "./filter-provider";
 import Providers from "./providers";
@@ -34,7 +33,7 @@ export default async function RootLayout({
                         <BodyProvider>
                             {/* <ActionProvider> */}
                             <FilterProvider>
-                                <GlobalCommands>{children}</GlobalCommands>
+                                {children}
                             </FilterProvider>
                             {/* </ActionProvider> */}
                         </BodyProvider>

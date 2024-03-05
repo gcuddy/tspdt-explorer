@@ -1,4 +1,4 @@
-import { MoviesSchema } from "tspdt/src/db/schema2";
+import { MoviesSchema } from "./db/schema";
 import { z } from "zod";
 
 export const MovieEmbeddingSchema = MoviesSchema.extend({

@@ -2,7 +2,6 @@
 
 import React from "react";
 import * as Dialog from "./ui/dialog";
-import { Button } from "./ui/button";
 
 // TODO: this is a *strange* way to do this, but it works
 export function ReadMoreDialog({

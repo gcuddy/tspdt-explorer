@@ -10,10 +10,7 @@ import {
     directors as DirectorsTable,
     rankings as RankingsTable,
     moviesToDirectors,
-} from "@/db/schema2";
-
-import { hc } from "hono/client";
-import { AppType } from "tspdt-api/src/index";
+} from "tspdt-api/src/db/schema";
 
 
 const alphabet =
