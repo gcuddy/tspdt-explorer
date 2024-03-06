@@ -23,19 +23,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: 'Bun setup'
-        uses: oven-sh/setup-bun@v1
+      - name: 'node'
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: 'latest'
 
-      - name: 'Bun install'
-        run: bun install --frozen-lockfile
+      - name: 'npm install'
+        run: npm install
 
       - name: Build
         run: |
           cd apps/web
           export API_URL=${{ secrets.API_URL }}
-          bunx @cloudflare/next-on-pages@latest
+          npx @cloudflare/next-on-pages@latest
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1.5.0
