@@ -1,7 +1,7 @@
 import { tmdb } from "@/lib/tmdb";
 import { notFound } from "next/navigation";
 import { Person } from "@/components/person";
-import { cache } from "react";
+import { Suspense, cache } from "react";
 import { RankingChart } from "@/app/(movie)/movie/[id]/ranking-chart";
 import { Card } from "@/components/ui/card";
 import { DefaultTableView } from "@/components/table";
@@ -60,6 +60,17 @@ async function lookupDirector(
     return director;
 }
 
+async function PersonWrapper({ director }: { director: Awaited<ReturnType<typeof getDirector>> }) {
+    const data = await lookupDirector(
+        director.name,
+        director.moviesToDirectors.map((directorToMovie) => directorToMovie.movie).filter(Boolean),
+        director.tmdbId ?? undefined
+    );
+    return (
+        data ? <Person person={data} /> : null
+    )
+}
+
 export default async function Page({ params }: { params: { id: string } }) {
     console.time("getDirector");
     const director = await getDirector(params.id);
@@ -68,20 +79,22 @@ export default async function Page({ params }: { params: { id: string } }) {
     if (!director.name) {
         notFound();
     }
-    const data = await lookupDirector(
-        director.name,
-        director.moviesToDirectors.map((directorToMovie) => directorToMovie.movie).filter(Boolean),
-        director.tmdbId ?? undefined
-    );
 
     const movies = director.moviesToDirectors.map(({ movie }) => movie).filter(Boolean);
 
     // TODO
     return (
         <div className="flex flex-col gap-4">
-            {/* <h1 className="text-4xl tracking-tighter font-bold">{director.name}</h1> */}
-            {data ? <Person person={data} /> : null}
-            {/* <MovieList list={movies} /> */}
+            <Suspense fallback={
+                <div className="flex gap-4">
+                    <div className="shrink w-36">
+                        <div className="bg-zinc-400 animate-pulse h-[216px] rounded  w-[144px]"></div>
+                    </div>
+                    <h2 className="text-2xl tracking-tighter font-bold">{director.name}</h2>
+                </div>
+            }>
+                <PersonWrapper director={director} />
+            </Suspense>
 
             <DefaultTableView
                 movies={movies}
