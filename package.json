@@ -10,7 +10,7 @@
     "build": "cd apps/web && bun run build",
     "deploy:web" : "cd apps/web && bun run deploy",
     "deploy:api" : "cd packages/api && bun run deploy",
-    "check": "tsc --noEmit --pretty",
+    "check": "tsc --noEmit --pretty"
   },
   "workspaces": [
     "packages/*",

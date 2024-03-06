@@ -3,7 +3,7 @@
 import { Lucia, TimeSpan } from "lucia";
 import { D1Adapter } from "@lucia-auth/adapter-sqlite";
 
-export function nitializeLucia(D1: D1Database, appUrl: string) {
+export function initializeLucia(D1: D1Database, appUrl: string) {
     const adapter = new D1Adapter(D1, {
         user: "tspdt_user",
         session: "tspdt_session"
