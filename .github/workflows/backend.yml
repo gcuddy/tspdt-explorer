@@ -1,4 +1,4 @@
-name: 'Backend Deployment'
+name: 'Next.JS deployment'
 
 on:
   workflow_dispatch:
@@ -6,36 +6,45 @@ on:
     branches:
       - main
     paths:
-      - 'packages/api/**'
+      - 'apps/web/**'
 
 jobs:
-  deploy:
-    name: Deploy to Cloudflare Workers
+  publish:
+    name: Publish to Cloudflare Pages
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      deployments: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: 'Bun setup'
-        uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          fetch-depth: 1
 
-      - name: 'Bun install'
-        run: bun install
-      
-      - name: Deploy
-        uses: cloudflare/wrangler-action@v3.3.2
+      - name: 'node'
+        uses: actions/setup-node@v4
         with:
-          wranglerVersion: '3.15.0'
+          node-version: 'latest'
+
+      - name: 'npm install'
+        run: npm install
+
+      - name: Build
+        run: |
+          cd apps/web
+          export API_URL=${{ secrets.API_URL }}
+          npx @cloudflare/next-on-pages@latest
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1.5.0
+        with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          workingDirectory: packages/api
-          command: deploy src/index.ts
-          packageManager: bun
-          secrets: |
-            CI
-        env:
-          CI: true
-          NO_D1_WARNING: true
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: tspdt
+          directory: .vercel/output/static
+          branch: main
+          wranglerVersion: '3'
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          workingDirectory: apps/web
