@@ -33,7 +33,7 @@ jobs:
 
       - name: Build
         run: |
-          cd apps/next
+          cd apps/web
           export API_URL=${{ secrets.API_URL }}
           bunx @cloudflare/next-on-pages
 
