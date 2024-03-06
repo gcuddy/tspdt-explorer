@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check": "tsc --noEmit --pretty"
+    "check": "tsc --noEmit --pretty",
+    "local-build": "bun x @cloudflare/next-on-pages@1 --disable-worker-minification"
   },
   "dependencies": {
     "@antfu/utils": "^0.7.7",

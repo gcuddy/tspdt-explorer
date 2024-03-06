@@ -2,7 +2,6 @@
 
 import { client } from "@/lib/hono";
 import { cookies } from "next/headers";
-import { cache } from "react";
 import { MovieEmbedding } from "tspdt-api/src/schemas";
 import { transformMovieIntoTextEmbedding } from "tspdt-api/src/utils";
 
@@ -15,7 +14,7 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
         : {};
 }
 
-export const getPageSession = cache(async () => {
+export const getPageSession = async () => {
     const auth_session = cookies().get("auth_session");
     console.log({ auth_session });
     auth_session?.value
@@ -28,7 +27,7 @@ export const getPageSession = cache(async () => {
     }).then(res => res.json())
     console.log({ session });
     return session;
-});
+}
 
 
 export async function getRecommendations(movie: MovieEmbedding) {
