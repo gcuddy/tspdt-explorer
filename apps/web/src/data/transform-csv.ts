@@ -143,8 +143,8 @@ const directorToIdLookup = new Map<string, string>();
 // TODO: amidst all this is to ingest data into vector database.
 
 let i = 0;
-// let's get first 1000
-for (const p of moviesWithTmdbId.slice(0, 1000)) {
+// ~~let's get first 1000~~ now we're going to do 1000-2500
+for (const p of moviesWithTmdbId.slice(1000, 2500)) {
     if (!p.IMDB_ID) continue;
     const movie = await imdbToTmdb(p.IMDB_ID);
 

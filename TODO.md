@@ -1,4 +1,6 @@
 - [x] Transfer all endpoints over to new API
+- [ ] set up cors / live api
+- [ ] set up github ci / cd to deploy api and web app
 - [ ] Unify genre/year pages with views
 - [ ] List view and table views across all views
 - [ ] Person page should have unified actor/director or at least link to work as actor
