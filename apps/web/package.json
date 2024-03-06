@@ -8,11 +8,15 @@
     "start": "next start",
     "lint": "next lint",
     "check": "tsc --noEmit --pretty",
-    "local-build": "bun x @cloudflare/next-on-pages@1 --disable-worker-minification"
+    "local-build": "bun x @cloudflare/next-on-pages@1 --disable-worker-minification",
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "pages:build": "bunx @cloudflare/next-on-pages",
+    "preview": "bun run pages:build && wrangler pages dev .vercel/output/static",
+    "deploy": "bun run pages:build && wrangler pages deploy .vercel/output/static"
   },
   "dependencies": {
     "@antfu/utils": "^0.7.7",
-    "@cloudflare/next-on-pages": "1.8.3",
+    "@cloudflare/next-on-pages": "^1.10.0",
     "@nivo/core": "^0.84.0",
     "@nivo/line": "^0.84.0",
     "@phosphor-icons/react": "^2.0.15",
