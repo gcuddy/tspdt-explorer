@@ -7,11 +7,13 @@ export const env = createEnv({
     DISCORD_ID: z.string().min(1),
     DISCORD_SECRET: z.string().min(1),
     API_URL: z.string().min(1),
+    APP_URL: z.string().min(1)
   },
   runtimeEnv: {
     TMDB_TOKEN: process.env.TMDB_TOKEN,
     DISCORD_ID: process.env.DISCORD_ID,
     DISCORD_SECRET: process.env.DISCORD_SECRET,
     API_URL: process.env.API_URL,
+    APP_URL: process.env.APP_URL
   },
 });
