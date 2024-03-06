@@ -1,20 +1,15 @@
 
 // lucia.ts
-import { Lucia } from "lucia";
+import { Lucia, TimeSpan } from "lucia";
 import { D1Adapter } from "@lucia-auth/adapter-sqlite";
 
-export function initializeLucia(D1: D1Database) {
+export function nitializeLucia(D1: D1Database, appUrl: string) {
     const adapter = new D1Adapter(D1, {
         user: "tspdt_user",
         session: "tspdt_session"
     });
+    const env = !appUrl || appUrl.startsWith('http:') ? 'DEV' : 'PROD';
     return new Lucia(adapter, {
-        sessionCookie: {
-            expires: false,
-            attributes: {
-                secure: process.env.NODE_ENV === "production"
-            }
-        },
         getUserAttributes: (attributes) => {
             return {
                 // attributes has the type of DatabaseUserAttributes
@@ -22,7 +17,17 @@ export function initializeLucia(D1: D1Database) {
                 username: attributes.username,
                 email: attributes.email
             };
-        }
+        },
+        sessionExpiresIn: new TimeSpan(365, 'd'),
+        sessionCookie: {
+            name: 'auth_session',
+            expires: false,
+            attributes: {
+                secure: env === 'PROD',
+                sameSite: 'lax' as const,
+            },
+        },
+
     });
 }
 

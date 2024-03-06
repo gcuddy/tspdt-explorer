@@ -18,6 +18,7 @@ type Bindings = {
     AI: any;
     VECTORIZE_INDEX: VectorizeIndex;
     DB: D1Database;
+    APP_URL: string;
 };
 
 type Variables = {
@@ -30,12 +31,9 @@ type Variables = {
 const app = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 
 app.use("*", async (c, next) => {
-    const lucia = initializeLucia(c.env.DB);
-    console.log(lucia)
-    const cok = c.req.header("Cookie") ?? "";
-    console.log('cok', cok);
+    const lucia = initializeLucia(c.env.DB, c.env.APP_URL);
     const sessionId = getCookie(c, lucia.sessionCookieName) ?? null;
-    console.log('sessionId', sessionId);
+
     if (!sessionId) {
         c.set("user", null);
         c.set("session", null);
