@@ -7,7 +7,7 @@ import Providers from "./providers";
 import { getPageSession } from "@/server/data-layer";
 import { UserProvider } from "./user-session";
 
-// export const runtime = "edge";
+export const runtime = "edge";
 
 export const metadata: Metadata = {
     title: "TSPDT Explorer",
