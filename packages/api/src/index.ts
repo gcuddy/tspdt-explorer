@@ -445,7 +445,7 @@ const routes = app
         return c.json({ session, user });
     })
     .post("/auth/logout", async (c) => {
-        const lucia = initializeLucia(c.env.DB);
+        const lucia = initializeLucia(c.env.DB, c.env.APP_URL);
         const session = c.get("session");
         if (!session) {
             throw new HTTPException(401, { message: "Unauthorized" });
@@ -463,7 +463,7 @@ const routes = app
     ), async (c) => {
         const db = createDb(c.env.DB);
         // should we only create one of these?
-        const lucia = initializeLucia(c.env.DB);
+        const lucia = initializeLucia(c.env.DB, c.env.APP_URL);
 
         const data = c.req.valid("json");
 
