@@ -16,17 +16,18 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
 
 export const getPageSession = async () => {
     const auth_session = cookies().get("auth_session");
-    console.log({ auth_session });
-    auth_session?.value
     // lol, there's gotta be a better way...
-    const session = await client.auth.validate.$get({}, {
+    const authData = await client.auth.validate.$get({}, {
         headers: {
             Cookie: auth_session ? `auth_session=${auth_session.value}` : "",
         }
         // headers: headersList.toJSON()
     }).then(res => res.json())
-    console.log({ session });
-    return session;
+    if (authData) {
+        const { session } = authData
+        if (session) cookies().set("auth_session", session.id)
+    }
+    return authData
 }
 
 
