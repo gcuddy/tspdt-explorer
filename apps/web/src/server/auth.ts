@@ -10,6 +10,9 @@ export const getPageSession = cache(async () => {
             Cookie: auth_session ? `auth_session=${auth_session.value}` : "",
         }
     }).then(res => res.json())
+        .catch(e => {
+            console.error(e);
+        })
     if (authData) {
         const { session } = authData
         try {
