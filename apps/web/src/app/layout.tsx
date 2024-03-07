@@ -21,16 +21,17 @@ export default async function RootLayout({
     actions: React.ReactNode;
 }) {
     //   const session = await getPageSession();
-    const { session, user } = await getPageSession();
-    console.log({ session, user });
+    const seshData = await getPageSession();
+    console.log({ seshData });
+    const { session, user } = seshData;
 
     return (
         <html lang="en">
-            <Providers>
-                <UserProvider session={session ? {
-                    ...session,
-                    expiresAt: new Date(session.expiresAt),
-                } : null} user={user}>
+            <UserProvider session={session ? {
+                ...session,
+                expiresAt: new Date(session.expiresAt),
+            } : null} user={user}>
+                <Providers>
                     {/* <R> */}
                     <CommandBar>
                         <BodyProvider>
@@ -42,8 +43,8 @@ export default async function RootLayout({
                         </BodyProvider>
                     </CommandBar>
                     {/* </R> */}
-                </UserProvider>
-            </Providers>
+                </Providers>
+            </UserProvider>
         </html>
     );
 }
