@@ -11,7 +11,7 @@ on:
 jobs:
   publish:
     name: Publish to Cloudflare Pages
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 10
     permissions:
       contents: read
