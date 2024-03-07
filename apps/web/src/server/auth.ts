@@ -22,6 +22,9 @@ export const getPageSession = cache(async () => {
         }
         return authData
     } catch {
-        return null
+        return {
+            session: null,
+            user: null
+        }
     }
 })
