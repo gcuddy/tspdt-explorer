@@ -10,21 +10,24 @@ export const getPageSession = cache(async () => {
             headers: {
                 Cookie: auth_session ? `auth_session=${auth_session.value}` : "",
             }
-        }).then(res => res.json())
-        if (authData) {
-            const { session } = authData
+        })
+        if (authData.ok) {
+            const { session, user } = await authData.json()
             try {
                 if (session) cookies().set("auth_session", session.id)
                 else cookies().delete("auth_session")
             } catch (e) {
                 console.error(e);
             }
+            return {
+                session,
+                user
+            }
         }
-        return authData
     } catch {
-        return {
-            session: null,
-            user: null
-        }
+    }
+    return {
+        session: null,
+        user: null
     }
 })
