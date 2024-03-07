@@ -4,7 +4,7 @@ import { CommandBar } from "@/components/command";
 import { BodyProvider } from "./body-provider";
 import { FilterProvider } from "./filter-provider";
 import Providers from "./providers";
-import { getPageSession } from "@/server/data-layer";
+import { getPageSession } from "@/server/auth";
 import { UserProvider } from "./user-session";
 
 export const runtime = "edge";
@@ -26,9 +26,12 @@ export default async function RootLayout({
 
     return (
         <html lang="en">
-            <UserProvider session={session ? { ...session, expiresAt: new Date(session.expiresAt) } : null} user={user}>
-                {/* <R> */}
-                <Providers>
+            <Providers>
+                <UserProvider session={session ? {
+                    ...session,
+                    expiresAt: new Date(session.expiresAt),
+                } : null} user={user}>
+                    {/* <R> */}
                     <CommandBar>
                         <BodyProvider>
                             {/* <ActionProvider> */}
@@ -38,9 +41,9 @@ export default async function RootLayout({
                             {/* </ActionProvider> */}
                         </BodyProvider>
                     </CommandBar>
-                </Providers>
-                {/* </R> */}
-            </UserProvider>
+                    {/* </R> */}
+                </UserProvider>
+            </Providers>
         </html>
     );
 }

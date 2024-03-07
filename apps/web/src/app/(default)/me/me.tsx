@@ -5,7 +5,8 @@ import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Heart, SignOut } from "@phosphor-icons/react/dist/ssr";
 import Form from "@/components/form";
-import { getMovieInteractions, getPageSession } from "@/server/data-layer";
+import { getMovieInteractions } from "@/server/data-layer";
+import { getPageSession } from "@/server/auth";
 import { DeepNonNullable } from "ts-essentials";
 import { FilmReel, Bookmarks } from "@phosphor-icons/react/dist/ssr";
 

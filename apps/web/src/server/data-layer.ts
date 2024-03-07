@@ -14,23 +14,6 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
         : {};
 }
 
-export const getPageSession = async () => {
-    const auth_session = cookies().get("auth_session");
-    // lol, there's gotta be a better way...
-    const authData = await client.auth.validate.$get({}, {
-        headers: {
-            Cookie: auth_session ? `auth_session=${auth_session.value}` : "",
-        }
-        // headers: headersList.toJSON()
-    }).then(res => res.json())
-    if (authData) {
-        const { session } = authData
-        if (session) cookies().set("auth_session", session.id)
-    }
-    return authData
-}
-
-
 export async function getRecommendations(movie: MovieEmbedding) {
     console.log("getting recommendations for movie", movie);
     const e = {

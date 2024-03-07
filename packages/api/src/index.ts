@@ -1,6 +1,6 @@
 import { Ai } from "@cloudflare/ai";
 import { chunk } from "remeda";
-import { Hono } from "hono";
+import { Context, Hono, Next } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { capitalizeFirstLetter, transformCamelToSnake, transformMovieIntoTextEmbedding } from "./utils";
@@ -13,6 +13,7 @@ import { initializeLucia } from "./lucia";
 import { setCookie, getCookie } from "hono/cookie";
 import { Session, generateId, User as LuciaUser } from "lucia";
 import { HTTPException } from 'hono/http-exception'
+import { cors } from "hono/cors";
 
 type Bindings = {
     AI: any;
@@ -29,6 +30,22 @@ type Variables = {
 }
 
 const app = new Hono<{ Bindings: Bindings, Variables: Variables }>();
+
+const corsHandler = async (c: Context<{ Bindings: Bindings }>, next: Next) => {
+    if (c.env.APP_URL === undefined) {
+        console.log(
+            'APP_URL is not set. CORS errors may occur. Make sure the .dev.vars file is present at /packages/api/.dev.vars'
+        )
+    }
+    return await cors({
+        origin: [c.env.APP_URL],
+        credentials: true,
+        allowMethods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+        // https://hono.dev/middleware/builtin/cors#options
+    })(c, next)
+}
+
+app.use("/auth/*", corsHandler);
 
 app.use("*", async (c, next) => {
     const lucia = initializeLucia(c.env.DB, c.env.APP_URL);

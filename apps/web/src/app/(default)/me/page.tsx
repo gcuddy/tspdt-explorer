@@ -1,4 +1,4 @@
-import { getPageSession } from "@/server/data-layer";
+import { getPageSession } from "@/server/auth";
 import { redirect } from "next/navigation";
 import Me from "./me";
 
