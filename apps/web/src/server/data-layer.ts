@@ -57,6 +57,8 @@ export async function getMoviesFromYear(year: number) {
 }
 
 export async function getMovies() {
+  console.log("client", client);
+  console.log(client.movies.list.$url());
   const res = await client.movies.list.$get();
   // TODO: this is where the app is breaking.
   console.log("res", res);

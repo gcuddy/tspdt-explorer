@@ -5,4 +5,8 @@ import type { AppType } from "tspdt-api/src/index";
 
 export const client = hc<AppType>(env.NEXT_PUBLIC_API_URL, { fetch });
 
-export const createClient = async () => hc<AppType>(env.NEXT_PUBLIC_API_URL, { fetch, headers: await getAuthHeaders() });
+export const createClient = async () =>
+  hc<AppType>(env.NEXT_PUBLIC_API_URL, {
+    fetch,
+    headers: await getAuthHeaders(),
+  });

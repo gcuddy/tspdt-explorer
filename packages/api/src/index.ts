@@ -126,20 +126,22 @@ app.use("*", async (c, next) => {
 const routes = app
   .get("/movies/list", async (c) => {
     // TODO: add cursor pagination
+    console.log("received movies/list");
     const db = createDb(c.env.DB);
-    return c.json(
-      await db.query.movies.findMany({
-        limit: 1000,
-        orderBy: asc(movies.currentRanking),
-        with: {
-          moviesToDirectors: {
-            with: {
-              director: true,
-            },
+    console.log("db", db);
+    const listed = await db.query.movies.findMany({
+      limit: 1000,
+      orderBy: asc(movies.currentRanking),
+      with: {
+        moviesToDirectors: {
+          with: {
+            director: true,
           },
         },
-      }),
-    );
+      },
+    });
+    console.log("listed", JSON.stringify(listed));
+    return c.json(listed);
   })
   .get("/movie/interactions", async (c) => {
     // TODO: add cursor pagination

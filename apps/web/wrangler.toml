@@ -2,3 +2,6 @@ name = "tspdt"
 compatibility_date = "2023-12-06"
 node_compat = true
 send_metrics = false
+
+[vars]
+NEXT_PUBLIC_API_URL = "https://tspdt-api.floral-violet-deef.workers.dev/"
