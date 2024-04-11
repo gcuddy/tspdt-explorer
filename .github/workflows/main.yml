@@ -1,4 +1,4 @@
-name: 'Next.JS deployment'
+name: "Next.JS deployment"
 
 on:
   workflow_dispatch:
@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - 'apps/web/**'
+      - "apps/web/**"
 
 jobs:
   publish:
     name: Publish to Cloudflare Pages
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
@@ -20,14 +20,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
-      - run: bun install --frozen-lockfile
+      - run: bun install
 
       - name: Build
         run: |
@@ -43,6 +41,6 @@ jobs:
           projectName: tspdt
           directory: .vercel/output/static
           branch: main
-          wranglerVersion: '3'
+          wranglerVersion: "3"
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           workingDirectory: apps/web

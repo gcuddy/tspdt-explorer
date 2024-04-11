@@ -30,7 +30,7 @@ import {
   userMovie,
   users,
 } from "./db/schema";
-import { cache } from "hono/cache";
+// import { cache } from "hono/cache";
 import { initializeLucia } from "./lucia";
 import { setCookie, getCookie } from "hono/cookie";
 import { Session, generateId, User as LuciaUser } from "lucia";
