@@ -9,7 +9,6 @@
     "lint": "next lint",
     "check": "tsc --noEmit --pretty",
     "local-build": "bun x @cloudflare/next-on-pages@1 --disable-worker-minification",
-    "deploy": "wrangler deploy --minify src/index.ts",
     "pages:build": "bunx @cloudflare/next-on-pages",
     "preview": "bun run pages:build && wrangler pages dev .vercel/output/static",
     "deploy": "bun run pages:build && wrangler pages deploy .vercel/output/static"
@@ -74,5 +73,8 @@
     "typescript": "^5",
     "vercel": "33.0.2",
     "wrangler": "3.22.3"
+  },
+  "resolutions": {
+    "string-width": "4.2.3"
   }
 }
