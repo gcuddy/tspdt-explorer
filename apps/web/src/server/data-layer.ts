@@ -57,8 +57,14 @@ export async function getMoviesFromYear(year: number) {
 
 export async function getMovies() {
     const res = await client.movies.list.$get();
-    const movies = await res.json();
-    return movies;
+    console.log("res", res);
+    try {
+        const movies = await res.json();
+        return movies;
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
 }
 
 export const getUserMovie = async (id: string) => await client.movie[":id"].interaction.$get({ param: { id } }, { headers: await getAuthHeaders() }).then((res) => res.json())

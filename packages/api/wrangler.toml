@@ -1,6 +1,8 @@
 name = "tspdt-api"
 compatibility_date = "2023-12-01"
 
+[vars]
+APP_URL="https://tspdt.pages.dev"
 
 [ai]
 binding = "AI"
