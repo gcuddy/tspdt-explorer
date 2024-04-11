@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@antfu/utils": "^0.7.7",
-    "@cloudflare/next-on-pages": "^1.10.0",
+    "@cloudflare/next-on-pages": "^1.11.0",
     "@nivo/core": "^0.84.0",
     "@nivo/line": "^0.84.0",
     "@phosphor-icons/react": "^2.0.15",
