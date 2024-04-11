@@ -30,7 +30,7 @@ import {
   userMovie,
   users,
 } from "./db/schema";
-// import { cache } from "hono/cache";
+import { cache } from "hono/cache";
 import { initializeLucia } from "./lucia";
 import { setCookie, getCookie } from "hono/cookie";
 import { Session, generateId, User as LuciaUser } from "lucia";
@@ -99,29 +99,29 @@ app.use("*", async (c, next) => {
 });
 
 // TODO: for ingesting, get keywords
-// app.get(
-//   "/director*",
-//   cache({
-//     cacheName: "movies",
-//     cacheControl: "max-age=3600",
-//   }),
-// );
-//
-// app.get(
-//   "/movies*",
-//   cache({
-//     cacheName: "movies",
-//     cacheControl: "max-age=3600",
-//   }),
-// );
-//
-// app.get(
-//   "/recommendations*",
-//   cache({
-//     cacheName: "movies",
-//     cacheControl: "max-age=3600",
-//   }),
-// );
+app.get(
+  "/director*",
+  cache({
+    cacheName: "movies",
+    cacheControl: "max-age=3600",
+  }),
+);
+
+app.get(
+  "/movies*",
+  cache({
+    cacheName: "movies",
+    cacheControl: "max-age=3600",
+  }),
+);
+
+app.get(
+  "/recommendations*",
+  cache({
+    cacheName: "movies",
+    cacheControl: "max-age=3600",
+  }),
+);
 
 const routes = app
   .get("/movies/list", async (c) => {
