@@ -9,8 +9,8 @@ export const GET = async (request: NextRequest) => {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  console.log("cookies", cookies().getAll());
-  const storedState = cookies().get("discord_oauth_state")?.value ?? null;
+  console.log("cookies", (await cookies()).getAll());
+  const storedState = (await cookies()).get("discord_oauth_state")?.value ?? null;
 
   console.log(url, code, state, storedState);
 
@@ -62,7 +62,7 @@ export const GET = async (request: NextRequest) => {
     console.log({ parsed });
 
     for (const [name, value] of parsed) {
-      cookies().set(name, value, {
+      (await cookies()).set(name, value, {
         path: "/",
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

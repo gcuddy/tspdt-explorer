@@ -10,7 +10,8 @@ async function getCountry(country: string) {
     }).then(res => res.json());
 }
 
-export default async function Page({ params }: { params: { code: string } }) {
+export default async function Page(props: { params: Promise<{ code: string }> }) {
+    const params = await props.params;
 
     const movies = await getCountry(params.code);
     return (

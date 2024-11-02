@@ -9,11 +9,16 @@ async function getMoviesForGenre(genre: string) {
     }).then((res) => res.json());
 }
 
-export default async function Page({
-    params: { id },
-}: {
-    params: { id: string };
-}) {
+export default async function Page(
+    props: {
+        params: Promise<{ id: string }>;
+    }
+) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
 
     const movies = await getMoviesForGenre(id);
     console.log("got movies", movies);

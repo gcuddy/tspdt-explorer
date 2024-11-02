@@ -8,7 +8,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 
-export default async function Page({ params }: { params: { year: string } }) {
+export default async function Page(props: { params: Promise<{ year: string }> }) {
+    const params = await props.params;
     const year = Number(params.year);
     if (Number.isNaN(year)) {
         notFound();

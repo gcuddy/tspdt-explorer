@@ -43,18 +43,20 @@ const getMovie = cache(async (id: string) => {
     //     tmdb: tmovie,
     // };
 });
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const params = await props.params;
     const movie = await getMovie(params.id);
     return {
         title: `${movie.title} (${movie.year}) - TSPDT`,
     };
 }
 
-export default async function MoviePage({
-    params,
-}: {
-    params: { id: string };
-}) {
+export default async function MoviePage(
+    props: {
+        params: Promise<{ id: string }>;
+    }
+) {
+    const params = await props.params;
     const movie = await getMovie(params.id);
     return <Movie movie={movie} actionSlot={
         <ActionBar movie={movie} />}
