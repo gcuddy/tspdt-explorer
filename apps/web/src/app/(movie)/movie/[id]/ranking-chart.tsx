@@ -16,6 +16,8 @@ const COLORS = [
   "hsla(300, 50%, 72%, 0.75)",
 ];
 
+
+
 export function RankingChart({
   data,
   enablePoints = true,
@@ -27,6 +29,8 @@ export function RankingChart({
 }) {
 
   const router = useRouter();
+
+  console.log({ data, enablePoints, colors })
 
   const { ticks, minYear, maxYear } = useMemo(() => {
     const years = new Set<number>();
@@ -66,6 +70,8 @@ export function RankingChart({
   }, [data]);
 
   console.log({ actualData });
+
+
 
   return (
     <ResponsiveLine
@@ -267,7 +273,7 @@ export function RankingChart({
       }
       legends={
         data.length === 1
-          ? undefined
+          ? []
           : [
             // TODO: this is not great, probably shuold implement own
             //   {

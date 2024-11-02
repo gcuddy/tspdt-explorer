@@ -3,7 +3,53 @@
 import { client } from "@/lib/hono";
 import { cookies } from "next/headers";
 import { MovieEmbedding } from "tspdt-api/src/schemas";
-import { transformMovieIntoTextEmbedding } from "tspdt-api/src/utils";
+
+function transformMovieIntoTextEmbedding(movie: MovieEmbedding): string {
+  let output = `Title:
+${movie.title}`;
+
+  if (movie.director) {
+    output += `Director:
+${movie.director}`;
+  }
+
+  if (movie.overview) {
+    output += `Overview:
+${movie.overview}`;
+  }
+
+  if (movie.cast) {
+    output += `Cast:
+${movie.cast}`;
+  }
+
+  if (movie.year) {
+    output += `Year:
+${movie.year}`;
+  }
+
+  if (movie.genre) {
+    output += `Genres:
+${movie.genre}`;
+  }
+
+  if (movie.country) {
+    output += `Country:
+${movie.country}`;
+  }
+
+  if (movie.color) {
+    output += `Color:
+${movie.color}`;
+  }
+
+  if (movie.budget) {
+    output += `Budget:
+${movie.budget}`;
+  }
+
+  return output;
+}
 
 export async function getAuthHeaders(): Promise<Record<string, string>> {
   const auth_session = (await cookies()).get("auth_session");
