@@ -67,6 +67,9 @@ export default function Header({
                   TSPDT
                 </span>
               </Link>
+              <Link className="text-sm text-white/90 font-medium tracking-tight" href="/about">
+                About
+              </Link>
               {/* {auth?.user ? ( */}
               {/*     <Link href="/me">Me</Link> */}
               {/* ) : ( */}
