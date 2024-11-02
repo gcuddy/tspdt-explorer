@@ -1,12 +1,12 @@
 name: "Next.JS deployment"
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "apps/web/**"
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - "apps/web/**"
 
 jobs:
   publish:
