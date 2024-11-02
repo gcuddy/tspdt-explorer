@@ -9,8 +9,8 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
   const auth_session = cookies().get("auth_session");
   return auth_session?.value
     ? {
-        Cookie: `auth_session=${auth_session.value}`,
-      }
+      Cookie: `auth_session=${auth_session.value}`,
+    }
     : {};
 }
 
@@ -57,11 +57,8 @@ export async function getMoviesFromYear(year: number) {
 }
 
 export async function getMovies() {
-  console.log("client", client);
-  console.log(client.movies.list.$url());
   const res = await client.movies.list.$get();
   // TODO: this is where the app is breaking.
-  console.log("res", res);
   try {
     const movies = await res.json();
     return movies;
