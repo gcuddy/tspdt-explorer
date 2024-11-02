@@ -2,7 +2,7 @@
 
 import ListItem from "@/components/list-item";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import React from "react";
+import React, { type JSX } from "react";
 import { useFilter } from "./filter-provider";
 import type { Movie, Director } from "tspdt-api/src/db/schema";
 

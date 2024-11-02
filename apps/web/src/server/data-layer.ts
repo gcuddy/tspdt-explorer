@@ -6,7 +6,7 @@ import { MovieEmbedding } from "tspdt-api/src/schemas";
 import { transformMovieIntoTextEmbedding } from "tspdt-api/src/utils";
 
 export async function getAuthHeaders(): Promise<Record<string, string>> {
-  const auth_session = cookies().get("auth_session");
+  const auth_session = (await cookies()).get("auth_session");
   return auth_session?.value
     ? {
       Cookie: `auth_session=${auth_session.value}`,

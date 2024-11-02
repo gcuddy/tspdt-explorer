@@ -71,7 +71,8 @@ async function PersonWrapper({ director }: { director: Awaited<ReturnType<typeof
     )
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     console.time("getDirector");
     const director = await getDirector(params.id);
     console.timeEnd("getDirector");

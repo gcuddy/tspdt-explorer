@@ -54,7 +54,8 @@ async function getData(id: number) {
     };
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const { person, movies } = await getData(parseInt(params.id));
 
     //   TODO: use memo to go through and get rankings
