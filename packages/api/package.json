@@ -14,17 +14,22 @@
   },
   "dependencies": {
     "@cloudflare/ai": "^1.0.50",
+    "@effect/cli": "^0.48.13",
+    "@effect/platform-bun": "^0.49.14",
     "@hono/zod-validator": "^0.4.1",
     "@lucia-auth/adapter-sqlite": "^3.0.2",
     "arctic": "^2.2.1",
     "drizzle-orm": "^0.36.0",
+    "effect": "^3.10.8",
     "hono": "^4.6.8",
     "lucia": "^3.2.2",
     "oslo": "^1.2.1",
+    "xlsx": "file:vendor/xlsx-0.20.3.tgz",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241022.0",
+    "@types/bun": "^1.1.12",
     "wrangler": "^3.84.1"
   }
 }
