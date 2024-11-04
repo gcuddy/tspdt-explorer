@@ -29,10 +29,13 @@ class AppError extends Data.TaggedError("AppError")<{ message: string }> {}
 
 const main = (filePath: string) =>
   Effect.gen(function* () {
-    const workbook = yield* Effect.try({
-      try: () => XLSX.readFile(filePath),
-      catch: () => new AppError({ message: `Failed to read file ${filePath}` }),
-    });
+    const workbook =
+      yield *
+      Effect.try({
+        try: () => XLSX.readFile(filePath),
+        catch: () =>
+          new AppError({ message: `Failed to read file ${filePath}` }),
+      });
 
     const sheet = Array.head(workbook.SheetNames).pipe(
       Option.flatMap((sheetName) =>
@@ -57,26 +60,36 @@ const main = (filePath: string) =>
       )
       .replace(/1$/, "");
 
-    // AB corresponds to Imdb column
-    yield* Effect.forEach(
-      Array.filter(Record.keys(sheet), (key) => key.startsWith(imdbKey)).slice(
-        0,
-        50
-      ),
-      (key) =>
-        Effect.gen(function* () {
-          const cell = yield* decodeLinkCell(sheet[key]);
-          if (cell.l) {
-            // CONTINUE HERE!!!!
-            // TODO: this gets the URL, now process it
-            yield* Console.log(cell.l.Target);
-          }
-        })
-    );
+    yield *
+      Effect.forEach(
+        Array.filter(keys, (key) => key.startsWith(imdbKey)).slice(0, 50),
+        (key) =>
+          Effect.gen(function* () {
+            const cell = yield* decodeLinkCell(sheet[key]);
+            const id = Option.fromNullable(cell.l?.Target).pipe(
+              Option.flatMap((link) =>
+                Array.last(Array.filter(link.split("/"), Predicate.isTruthy))
+              ),
+              Option.filter((id) => id.startsWith("tt")),
+              Option.getOrElse(() => "")
+            );
+            // yield* Effect.log(`Attempting to write ${id} to origin ${key}`);
+            // yield* Effect.try(() =>
+            //   XLSX.utils.sheet_add_aoa(sheet, [[id]], { origin: key })
+            // );
+          })
+      );
 
+    // yield *
+    Effect.try(() =>
+      XLSX.utils.sheet_add_aoa(sheet, [["imdbId"]], { origin: "AD1" })
+    );
+    Effect.try(() =>
+      XLSX.utils.sheet_add_aoa(sheet, [["tt0067000"]], { origin: "AD6" })
+    );
     // XLSX.utils.sheet_add_aoa(sheet, [["Hello", "World"]], { origin: "A1" });
 
-    // yield* Console.log(XLSX.utils.sheet_to_json(sheet));
+    yield * Console.log(XLSX.utils.sheet_to_json(sheet).slice(0, 10));
     // // yield* Console.log(`Successfully read file ${filePath}`);
   });
 
