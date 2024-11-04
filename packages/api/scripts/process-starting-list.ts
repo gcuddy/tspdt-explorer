@@ -1,81 +1,173 @@
 import * as XLSX from "xlsx";
 import * as fs from "node:fs";
+import {
+  Array,
+  Console,
+  Data,
+  Effect,
+  Option,
+  MutableHashMap as HashMap,
+  Predicate,
+  Record,
+  Schema as S,
+  pipe,
+} from "effect";
+import { BunContext, BunRuntime } from "@effect/platform-bun";
+import { Args, Command } from "@effect/cli";
 
 XLSX.set_fs(fs);
 
-if (process.argv.length < 3) {
-  console.error("Please provide an Excel file path as argument");
-  process.exit(1);
+const LinkCellSchema = S.Struct({
+  l: S.UndefinedOr(
+    S.Struct({
+      Target: S.UndefinedOr(S.String),
+    })
+  ),
+});
+
+const TSPDTIdCell = S.Struct({
+  v: S.Number,
+});
+
+// TODO: propertySignature to rename keys?
+export class TSPDTRow extends S.Class<TSPDTRow>("TSPDTRow")({
+  "2007": S.Number,
+  "2008": S.Number,
+  "2010": S.Number,
+  "2011": S.Number,
+  "2012": S.Number,
+  "2013": S.Number,
+  "2014": S.Number,
+  "2015": S.Number,
+  "2016": S.Number,
+  "2017": S.Number,
+  "2018": S.Number,
+  "2019": S.Number,
+  "2020": S.Number,
+  "2021": S.Number,
+  "2022": S.Number,
+  "2023": S.Number,
+  "2024": S.Number,
+  "Director(s)": S.String,
+  Title: S.String,
+  Year: S.Union(S.Number, S.String),
+  Country: S.String,
+  Length: S.Union(S.Number, S.Literal("---")),
+  Colour: S.Union(S.String, S.Literal("---")),
+  Genre: S.Union(S.String, S.Literal("---")),
+  "Dec-06": S.Number,
+  "Mar-06": S.Number,
+  idTSPDT: S.Number,
+}) {
+  static array = S.Array(TSPDTRow);
 }
 
-const filePath = process.argv[2];
+const decodeLinkCell = S.decodeUnknown(LinkCellSchema);
+const decodeTSPDTIdCell = S.decodeUnknown(TSPDTIdCell);
+const decodeRows = S.decodeUnknown(TSPDTRow.array);
 
-if (!fs.existsSync(filePath)) {
-  console.error(`File ${filePath} does not exist`);
-  process.exit(1);
-}
+class AppError extends Data.TaggedError("AppError")<{ message: string }> {}
 
-// Function to extract IMDB ID from URL
-function extractImdbId(url: string): string | null {
-  if (!url) return null;
-  const match = url.match(/\/title\/(tt\d+)/);
-  return match ? match[1] : null;
-}
+const parseRows = (filePath: string) =>
+  Effect.gen(function* () {
+    const tsptIdToImdbId = HashMap.empty<number, string>();
+    const workbook = yield* Effect.try({
+      try: () => XLSX.readFile(filePath),
+      catch: () => new AppError({ message: `Failed to read file ${filePath}` }),
+    });
 
-const workbook = XLSX.readFile(filePath);
-const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const sheet = Array.head(workbook.SheetNames).pipe(
+      Option.flatMap((sheetName) =>
+        Option.fromNullable(workbook.Sheets[sheetName])
+      ),
+      Option.getOrThrowWith(
+        () => new AppError({ message: `No sheets found in ${filePath}` })
+      )
+    );
 
-// Find the IMDB column and extract hyperlink URLs
-const range = XLSX.utils.decode_range(sheet["!ref"] || "A1:A1");
-const imdbColumnIndex = Object.keys(sheet)
-  .find((key) => {
-    const cell = sheet[key];
-    return cell.v === "IMDB" || cell.v === "imdb" || cell.v === "IMDb";
-  })
-  ?.charAt(0);
+    const keys = Record.keys(sheet);
 
-if (!imdbColumnIndex) {
-  console.error("Could not find IMDB column");
-  process.exit(1);
-}
+    const imdbKey = Array.findFirst(
+      Array.filter(keys, (key) => /[A-z]1$/.test(key)),
+      (key) =>
+        String((sheet[key] as XLSX.CellObject).v).toLowerCase() === "imdb"
+    )
+      .pipe(
+        Option.getOrThrowWith(
+          () => new AppError({ message: "No IMDB key found" })
+        )
+      )
+      .replace(/1$/, "");
 
-// Process hyperlinks before converting to JSON
-for (let row = range.s.r + 1; row <= range.e.r; row++) {
-  const cellAddress = `${imdbColumnIndex}${row + 1}`;
-  const cell = sheet[cellAddress];
-  if (cell?.l?.Target) {
-    // Store the URL in a new column
-    const urlColumnAddress = `${String.fromCharCode(
-      imdbColumnIndex.charCodeAt(0) + 1
-    )}${row + 1}`;
-    sheet[urlColumnAddress] = { t: "s", v: cell.l.Target };
+    const tspdtId = Array.findFirst(
+      Array.filter(keys, (key) => /[A-z]1$/.test(key)),
+      (key) => String((sheet[key] as XLSX.CellObject).v) === "idTSPDT"
+    )
+      .pipe(
+        Option.getOrThrowWith(
+          () => new AppError({ message: "No TSPDT ID key found" })
+        )
+      )
+      .replace(/1$/, "");
 
-    // Extract and store the IMDB ID
-    const imdbId = extractImdbId(cell.l.Target);
-    const idColumnAddress = `${String.fromCharCode(
-      imdbColumnIndex.charCodeAt(0) + 2
-    )}${row + 1}`;
-    sheet[idColumnAddress] = { t: "s", v: imdbId || "" };
-  }
-}
+    const keysToProcess = pipe(
+      Array.filter(keys, (key) => key.startsWith(imdbKey)),
+      Array.tail,
+      Option.getOrElse(() => [] as string[])
+    );
 
-// Add headers for the new columns
-const headerRow = "1";
-const urlColumnLetter = String.fromCharCode(imdbColumnIndex.charCodeAt(0) + 1);
-const idColumnLetter = String.fromCharCode(imdbColumnIndex.charCodeAt(0) + 2);
-sheet[`${urlColumnLetter}${headerRow}`] = { t: "s", v: "IMDB_URL" };
-sheet[`${idColumnLetter}${headerRow}`] = { t: "s", v: "IMDB_ID" };
+    yield *
+      Effect.forEach(
+        keysToProcess,
+        (key) =>
+          Effect.gen(function* () {
+            const rowNum = key.replace(imdbKey, "");
+            const cell = yield* decodeLinkCell(sheet[key]);
+            const id = Option.fromNullable(cell.l?.Target).pipe(
+              Option.flatMap((link) =>
+                Array.last(Array.filter(link.split("/"), Predicate.isTruthy))
+              ),
+              Option.filter((id) => id.startsWith("tt")),
+              Option.getOrElse(() => "")
+            );
+            const tspdtCell = yield* decodeTSPDTIdCell(
+              sheet[`${tspdtId}${rowNum}`]
+            );
+            HashMap.set(tsptIdToImdbId, tspdtCell.v, id);
+          }),
+        {
+          concurrency: "unbounded",
+        }
+      );
 
-// Update the sheet range to include new columns
-const lastCol = String.fromCharCode(imdbColumnIndex.charCodeAt(0) + 2);
-sheet["!ref"] = sheet["!ref"]?.replace(/:[A-Z]+/, `:${lastCol}`);
+    const rows =
+      yield *
+      Effect.try(() => XLSX.utils.sheet_to_json(sheet).slice(0, 1000)).pipe(
+        Effect.andThen(decodeRows),
+        Effect.map(
+          Array.map((rows) => ({
+            ...rows,
+            imdbId: HashMap.get(tsptIdToImdbId, rows.idTSPDT).pipe(
+              Option.getOrNull
+            ),
+          }))
+        )
+      );
 
-// Create new workbook with processed data
-const newWorkbook = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(newWorkbook, sheet, "Processed Data");
+    return rows;
+  });
 
-// Write to new file
-const outputPath = filePath.replace(".xlsx", "_processed.xlsx");
-XLSX.writeFile(newWorkbook, outputPath);
+const main = (filePath: string) =>
+  Effect.gen(function* () {
+    const rows = yield* parseRows(filePath);
+  });
 
-console.log(`Processed file saved as: ${outputPath}`);
+const path = Args.path();
+const command = Command.make("process", { path }, ({ path }) => main(path));
+
+const cli = Command.run(command, {
+  name: "TSPDT Starting List Processor",
+  version: "0.0.1",
+});
+
+cli(Bun.argv).pipe(Effect.provide(BunContext.layer), BunRuntime.runMain);
