@@ -6,36 +6,66 @@ import {
   Data,
   Effect,
   Option,
+  MutableHashMap as HashMap,
   Predicate,
   Record,
-  Schema,
+  Schema as S,
 } from "effect";
 import { BunContext, BunRuntime } from "@effect/platform-bun";
 import { Args, Command } from "@effect/cli";
 
 XLSX.set_fs(fs);
 
-const LinkCellSchema = Schema.Struct({
-  l: Schema.UndefinedOr(
-    Schema.Struct({
-      Target: Schema.UndefinedOr(Schema.String),
+const LinkCellSchema = S.Struct({
+  l: S.UndefinedOr(
+    S.Struct({
+      Target: S.UndefinedOr(S.String),
     })
   ),
 });
 
-const decodeLinkCell = Schema.decode(LinkCellSchema);
+export class TSPDTRow extends S.Class<TSPDTRow>("TSPDTRow")({
+  "2007": S.Number,
+  "2008": S.Number,
+  "2010": S.Number,
+  "2011": S.Number,
+  "2012": S.Number,
+  "2013": S.Number,
+  "2014": S.Number,
+  "2015": S.Number,
+  "2016": S.Number,
+  "2017": S.Number,
+  "2018": S.Number,
+  "2019": S.Number,
+  "2020": S.Number,
+  "2021": S.Number,
+  "2022": S.Number,
+  "2023": S.Number,
+  "2024": S.Number,
+  "Director(s)": S.String,
+  Title: S.String,
+  Year: S.Number,
+  Country: S.String,
+  Length: S.Number,
+  Colour: S.String,
+  Genre: S.String,
+  "Dec-06": S.Number,
+  "Mar-06": S.Number,
+  IMDb: S.String,
+  idTSPDT: S.Number,
+}) {}
+
+const decodeLinkCell = S.decode(LinkCellSchema);
 
 class AppError extends Data.TaggedError("AppError")<{ message: string }> {}
 
 const main = (filePath: string) =>
   Effect.gen(function* () {
-    const workbook =
-      yield *
-      Effect.try({
-        try: () => XLSX.readFile(filePath),
-        catch: () =>
-          new AppError({ message: `Failed to read file ${filePath}` }),
-      });
+    const tsptIdToImdbId = HashMap.empty<string, string>();
+    const workbook = yield* Effect.try({
+      try: () => XLSX.readFile(filePath),
+      catch: () => new AppError({ message: `Failed to read file ${filePath}` }),
+    });
 
     const sheet = Array.head(workbook.SheetNames).pipe(
       Option.flatMap((sheetName) =>
@@ -60,36 +90,36 @@ const main = (filePath: string) =>
       )
       .replace(/1$/, "");
 
-    yield *
-      Effect.forEach(
-        Array.filter(keys, (key) => key.startsWith(imdbKey)).slice(0, 50),
-        (key) =>
-          Effect.gen(function* () {
-            const cell = yield* decodeLinkCell(sheet[key]);
-            const id = Option.fromNullable(cell.l?.Target).pipe(
-              Option.flatMap((link) =>
-                Array.last(Array.filter(link.split("/"), Predicate.isTruthy))
-              ),
-              Option.filter((id) => id.startsWith("tt")),
-              Option.getOrElse(() => "")
-            );
-            // yield* Effect.log(`Attempting to write ${id} to origin ${key}`);
-            // yield* Effect.try(() =>
-            //   XLSX.utils.sheet_add_aoa(sheet, [[id]], { origin: key })
-            // );
-          })
-      );
+    yield* Effect.forEach(
+      Array.filter(keys, (key) => key.startsWith(imdbKey)).slice(0, 50),
+      (key) =>
+        Effect.gen(function* () {
+          const cell = yield* decodeLinkCell(sheet[key]);
+          const id = Option.fromNullable(cell.l?.Target).pipe(
+            Option.flatMap((link) =>
+              Array.last(Array.filter(link.split("/"), Predicate.isTruthy))
+            ),
+            Option.filter((id) => id.startsWith("tt")),
+            Option.getOrElse(() => "")
+          );
+          HashMap.set(tsptIdToImdbId, key, id);
+          // yield* Effect.log(`Attempting to write ${id} to origin ${key}`);
+          // yield* Effect.try(() =>
+          //   XLSX.utils.sheet_add_aoa(sheet, [[id]], { origin: key })
+          // );
+        })
+    );
 
-    // yield *
-    Effect.try(() =>
-      XLSX.utils.sheet_add_aoa(sheet, [["imdbId"]], { origin: "AD1" })
-    );
-    Effect.try(() =>
-      XLSX.utils.sheet_add_aoa(sheet, [["tt0067000"]], { origin: "AD6" })
-    );
+    // // yield *
+    // Effect.try(() =>
+    //   XLSX.utils.sheet_add_aoa(sheet, [["imdbId"]], { origin: "AD1" })
+    // );
+    // Effect.try(() =>
+    //   XLSX.utils.sheet_add_aoa(sheet, [["tt0067000"]], { origin: "AD6" })
+    // );
     // XLSX.utils.sheet_add_aoa(sheet, [["Hello", "World"]], { origin: "A1" });
 
-    yield * Console.log(XLSX.utils.sheet_to_json(sheet).slice(0, 10));
+    yield* Console.log(XLSX.utils.sheet_to_json(sheet).slice(0, 10));
     // // yield* Console.log(`Successfully read file ${filePath}`);
   });
 
