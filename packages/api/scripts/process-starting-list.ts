@@ -11,9 +11,11 @@ import {
   Record,
   Schema as S,
   pipe,
+  String as Str,
 } from "effect";
 import { BunContext, BunRuntime } from "@effect/platform-bun";
 import { Args, Command } from "@effect/cli";
+import { FileSystem } from "@effect/platform";
 
 XLSX.set_fs(fs);
 
@@ -28,6 +30,15 @@ const LinkCellSchema = S.Struct({
 const TSPDTIdCell = S.Struct({
   v: S.Number,
 });
+
+const StringCoerce = S.transform(
+  S.Union(S.String, S.Number, S.Boolean, S.Undefined),
+  S.String,
+  {
+    decode: (v) => String(v),
+    encode: (v) => v,
+  }
+);
 
 // TODO: propertySignature to rename keys?
 export class TSPDTRow extends S.Class<TSPDTRow>("TSPDTRow")({
@@ -49,7 +60,7 @@ export class TSPDTRow extends S.Class<TSPDTRow>("TSPDTRow")({
   "2023": S.Number,
   "2024": S.Number,
   "Director(s)": S.String,
-  Title: S.String,
+  Title: StringCoerce,
   Year: S.Union(S.Number, S.String),
   Country: S.String,
   Length: S.Union(S.Number, S.Literal("---")),
@@ -77,9 +88,7 @@ const parseRows = (filePath: string) =>
     });
 
     const sheet = Array.head(workbook.SheetNames).pipe(
-      Option.flatMap((sheetName) =>
-        Option.fromNullable(workbook.Sheets[sheetName])
-      ),
+      Option.flatMap((sheetName) => Record.get(workbook.Sheets, sheetName)),
       Option.getOrThrowWith(
         () => new AppError({ message: `No sheets found in ${filePath}` })
       )
@@ -111,7 +120,7 @@ const parseRows = (filePath: string) =>
       .replace(/1$/, "");
 
     const keysToProcess = pipe(
-      Array.filter(keys, (key) => key.startsWith(imdbKey)),
+      Array.filter(keys, Str.startsWith(imdbKey)),
       Array.tail,
       Option.getOrElse(() => [] as string[])
     );
@@ -142,7 +151,7 @@ const parseRows = (filePath: string) =>
 
     const rows =
       yield *
-      Effect.try(() => XLSX.utils.sheet_to_json(sheet).slice(0, 1000)).pipe(
+      Effect.try(() => XLSX.utils.sheet_to_json(sheet)).pipe(
         Effect.andThen(decodeRows),
         Effect.map(
           Array.map((rows) => ({
@@ -160,6 +169,13 @@ const parseRows = (filePath: string) =>
 const main = (filePath: string) =>
   Effect.gen(function* () {
     const rows = yield* parseRows(filePath);
+    const fs = yield * FileSystem.FileSystem;
+
+    // TODO: do stuff with these parsed rows now, like update the database lol
+    const str = yield * Effect.try(() => JSON.stringify(rows));
+    yield * fs.writeFileString("./starting-list-2024.json", str);
+    yield *
+      Console.log(`Wrote ${rows.length} rows to ./starting-list-2024.json`);
   });
 
 const path = Args.path();
