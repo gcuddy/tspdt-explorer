@@ -14,7 +14,7 @@ import {
   String as Str,
 } from "effect";
 import { BunContext, BunRuntime } from "@effect/platform-bun";
-import { Args, Command } from "@effect/cli";
+import { Args, Command, Options } from "@effect/cli";
 import { FileSystem } from "@effect/platform";
 
 XLSX.set_fs(fs);
