@@ -13,9 +13,11 @@ import {
   pipe,
   String as Str,
 } from "effect";
-import { BunContext, BunRuntime } from "@effect/platform-bun";
+import { BunContext, BunRuntime, BunHttpPlatform } from "@effect/platform-bun";
 import { Args, Command, Options } from "@effect/cli";
-import { FileSystem } from "@effect/platform";
+import { FileSystem, HttpClient } from "@effect/platform";
+import { imdbToTmdb } from "./imdb-to-tmdb";
+import { layerFileSystem } from "@effect/platform-bun/BunKeyValueStore";
 
 XLSX.set_fs(fs);
 
@@ -125,43 +127,40 @@ const parseRows = (filePath: string) =>
       Option.getOrElse(() => [] as string[])
     );
 
-    yield *
-      Effect.forEach(
-        keysToProcess,
-        (key) =>
-          Effect.gen(function* () {
-            const rowNum = key.replace(imdbKey, "");
-            const cell = yield* decodeLinkCell(sheet[key]);
-            const id = Option.fromNullable(cell.l?.Target).pipe(
-              Option.flatMap((link) =>
-                Array.last(Array.filter(link.split("/"), Predicate.isTruthy))
-              ),
-              Option.filter((id) => id.startsWith("tt")),
-              Option.getOrElse(() => "")
-            );
-            const tspdtCell = yield* decodeTSPDTIdCell(
-              sheet[`${tspdtId}${rowNum}`]
-            );
-            HashMap.set(tsptIdToImdbId, tspdtCell.v, id);
-          }),
-        {
-          concurrency: "unbounded",
-        }
-      );
-
-    const rows =
-      yield *
-      Effect.try(() => XLSX.utils.sheet_to_json(sheet)).pipe(
-        Effect.andThen(decodeRows),
-        Effect.map(
-          Array.map((rows) => ({
-            ...rows,
-            imdbId: HashMap.get(tsptIdToImdbId, rows.idTSPDT).pipe(
-              Option.getOrNull
+    yield* Effect.forEach(
+      keysToProcess,
+      (key) =>
+        Effect.gen(function* () {
+          const rowNum = key.replace(imdbKey, "");
+          const cell = yield* decodeLinkCell(sheet[key]);
+          const id = Option.fromNullable(cell.l?.Target).pipe(
+            Option.flatMap((link) =>
+              Array.last(Array.filter(link.split("/"), Predicate.isTruthy))
             ),
-          }))
-        )
-      );
+            Option.filter((id) => id.startsWith("tt")),
+            Option.getOrElse(() => "")
+          );
+          const tspdtCell = yield* decodeTSPDTIdCell(
+            sheet[`${tspdtId}${rowNum}`]
+          );
+          HashMap.set(tsptIdToImdbId, tspdtCell.v, id);
+        }),
+      {
+        concurrency: "unbounded",
+      }
+    );
+
+    const rows = yield* Effect.try(() => XLSX.utils.sheet_to_json(sheet)).pipe(
+      Effect.andThen(decodeRows),
+      Effect.map(
+        Array.map((rows) => ({
+          ...rows,
+          imdbId: HashMap.get(tsptIdToImdbId, rows.idTSPDT).pipe(
+            Option.getOrNull
+          ),
+        }))
+      )
+    );
 
     return rows;
   });
@@ -169,13 +168,25 @@ const parseRows = (filePath: string) =>
 const main = (filePath: string) =>
   Effect.gen(function* () {
     const rows = yield* parseRows(filePath);
-    const fs = yield * FileSystem.FileSystem;
+    const fs = yield* FileSystem.FileSystem;
 
     // TODO: do stuff with these parsed rows now, like update the database lol
-    const str = yield * Effect.try(() => JSON.stringify(rows));
-    yield * fs.writeFileString("./starting-list-2024.json", str);
-    yield *
-      Console.log(`Wrote ${rows.length} rows to ./starting-list-2024.json`);
+    const str = yield* Effect.try(() => JSON.stringify(rows));
+    yield* fs.writeFileString("./starting-list-2024.json", str);
+    yield* Console.log(
+      `Wrote ${rows.length} rows to ./starting-list-2024.json`
+    );
+
+    // TODO: decide where this should happen.
+    // chunk into 1000s and process them.
+    const rowsToLookAt = rows.slice(1000, 1050).filter((r) => r.imdbId);
+    yield* Console.log(`Processing ${rowsToLookAt.length} rows`);
+    // TODO: retries and backoff
+    yield* Effect.forEach(rowsToLookAt, (row) => imdbToTmdb(row.imdbId!), {
+      concurrency: 10,
+    });
+
+    yield* Effect.log("got everything");
   });
 
 const path = Args.path();
@@ -186,4 +197,8 @@ const cli = Command.run(command, {
   version: "0.0.1",
 });
 
-cli(Bun.argv).pipe(Effect.provide(BunContext.layer), BunRuntime.runMain);
+cli(Bun.argv).pipe(
+  Effect.provide(layerFileSystem("./data")),
+  Effect.provide(BunContext.layer),
+  BunRuntime.runMain
+);
