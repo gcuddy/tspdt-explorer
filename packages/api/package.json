@@ -12,7 +12,9 @@
     "seed": "wrangler d1 execute tspdt --file=./seed/seed.sql",
     "seed:local": "wrangler d1 execute tspdt --local --file=./seed/seed.sql",
     "seed:generate": "bun seed/generate-seed.ts",
-    "studio": "drizzle-kit studio"
+    "studio": "drizzle-kit studio",
+    "check": "tsc --noEmit",
+    "check:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
     "@cloudflare/ai": "^1.0.50",
