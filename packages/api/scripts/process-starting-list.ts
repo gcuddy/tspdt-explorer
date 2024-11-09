@@ -15,9 +15,13 @@ import {
 } from "effect";
 import { BunContext, BunRuntime, BunHttpPlatform } from "@effect/platform-bun";
 import { Args, Command, Options } from "@effect/cli";
-import { FileSystem, HttpClient } from "@effect/platform";
+import { FetchHttpClient, FileSystem, HttpClient } from "@effect/platform";
 import { imdbToTmdb } from "./imdb-to-tmdb";
 import { layerFileSystem } from "@effect/platform-bun/BunKeyValueStore";
+import { PersistedCache } from "@effect/experimental";
+import { TMDB, TMDBLive } from "../src/services/tmdb";
+import * as SqliteDrizzle from "@effect/sql-drizzle/Sqlite";
+import * as DS from "../src/db/schema";
 
 XLSX.set_fs(fs);
 
@@ -167,27 +171,101 @@ const parseRows = (filePath: string) =>
 
 const main = (filePath: string) =>
   Effect.gen(function* () {
-    const rows = yield* parseRows(filePath);
-    const fs = yield* FileSystem.FileSystem;
+    const rows = yield * parseRows(filePath);
+    const fs = yield * FileSystem.FileSystem;
 
     // TODO: do stuff with these parsed rows now, like update the database lol
-    const str = yield* Effect.try(() => JSON.stringify(rows));
-    yield* fs.writeFileString("./starting-list-2024.json", str);
-    yield* Console.log(
-      `Wrote ${rows.length} rows to ./starting-list-2024.json`
-    );
+    const str = yield * Effect.try(() => JSON.stringify(rows));
+    yield * fs.writeFileString("./starting-list-2024.json", str);
+    yield *
+      Console.log(`Wrote ${rows.length} rows to ./starting-list-2024.json`);
 
     // TODO: decide where this should happen.
     // chunk into 1000s and process them.
     const rowsToLookAt = rows.slice(1000, 1050).filter((r) => r.imdbId);
-    yield* Console.log(`Processing ${rowsToLookAt.length} rows`);
-    // TODO: retries and backoff
-    yield* Effect.forEach(rowsToLookAt, (row) => imdbToTmdb(row.imdbId!), {
-      concurrency: 10,
-    });
+    yield * Console.log(`Processing ${rowsToLookAt.length} rows`);
 
-    yield* Effect.log("got everything");
-  });
+    // const results = pipe(
+    //   yield *
+    //     Effect.forEach(rowsToLookAt, (row) => imdbToTmdb(row.imdbId!), {
+    //       concurrency: 25,
+    //     }),
+    //   Array.filterMap((e) => e),
+    //   Record.fromEntries
+    // );
+
+    // yield * Console.log({ results });
+
+    // yield *
+    //   fs.writeFileString(
+    //     "./tmdb-to-imdb-2024.json",
+    //     yield * Effect.try(() => JSON.stringify(results))
+    //   );
+
+    // yield * Console.log(`Wrote ${results.length} rows to ./imdb-to-tmdb.json`);
+
+    yield *
+      Effect.forEach(
+        rowsToLookAt,
+        (row) =>
+          Effect.gen(function* () {
+            const tmdb = yield* TMDB;
+            const { movie_results } = yield* tmdb.findById(row.imdbId!, {
+              external_source: "imdb_id",
+            });
+            const movie = yield* Option.fromNullable(movie_results)
+              .pipe(Option.flatMap(Array.head))
+              .pipe(
+                Option.match({
+                  onSome: (movie) =>
+                    Effect.gen(function* () {
+                      const genres = row.Genre.split("-").map((g) => g.trim());
+                      const color =
+                        row.Colour === "BW"
+                          ? "bw"
+                          : row.Colour === "Col" || row.Colour === "Colour"
+                          ? "col"
+                          : "col-bw";
+                      const country = row.Country.split("-").map((c) =>
+                        c.trim()
+                      );
+
+                      const tmdbMovie = yield* tmdb.movieDetails(
+                        movie.id.toString(),
+                        { append_to_response: "credits" }
+                      );
+
+                      const db = yield* SqliteDrizzle.SqliteDrizzle;
+
+                      // TODO: acutally instead of this let's just post stuff to local server
+                      const x = db.insert(DS.movies).values({
+                        id: movie.id.toString(),
+                        title: tmdbMovie.title ?? "",
+                        year: +row.Year,
+                        imdbId: row.imdbId ?? "",
+                      });
+                      console.log({ x });
+
+                      return tmdbMovie;
+                    }),
+                  onNone: () => Effect.succeed(undefined),
+                })
+              );
+            yield* Console.log({ movie });
+          }),
+        {
+          concurrency: 25,
+        }
+      );
+
+    yield * Effect.log("got everything");
+  }).pipe(
+    Effect.provide(TMDBLive),
+    Effect.scoped,
+    Effect.provide(FetchHttpClient.layer)
+  );
+
+const DrizzleLive = SqliteDrizzle.layer.pipe();
 
 const path = Args.path();
 const command = Command.make("process", { path }, ({ path }) => main(path));
