@@ -1,56 +1,62 @@
+import { ConfigProvider } from "effect";
 import { MovieEmbedding } from "./schemas";
 
-
-export const transformCamelToSnake = (str: string) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
+export const transformCamelToSnake = (str: string) =>
+  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
 export function capitalizeFirstLetter<T extends string>(string: T) {
-    return string.charAt(0).toUpperCase() + string.slice(1) as Capitalize<T>;
+  return (string.charAt(0).toUpperCase() + string.slice(1)) as Capitalize<T>;
 }
 
 export function transformMovieIntoTextEmbedding(movie: MovieEmbedding): string {
-    let output = `Title:
+  let output = `Title:
 ${movie.title}`;
 
-    if (movie.director) {
-        output += `Director:
+  if (movie.director) {
+    output += `Director:
 ${movie.director}`;
-    }
+  }
 
-    if (movie.overview) {
-        output += `Overview:
+  if (movie.overview) {
+    output += `Overview:
 ${movie.overview}`;
-    }
+  }
 
-    if (movie.cast) {
-        output += `Cast:
+  if (movie.cast) {
+    output += `Cast:
 ${movie.cast}`;
-    }
+  }
 
-    if (movie.year) {
-        output += `Year:
+  if (movie.year) {
+    output += `Year:
 ${movie.year}`;
-    }
+  }
 
-    if (movie.genre) {
-        output += `Genres:
+  if (movie.genre) {
+    output += `Genres:
 ${movie.genre}`;
-    }
+  }
 
-    if (movie.country) {
-        output += `Country:
+  if (movie.country) {
+    output += `Country:
 ${movie.country}`;
-    }
+  }
 
-    if (movie.color) {
-        output += `Color:
+  if (movie.color) {
+    output += `Color:
 ${movie.color}`;
-    }
+  }
 
-    if (movie.budget) {
-        output += `Budget:
+  if (movie.budget) {
+    output += `Budget:
 ${movie.budget}`;
-    }
+  }
 
-    return output;
+  return output;
 }
+
+export const configProviderNested = (prefix: string) =>
+  ConfigProvider.fromEnv().pipe(
+    ConfigProvider.nested(prefix),
+    ConfigProvider.constantCase
+  );

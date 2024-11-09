@@ -12,6 +12,7 @@ import {
   Schema as S,
   pipe,
   String as Str,
+  Layer,
 } from "effect";
 import { BunContext, BunRuntime, BunHttpPlatform } from "@effect/platform-bun";
 import { Args, Command, Options } from "@effect/cli";
@@ -19,9 +20,13 @@ import { FetchHttpClient, FileSystem, HttpClient } from "@effect/platform";
 import { imdbToTmdb } from "./imdb-to-tmdb";
 import { layerFileSystem } from "@effect/platform-bun/BunKeyValueStore";
 import { PersistedCache } from "@effect/experimental";
-import { TMDB, TMDBLive } from "../src/services/tmdb";
+import { Tmdb, TMDB, TMDBLive } from "../src/services/tmdb";
 import * as SqliteDrizzle from "@effect/sql-drizzle/Sqlite";
+import * as D from "drizzle-orm";
 import * as DS from "../src/db/schema";
+import { SqliteClient } from "@effect/sql-sqlite-bun";
+import * as T from "../data/effect-openapi";
+import { Nanoid } from "../src/Nanoid";
 
 XLSX.set_fs(fs);
 
@@ -77,6 +82,10 @@ export class TSPDTRow extends S.Class<TSPDTRow>("TSPDTRow")({
   idTSPDT: S.Number,
 }) {
   static array = S.Array(TSPDTRow);
+
+  static isRankingKey(key: keyof TSPDTRow | string) {
+    return /\d{4}/.test(key) || key === "Dec-06" || key === "Mar-06";
+  }
 }
 
 const decodeLinkCell = S.decodeUnknown(LinkCellSchema);
@@ -169,7 +178,15 @@ const parseRows = (filePath: string) =>
     return rows;
   });
 
-const main = (filePath: string) =>
+const main = ({
+  path: filePath,
+  start,
+  end,
+}: {
+  path: string;
+  start: number;
+  end: number;
+}) =>
   Effect.gen(function* () {
     const rows = yield * parseRows(filePath);
     const fs = yield * FileSystem.FileSystem;
@@ -182,7 +199,10 @@ const main = (filePath: string) =>
 
     // TODO: decide where this should happen.
     // chunk into 1000s and process them.
-    const rowsToLookAt = rows.slice(1000, 1050).filter((r) => r.imdbId);
+    const rowsToLookAt = rows
+      .sort((a, b) => a["2024"] - b["2024"])
+      .slice(start, end)
+      .filter((r) => r.imdbId);
     yield * Console.log(`Processing ${rowsToLookAt.length} rows`);
 
     // const results = pipe(
@@ -204,15 +224,15 @@ const main = (filePath: string) =>
 
     // yield * Console.log(`Wrote ${results.length} rows to ./imdb-to-tmdb.json`);
 
-    yield *
+    const a =
+      yield *
       Effect.forEach(
         rowsToLookAt,
         (row) =>
           Effect.gen(function* () {
-            const tmdb = yield* TMDB;
-            const { movie_results } = yield* tmdb.findById(row.imdbId!, {
-              external_source: "imdb_id",
-            });
+            const tmdb = yield* Tmdb;
+            const nanoid = yield* Nanoid;
+            const { movie_results } = yield* tmdb.lookupImdb(row.imdbId!);
             const movie = yield* Option.fromNullable(movie_results)
               .pipe(Option.flatMap(Array.head))
               .pipe(
@@ -230,29 +250,100 @@ const main = (filePath: string) =>
                         c.trim()
                       );
 
-                      const tmdbMovie = yield* tmdb.movieDetails(
-                        movie.id.toString(),
-                        { append_to_response: "credits" }
+                      const tmdbMovie = yield* tmdb.lookupMovie(
+                        movie.id.toString()
                       );
 
                       const db = yield* SqliteDrizzle.SqliteDrizzle;
 
-                      // TODO: acutally instead of this let's just post stuff to local server
-                      const x = db.insert(DS.movies).values({
-                        id: movie.id.toString(),
-                        title: tmdbMovie.title ?? "",
-                        year: +row.Year,
-                        imdbId: row.imdbId ?? "",
-                      });
-                      console.log({ x });
+                      yield* db
+                        .insert(DS.movies)
+                        .values({
+                          id: row.idTSPDT.toString(),
+                          title: tmdbMovie.title ?? "",
+                          year: Number(row.Year),
+                          tmdbId: tmdbMovie.id,
+                          color,
+                          country,
+                          genre: genres,
+                          overview: tmdbMovie.overview ?? "",
+                          currentRanking: row["2024"],
+                          imdbId: row.imdbId,
+                          runtime: tmdbMovie.runtime,
+                          tmdbBackdropPath: tmdbMovie.backdrop_path ?? "",
+                          tmdbPosterPath: tmdbMovie.poster_path ?? "",
+                        })
+                        .onConflictDoUpdate({
+                          target: [DS.movies.id],
+                          set: {
+                            title: tmdbMovie.title ?? "",
+                            year: Number(row.Year),
+                            tmdbId: tmdbMovie.id,
+                            color,
+                            country,
+                            genre: genres,
+                            overview: tmdbMovie.overview ?? "",
+                            currentRanking: row["2024"],
+                            imdbId: row.imdbId,
+                            runtime: tmdbMovie.runtime,
+                            tmdbBackdropPath: tmdbMovie.backdrop_path ?? "",
+                            tmdbPosterPath: tmdbMovie.poster_path ?? "",
+                          },
+                        });
+
+                      const rankingKeys = Record.keys(row).filter(
+                        TSPDTRow.isRankingKey
+                      );
+                      for (const key of rankingKeys) {
+                        // for clarity, we'll just use 2006 for Dec-06 and 2005 for Mar-06
+                        const year =
+                          key === "Dec-06"
+                            ? 2006
+                            : key === "Mar-06"
+                            ? 2005
+                            : +key;
+                        yield* db.insert(DS.rankings).values({
+                          movieId: row.idTSPDT.toString(),
+                          year,
+                          ranking: Number(row[key]),
+                        });
+                      }
+                      const directors =
+                        tmdbMovie.credits.crew?.filter(
+                          (c) => c.job === "Director"
+                        ) ?? [];
+
+                      for (const director of directors) {
+                        const [existing] = yield* db
+                          .select()
+                          .from(DS.directors)
+                          .where(D.eq(DS.directors.tmdbId, director.id));
+
+                        const id = existing
+                          ? existing.id
+                          : yield* nanoid.generate;
+
+                        yield* db
+                          .insert(DS.directors)
+                          .values({
+                            id,
+                            name: director.name ?? "",
+                            tmdbId: director.id,
+                          })
+                          .onConflictDoNothing();
+
+                        yield* db.insert(DS.moviesToDirectors).values({
+                          directorId: id,
+                          movieId: row.idTSPDT.toString(),
+                        });
+                      }
 
                       return tmdbMovie;
                     }),
                   onNone: () => Effect.succeed(undefined),
                 })
               );
-            yield* Console.log({ movie });
-          }),
+          }).pipe(Effect.catchTag("SqlError", (e) => Effect.logError(e))),
         {
           concurrency: 25,
         }
@@ -260,15 +351,26 @@ const main = (filePath: string) =>
 
     yield * Effect.log("got everything");
   }).pipe(
-    Effect.provide(TMDBLive),
+    Effect.provide(Tmdb.Default),
+    Effect.provide(Nanoid.Default),
     Effect.scoped,
     Effect.provide(FetchHttpClient.layer)
   );
 
-const DrizzleLive = SqliteDrizzle.layer.pipe();
+const SqlLive = SqliteClient.layer({
+  filename: "./tspdt.db",
+});
+
+const DrizzleLive = SqliteDrizzle.layer.pipe(Layer.provide(SqlLive));
 
 const path = Args.path();
-const command = Command.make("process", { path }, ({ path }) => main(path));
+const start = Args.integer({ name: "start" });
+const end = Args.integer({ name: "end" });
+const command = Command.make(
+  "process",
+  { path, start, end },
+  ({ path, start, end }) => main({ path, start, end })
+);
 
 const cli = Command.run(command, {
   name: "TSPDT Starting List Processor",
@@ -278,5 +380,6 @@ const cli = Command.run(command, {
 cli(Bun.argv).pipe(
   Effect.provide(layerFileSystem("./data")),
   Effect.provide(BunContext.layer),
+  Effect.provide(DrizzleLive),
   BunRuntime.runMain
 );
