@@ -9,7 +9,7 @@
     "openapi:effect": "bunx @tim-smart/openapi-gen -s data/tmdb-openapi.json",
     "migrate": "wrangler d1 migrations apply tspdt",
     "migrate:local": "wrangler d1 migrations apply tspdt --local",
-    "seed": "wrangler d1 execute tspdt --file=./seed/seed.sql",
+    "seed": "wrangler d1 execute tspdt --file=./tspdt.db.sql",
     "seed:local": "wrangler d1 execute tspdt --local --file=./seed/seed.sql",
     "seed:generate": "bun seed/generate-seed.ts",
     "studio": "drizzle-kit studio",
