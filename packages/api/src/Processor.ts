@@ -87,12 +87,13 @@ export class Processor extends Effect.Service<Processor>()("Processor", {
         const rows = yield* Effect.try(() => XLSX.utils.sheet_to_json(sheet)).pipe(
           Effect.andThen(decodeRows),
           Effect.map(
-            Array.map((rows) => ({
-              ...rows,
-              imdbId: HashMap.get(tsptIdToImdbId, rows.idTSPDT).pipe(
-                Option.getOrNull
-              ),
-            }))
+            Array.map((rows) =>
+              TSPDTRowWithImdbId.make({
+                ...rows,
+                imdbId: HashMap.get(tsptIdToImdbId, rows.idTSPDT).pipe(
+                  Option.getOrNull
+                ),
+              }))
           )
         );
 
@@ -155,6 +156,11 @@ export class TSPDTRow extends S.Class<TSPDTRow>("TSPDTRow")({
   }
 }
 
+export class TSPDTRowWithImdbId extends TSPDTRow.extend<TSPDTRowWithImdbId>("TSPDTRowWithImdbId")({
+  imdbId: S.NullOr(S.String),
+}) {
+
+}
 
 const LinkCellSchema = S.Struct({
   l: S.UndefinedOr(
