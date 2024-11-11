@@ -15,7 +15,7 @@ import * as XLSX from 'xlsx';
 export class Processor extends Effect.Service<Processor>()("Processor", {
   effect: Effect.gen(function* () {
 
-    const parseRows = (file: Buffer) =>
+    const parseRows = (file: Buffer | Uint8Array) =>
       Effect.gen(function* () {
         const tsptIdToImdbId = HashMap.empty<number, string>();
         const workbook = yield* Effect.try({
